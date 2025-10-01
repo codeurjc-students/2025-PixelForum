@@ -108,9 +108,19 @@ The functionalities of the application are classified according to their complex
 
 ## 📑 Analysis
 ### 🖥️ Screens and navigation:
-The following image provides a preliminary mockup of the web application, illustrating the overall design and aesthetics of the platform. From this feed, users will be able to navigate to all the main functionalities of the system.
+The images below present a preliminary mockup of the web application, showcasing its overall design and visual style. From any page, users will have seamless access to all the platform’s main functionalities, ensuring intuitive and consistent navigation.
 
+#### Main feed
 ![Mockup](Images/Feed.png)
+
+#### Create post screen
+![Mockup](Images/CreatePost.png)
+
+#### MY profile screen
+![Mockup](Images/Profile.png)
+
+#### Charts screen
+![Mockup](Images/Charts.png)
 
 ### 🧩 Entities:
 | Entity | Attributes | Description |
@@ -145,8 +155,8 @@ An advanced recommendation algorithm will be implemented to suggest relevant pos
 
 ## 📌 Tracking / Progress
 In order to keep track of the project: a blog will be maintained with announcements and updates about the development and a GitHub Project board will be used to manage tasks, track progress, and organize development activities.
-Project blog: 
-GitHub Project: 
+Project blog: https://medium.com/@m.gutierrezp.2022
+GitHub Project: https://github.com/orgs/codeurjc-students/projects/35
 
 ## 👤 Author
 This application is developed for my Degree's Final Project for the Computer Science degree at the ETSII of URJC.
