@@ -43,6 +43,14 @@ public class Post {
 
     private int likes;
     private List<Long> usersThatLiked;
+
+    public Post() {
+    }
+    public Post(String title, String content, List<Topic> topics) {
+        this.title = title;
+        this.content = content;
+        this.topics = topics;
+    }
     public long getId() {
         return id;
     }

@@ -23,6 +23,15 @@ public class Topic {
     @ManyToMany(mappedBy = "topics")
 	private List<Post> posts;
 
+    
+    public Topic() {
+    }
+
+    public Topic(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     public long getId() {
         return id;
     }
