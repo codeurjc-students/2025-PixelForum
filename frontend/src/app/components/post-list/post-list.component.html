@@ -1,0 +1,23 @@
+<div class="post-list-container">
+	<h2 class="list-title">Últimos posts</h2>
+
+	<!-- Estado de carga -->
+	<div *ngIf="loading" class="loading">
+		Cargando publicaciones...
+	</div>
+
+	<!-- Error -->
+	<div *ngIf="error" class="error">
+		{{ error }}
+	</div>
+
+	<!-- Lista de posts -->
+	<div *ngIf="!loading && !error && posts.length > 0">
+		<app-post *ngFor="let post of posts" [post]="post"></app-post>
+	</div>
+
+	<!-- Si no hay posts -->
+	<div *ngIf="!loading && !error && posts.length === 0" class="empty">
+		<p>No hay publicaciones todavía 😕</p>
+	</div>
+</div>

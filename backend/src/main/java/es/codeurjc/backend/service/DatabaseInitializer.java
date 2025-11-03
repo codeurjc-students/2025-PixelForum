@@ -42,12 +42,16 @@ public class DatabaseInitializer {
         userService.save(usuario3);
         userService.save(usuario4);
 
-        Topic topic1 = new Topic("GTA VI", "Videojuego de Rockstar Games");
+        Topic topic1 = new Topic("GTA VI", "All news about Grand Theft Auto VI");
         topicService.save(topic1);
 
-        Post post1 = new Post("GTA VI Filtración Masiva", "Se han filtrado imágenes y vídeos del próximo Grand Theft Auto VI, mostrando nuevas ubicaciones, personajes y mecánicas de juego. Rockstar Games aún no ha comentado sobre la filtración.", 
+        Post post1 = new Post("GTA VI Massive leak", "A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.", 
             List.of(topic1));
         postService.save(post1);
+
+        Post post2 = new Post("GTA VI official 2nd trailer", "Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.", 
+            List.of(topic1));
+        postService.save(post2);
     
     }   
 

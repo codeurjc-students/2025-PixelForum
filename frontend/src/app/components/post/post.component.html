@@ -1,0 +1,41 @@
+<div class="post-card">
+	<!-- Título -->
+	<h2 class="post-title">{{ post.title }}</h2>
+
+	<!-- Autor y fecha -->
+	<div class="post-meta">
+		<span *ngIf="post.author">
+			 {{ post.author.username }}
+		</span>
+		<span *ngIf="post.createdAt">
+			• {{ post.createdAt | date:'medium' }}
+		</span>
+	</div>
+
+	<!-- Contenido -->
+	<p class="post-content">
+		{{ post.content }}
+	</p>
+
+	<!-- Imágenes -->
+	<div *ngIf="post.images?.length" class="post-images">
+		<img
+			*ngFor="let img of post.images"
+			[src]="img"
+			alt="Post image"
+			class="post-image"
+		/>
+	</div>
+
+	<!-- Temas -->
+	<div *ngIf="post.topics?.length" class="post-topics">
+		<span *ngFor="let topic of post.topics" class="topic-badge">
+			#{{ topic.name }}
+		</span>
+	</div>
+
+	<!-- Likes -->
+	<div class="post-footer">
+		<span class="likes"> {{ post.likes || 0 }} likes</span>
+	</div>
+</div>
