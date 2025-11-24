@@ -20,13 +20,13 @@ public class PostRestController {
     @Autowired
     private PostService postService;
 
-    // Obtener todos los posts
+    // Get all posts
     @GetMapping("/")
     public List<Post> getAllPosts() {
         return postService.findAll();
     }
 
-    // Obtener un post por ID
+    // Get post by ID
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable long id) {
         Optional<Post> post = postService.findById(id);

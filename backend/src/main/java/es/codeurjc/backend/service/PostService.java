@@ -22,7 +22,12 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-	
+
+	public PostService(PostRepository postRepository, PostMapper mapper) {
+        this.postRepository = postRepository;
+        this.mapper = mapper;
+    }
+
 	public Optional<Post> findById(long id) {
 		return postRepository.findById(id);
 	}

@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/posts/{id}:
+    get:
+      tags:
+      - post-rest-controller
+      operationId: getPostById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Post"
+  /api/posts/:
+    get:
+      tags:
+      - post-rest-controller
+      operationId: getAllPosts
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        images:
+          type: array
+          items:
+            type: object
+            properties:
+              binaryStream:
+                type: object
+        author:
+          $ref: "#/components/schemas/User"
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topic"
+        likes:
+          type: integer
+          format: int32
+        usersThatLiked:
+          type: array
+          items:
+            type: integer
+            format: int64
+    Topic:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        avatar:
+          type: object
+          properties:
+            binaryStream:
+              type: object
+        likedPosts:
+          type: array
+          items:
+            type: integer
+            format: int64
+        likedComments:
+          type: array
+          items:
+            type: integer
+            format: int64
+        roles:
+          type: array
+          items:
+            type: string

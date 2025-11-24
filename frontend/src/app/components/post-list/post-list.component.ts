@@ -36,7 +36,7 @@ export class PostListComponent implements OnInit {
 			},
 			error: err => {
 				console.error('Error loading posts', err);
-				this.error = 'Error cargando los posts.';
+				this.error = 'Error loading posts.';
 				this.loading = false;
 			}
 		});

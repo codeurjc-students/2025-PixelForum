@@ -155,7 +155,9 @@ An advanced recommendation algorithm will be implemented to suggest relevant pos
 
 ## 📌 Tracking / Progress
 In order to keep track of the project: a blog will be maintained with announcements and updates about the development and a GitHub Project board will be used to manage tasks, track progress, and organize development activities.
+
 Project blog: https://medium.com/@m.gutierrezp.2022
+
 GitHub Project: https://github.com/orgs/codeurjc-students/projects/35
 
 ## 👤 Author
