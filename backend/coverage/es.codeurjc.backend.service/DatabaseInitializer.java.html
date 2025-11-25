@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">DatabaseInitializer.java</span></div><h1>DatabaseInitializer.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.model.Topic;
+import es.codeurjc.backend.model.User;
+import jakarta.annotation.PostConstruct;
+
+
+@Component
+<span class="fc" id="L16">public class DatabaseInitializer {</span>
+
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private UserService userService;
+
+    //@Autowired
+    //private CommentService commentService;
+
+    @Autowired
+    private TopicService topicService;
+
+    @PostConstruct
+    public void init() throws IOException {
+        
+<span class="fc" id="L33">        User admin = new User(&quot;admin&quot;, &quot;admin@host&quot;, &quot;admin&quot;, &quot;ADMIN&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L34">        User usuario1 = new User(&quot;martin&quot;, &quot;martin@gmail.com&quot;, &quot;martin&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L35">        User usuario2 = new User(&quot;robert&quot;,&quot;robert@gmail.com&quot;, &quot;robert&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L36">        User usuario3 = new User(&quot;daniel&quot;,&quot;daniel@gmail.com&quot;, &quot;daniel&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L37">        User usuario4 = new User(&quot;alvaro&quot;,&quot;alvaro@gmail.com&quot;, &quot;alvaro&quot;, &quot;USER&quot;);</span>
+
+<span class="fc" id="L39">        userService.save(admin);</span>
+<span class="fc" id="L40">        userService.save(usuario1);</span>
+<span class="fc" id="L41">        userService.save(usuario2);</span>
+<span class="fc" id="L42">        userService.save(usuario3);</span>
+<span class="fc" id="L43">        userService.save(usuario4);</span>
+
+<span class="fc" id="L45">        Topic topic1 = new Topic(&quot;GTA VI&quot;, &quot;All news about Grand Theft Auto VI&quot;);</span>
+<span class="fc" id="L46">        topicService.save(topic1);</span>
+
+<span class="fc" id="L48">        Post post1 = new Post(&quot;GTA VI Massive leak&quot;, &quot;A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.&quot;, </span>
+<span class="fc" id="L49">            List.of(topic1));</span>
+<span class="fc" id="L50">        postService.save(post1);</span>
+
+<span class="fc" id="L52">        Post post2 = new Post(&quot;GTA VI official 2nd trailer&quot;, &quot;Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.&quot;, </span>
+<span class="fc" id="L53">            List.of(topic1));</span>
+<span class="fc" id="L54">        postService.save(post2);</span>
+    
+<span class="fc" id="L56">    }   </span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopicService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">TopicService.java</span></div><h1>TopicService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import es.codeurjc.backend.dto.TopicDTO;
+import es.codeurjc.backend.dto.TopicMapper;
+import es.codeurjc.backend.model.Topic;
+import es.codeurjc.backend.repository.TopicRepository;
+import jakarta.transaction.Transactional;
+
+@Service
+<span class="fc" id="L17">public class TopicService {</span>
+
+	@Autowired
+    private TopicMapper mapper;
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+	
+	public Optional&lt;Topic&gt; findById(long id) {
+<span class="nc" id="L27">		return topicRepository.findById(id);</span>
+	}
+
+	public boolean exist(long id) {
+<span class="nc" id="L31">		return topicRepository.existsById(id);</span>
+	}
+
+	public List&lt;Topic&gt; findAll() {
+<span class="nc" id="L35">		return topicRepository.findAll();</span>
+	}
+
+	public Topic save(Topic topic){
+<span class="fc" id="L39">		return topicRepository.save(topic);</span>
+	}
+
+    @Transactional 
+    public void deleteById(Long id) {
+<span class="nc" id="L44">        Optional&lt;Topic&gt; topicOptional = topicRepository.findById(id);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (topicOptional.isPresent()) {</span>
+<span class="nc" id="L46">            Topic topic = topicOptional.get();</span>
+<span class="nc" id="L47">			topicRepository.delete(topic);</span>
+        }
+<span class="nc" id="L49">    }</span>
+
+	private TopicDTO toDTO (Topic topic) {
+<span class="nc" id="L52">        return mapper.toDTO(topic);</span>
+    }
+
+    private Topic toDomain (TopicDTO topicDTO) {
+<span class="nc" id="L56">        return mapper.toDomain(topicDTO);</span>
+    }
+
+    private List&lt;TopicDTO&gt; toDTOs(Collection&lt;Topic&gt; topics){
+<span class="nc" id="L60">        return mapper.toDTOs(topics);</span>
+    }
+
+	public Collection&lt;TopicDTO&gt; getTopics() {
+<span class="nc" id="L64">		return toDTOs(topicRepository.findAll());</span>
+	}
+
+	public TopicDTO getTopic(long id) {
+<span class="nc" id="L68">		return toDTO(topicRepository.findById(id).orElseThrow());</span>
+	}
+
+	public TopicDTO createTopic(TopicDTO topicDTO) {
+<span class="nc" id="L72">		Topic topic = toDomain(topicDTO);</span>
+<span class="nc" id="L73"> 		this.save(topic);</span>
+<span class="nc" id="L74"> 		return toDTO(topic);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

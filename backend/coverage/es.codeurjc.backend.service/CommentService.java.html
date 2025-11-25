@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">CommentService.java</span></div><h1>CommentService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import es.codeurjc.backend.dto.CommentDTO;
+import es.codeurjc.backend.dto.CommentMapper;
+import es.codeurjc.backend.model.Comment;
+import es.codeurjc.backend.repository.CommentRepository;
+import jakarta.transaction.Transactional;
+
+@Service
+<span class="fc" id="L17">public class CommentService {</span>
+
+	@Autowired
+    private CommentMapper mapper;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+	
+	public Optional&lt;Comment&gt; findById(long id) {
+<span class="nc" id="L27">		return commentRepository.findById(id);</span>
+	}
+
+	public boolean exist(long id) {
+<span class="nc" id="L31">		return commentRepository.existsById(id);</span>
+	}
+
+	public List&lt;Comment&gt; findAll() {
+<span class="nc" id="L35">		return commentRepository.findAll();</span>
+	}
+
+	public Comment save(Comment comment){
+<span class="nc" id="L39">		return commentRepository.save(comment);</span>
+	}
+
+    @Transactional 
+    public void deleteById(Long id) {
+<span class="nc" id="L44">        Optional&lt;Comment&gt; commentOptional = commentRepository.findById(id);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (commentOptional.isPresent()) {</span>
+<span class="nc" id="L46">            Comment comment = commentOptional.get();</span>
+<span class="nc" id="L47">			commentRepository.delete(comment);</span>
+        }
+<span class="nc" id="L49">    }</span>
+
+	private CommentDTO toDTO (Comment comment) {
+<span class="nc" id="L52">        return mapper.toDTO(comment);</span>
+    }
+
+    private Comment toDomain (CommentDTO commentDTO) {
+<span class="nc" id="L56">        return mapper.toDomain(commentDTO);</span>
+    }
+
+    private List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments){
+<span class="nc" id="L60">        return mapper.toDTOs(comments);</span>
+    }
+
+	public Collection&lt;CommentDTO&gt; getcomments() {
+<span class="nc" id="L64">		return toDTOs(commentRepository.findAll());</span>
+	}
+
+	public CommentDTO getcomment(long id) {
+<span class="nc" id="L68">		return toDTO(commentRepository.findById(id).orElseThrow());</span>
+	}
+
+	public CommentDTO createcomment(CommentDTO commentDTO) {
+<span class="nc" id="L72">		Comment comment = toDomain(commentDTO);</span>
+<span class="nc" id="L73"> 		this.save(comment);</span>
+<span class="nc" id="L74"> 		return toDTO(comment);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

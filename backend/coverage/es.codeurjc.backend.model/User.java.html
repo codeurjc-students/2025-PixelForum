@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.model;
+
+import java.sql.Blob;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = &quot;users&quot;)
+public class User {
+
+    @Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
+    @Column (unique = true)
+    private String username;
+
+    @Column (unique = true)
+    private String email;
+    private String password;
+
+    @Lob
+    private Blob avatar;
+
+    private List&lt;Long&gt; likedPosts;
+    private List&lt;Long&gt; likedComments;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+	private List&lt;String&gt; roles;
+    
+<span class="fc" id="L41">    public User(){</span>
+        
+<span class="fc" id="L43">    }</span>
+
+<span class="fc" id="L45">    public User(String username, String email, String password, String... roles) {</span>
+<span class="fc" id="L46">        this.username = username;</span>
+<span class="fc" id="L47">        this.email = email;</span>
+<span class="fc" id="L48">        this.password = password;</span>
+<span class="fc" id="L49">        likedPosts = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L50">        likedComments = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L51">        this.roles = List.of(roles);</span>
+<span class="fc" id="L52">    }</span>
+
+    // Getters
+    public long getId() {
+<span class="nc" id="L56">        return id;</span>
+    }
+
+    public String getUsername(){
+<span class="nc" id="L60">        return this.username;</span>
+    }
+
+    public String getEmail() {
+<span class="nc" id="L64">        return this.email;</span>
+    }
+
+    public String getPassword() {
+<span class="nc" id="L68">        return this.password;</span>
+    }
+
+    public Blob getAvatar() {
+<span class="nc" id="L72">		return avatar;</span>
+	}
+
+    public List&lt;Long&gt; getLikedPosts() {
+<span class="nc" id="L76">		return likedPosts;</span>
+	}
+
+    public List&lt;Long&gt; getLikedComments() {
+<span class="nc" id="L80">		return likedComments;</span>
+	}
+
+    public List&lt;String&gt; getRoles() {
+<span class="nc" id="L84">		return roles;</span>
+	}
+
+    //Setters
+
+    public void setId(long id) {
+<span class="nc" id="L90">        this.id = id;</span>
+<span class="nc" id="L91">    }</span>
+
+    public void setUsername(String username) {
+<span class="nc" id="L94">        this.username = username;</span>
+<span class="nc" id="L95">    }</span>
+
+    public void setEmail(String email) {
+<span class="nc" id="L98">        this.email = email;</span>
+<span class="nc" id="L99">    }</span>
+
+    public void setPassword(String password) {
+<span class="nc" id="L102">        this.password = password;</span>
+<span class="nc" id="L103">    }</span>
+
+    public void setAvatar(Blob avatar) {
+<span class="nc" id="L106">		this.avatar = avatar;</span>
+<span class="nc" id="L107">	}</span>
+
+    public void setLikedPosts(ArrayList&lt;Long&gt; likedPosts) {
+<span class="nc" id="L110">        this.likedPosts = likedPosts;</span>
+<span class="nc" id="L111">    }</span>
+
+    public void setLikedComments(ArrayList&lt;Long&gt; likedComments) {
+<span class="nc" id="L114">        this.likedComments = likedComments;</span>
+<span class="nc" id="L115">    }</span>
+
+	public void setRoles(List&lt;String&gt; roles) {
+<span class="nc" id="L118">		this.roles = roles;</span>
+<span class="nc" id="L119">	}</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L123">        return &quot;User [id=&quot; + id + &quot;, username=&quot; + username + &quot;, mail=&quot; + email + &quot;, password=&quot; + password;</span>
+                
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

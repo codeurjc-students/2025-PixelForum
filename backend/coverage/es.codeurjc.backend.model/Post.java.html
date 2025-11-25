@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Post.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.model</a> &gt; <span class="el_source">Post.java</span></div><h1>Post.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.model;
+
+import java.sql.Blob;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+
+@Entity
+public class Post {
+
+    @Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
+    private String title;
+    private String content;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @Lob
+    private List&lt;Blob&gt; images;
+
+    @ManyToOne
+	@JoinColumn(name = &quot;user_id&quot;)
+	private User author;
+
+    @ManyToMany
+	@JoinTable(
+		name = &quot;post_topics&quot;,
+		joinColumns = @JoinColumn(name = &quot;post_id&quot;),
+		inverseJoinColumns = @JoinColumn(name = &quot;topic_id&quot;)
+	)
+	private List&lt;Topic&gt; topics;
+
+    private int likes;
+    private List&lt;Long&gt; usersThatLiked;
+
+<span class="fc" id="L47">    public Post() {</span>
+<span class="fc" id="L48">    }</span>
+<span class="fc" id="L49">    public Post(String title, String content, List&lt;Topic&gt; topics) {</span>
+<span class="fc" id="L50">        this.title = title;</span>
+<span class="fc" id="L51">        this.content = content;</span>
+<span class="fc" id="L52">        this.topics = topics;</span>
+<span class="fc" id="L53">    }</span>
+    public long getId() {
+<span class="fc" id="L55">        return id;</span>
+    }
+    public void setId(long id) {
+<span class="fc" id="L58">        this.id = id;</span>
+<span class="fc" id="L59">    }</span>
+    public String getTitle() {
+<span class="fc" id="L61">        return title;</span>
+    }
+    public void setTitle(String title) {
+<span class="fc" id="L64">        this.title = title;</span>
+<span class="fc" id="L65">    }</span>
+    public String getContent() {
+<span class="fc" id="L67">        return content;</span>
+    }
+    public void setContent(String content) {
+<span class="fc" id="L70">        this.content = content;</span>
+<span class="fc" id="L71">    }</span>
+    public LocalDateTime getCreatedAt() {
+<span class="fc" id="L73">        return createdAt;</span>
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L76">        this.createdAt = createdAt;</span>
+<span class="nc" id="L77">    }</span>
+    public LocalDateTime getUpdatedAt() {
+<span class="fc" id="L79">        return updatedAt;</span>
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="nc" id="L82">        this.updatedAt = updatedAt;</span>
+<span class="nc" id="L83">    }</span>
+    public List&lt;Blob&gt; getImages() {
+<span class="fc" id="L85">        return images;</span>
+    }
+    public void setImages(List&lt;Blob&gt; images) {
+<span class="nc" id="L88">        this.images = images;</span>
+<span class="nc" id="L89">    }</span>
+    public User getAuthor() {
+<span class="fc" id="L91">        return author;</span>
+    }
+    public void setAuthor(User author) {
+<span class="nc" id="L94">        this.author = author;</span>
+<span class="nc" id="L95">    }</span>
+    public List&lt;Topic&gt; getTopics() {
+<span class="fc" id="L97">        return topics;</span>
+    }
+    public void setTopics(List&lt;Topic&gt; topics) {
+<span class="nc" id="L100">        this.topics = topics;</span>
+<span class="nc" id="L101">    }</span>
+    public int getLikes() {
+<span class="fc" id="L103">        return likes;</span>
+    }
+    public void setLikes(int likes) {
+<span class="nc" id="L106">        this.likes = likes;</span>
+<span class="nc" id="L107">    }</span>
+    public List&lt;Long&gt; getUsersThatLiked() {
+<span class="fc" id="L109">        return usersThatLiked;</span>
+    }
+    public void setUsersThatLiked(List&lt;Long&gt; usersThatLiked) {
+<span class="nc" id="L112">        this.usersThatLiked = usersThatLiked;</span>
+<span class="nc" id="L113">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

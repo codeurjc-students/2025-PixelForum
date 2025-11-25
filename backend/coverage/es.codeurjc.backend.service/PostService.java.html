@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">PostService.java</span></div><h1>PostService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import es.codeurjc.backend.dto.PostDTO;
+import es.codeurjc.backend.dto.PostMapper;
+import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.repository.PostRepository;
+import jakarta.transaction.Transactional;
+
+@Service
+public class PostService {
+
+	@Autowired
+    private PostMapper mapper;
+
+    @Autowired
+    private PostRepository postRepository;
+
+
+<span class="fc" id="L26">	public PostService(PostRepository postRepository, PostMapper mapper) {</span>
+<span class="fc" id="L27">        this.postRepository = postRepository;</span>
+<span class="fc" id="L28">        this.mapper = mapper;</span>
+<span class="fc" id="L29">    }</span>
+
+	public Optional&lt;Post&gt; findById(long id) {
+<span class="fc" id="L32">		return postRepository.findById(id);</span>
+	}
+
+	public boolean exist(long id) {
+<span class="fc" id="L36">		return postRepository.existsById(id);</span>
+	}
+
+	public List&lt;Post&gt; findAll() {
+<span class="fc" id="L40">		return postRepository.findAll();</span>
+	}
+
+	public Post save(Post post){
+<span class="fc" id="L44">		return postRepository.save(post);</span>
+	}
+
+    @Transactional 
+    public void deleteById(Long id) {
+<span class="nc" id="L49">        Optional&lt;Post&gt; postOptional = postRepository.findById(id);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (postOptional.isPresent()) {</span>
+<span class="nc" id="L51">            Post post = postOptional.get();</span>
+<span class="nc" id="L52">			postRepository.delete(post);</span>
+        }
+<span class="nc" id="L54">    }</span>
+
+	private PostDTO toDTO (Post post) {
+<span class="fc" id="L57">        return mapper.toDTO(post);</span>
+    }
+
+    private Post toDomain (PostDTO postDTO) {
+<span class="nc" id="L61">        return mapper.toDomain(postDTO);</span>
+    }
+
+    private List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; posts){
+<span class="nc" id="L65">        return mapper.toDTOs(posts);</span>
+    }
+
+	public Collection&lt;PostDTO&gt; getposts() {
+<span class="nc" id="L69">		return toDTOs(postRepository.findAll());</span>
+	}
+
+	public PostDTO getPost(long id) {
+<span class="fc" id="L73">		return toDTO(postRepository.findById(id).orElseThrow());</span>
+	}
+
+	public PostDTO createPost(PostDTO postDTO) {
+<span class="nc" id="L77">		Post post = toDomain(postDTO);</span>
+<span class="nc" id="L78"> 		this.save(post);</span>
+<span class="nc" id="L79"> 		return toDTO(post);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

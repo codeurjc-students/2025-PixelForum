@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.dto</a> &gt; <span class="el_source">UserMapperImpl.java</span></div><h1>UserMapperImpl.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.dto;
+
+import es.codeurjc.backend.model.User;
+import java.sql.Blob;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2025-11-25T18:59:29+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
+)
+@Component
+<span class="fc" id="L17">public class UserMapperImpl implements UserMapper {</span>
+
+    @Override
+    public UserDTO toDTO(User user) {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if ( user == null ) {</span>
+<span class="nc" id="L22">            return null;</span>
+        }
+
+<span class="nc" id="L25">        Long id = null;</span>
+<span class="nc" id="L26">        String username = null;</span>
+<span class="nc" id="L27">        String email = null;</span>
+<span class="nc" id="L28">        String password = null;</span>
+<span class="nc" id="L29">        Blob avatar = null;</span>
+<span class="nc" id="L30">        List&lt;Long&gt; likedPosts = null;</span>
+<span class="nc" id="L31">        List&lt;Long&gt; likedComments = null;</span>
+<span class="nc" id="L32">        List&lt;String&gt; roles = null;</span>
+
+<span class="nc" id="L34">        id = user.getId();</span>
+<span class="nc" id="L35">        username = user.getUsername();</span>
+<span class="nc" id="L36">        email = user.getEmail();</span>
+<span class="nc" id="L37">        password = user.getPassword();</span>
+<span class="nc" id="L38">        avatar = user.getAvatar();</span>
+<span class="nc" id="L39">        List&lt;Long&gt; list = user.getLikedPosts();</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if ( list != null ) {</span>
+<span class="nc" id="L41">            likedPosts = new ArrayList&lt;Long&gt;( list );</span>
+        }
+<span class="nc" id="L43">        List&lt;Long&gt; list1 = user.getLikedComments();</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if ( list1 != null ) {</span>
+<span class="nc" id="L45">            likedComments = new ArrayList&lt;Long&gt;( list1 );</span>
+        }
+<span class="nc" id="L47">        List&lt;String&gt; list2 = user.getRoles();</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if ( list2 != null ) {</span>
+<span class="nc" id="L49">            roles = new ArrayList&lt;String&gt;( list2 );</span>
+        }
+
+<span class="nc" id="L52">        UserDTO userDTO = new UserDTO( id, username, email, password, avatar, likedPosts, likedComments, roles );</span>
+
+<span class="nc" id="L54">        return userDTO;</span>
+    }
+
+    @Override
+    public List&lt;UserDTO&gt; toDTOs(Collection&lt;User&gt; users) {
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if ( users == null ) {</span>
+<span class="nc" id="L60">            return null;</span>
+        }
+
+<span class="nc" id="L63">        List&lt;UserDTO&gt; list = new ArrayList&lt;UserDTO&gt;( users.size() );</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for ( User user : users ) {</span>
+<span class="nc" id="L65">            list.add( toDTO( user ) );</span>
+        }
+
+<span class="nc" id="L68">        return list;</span>
+    }
+
+    @Override
+    public User toDomain(UserDTO userDTO) {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if ( userDTO == null ) {</span>
+<span class="nc" id="L74">            return null;</span>
+        }
+
+<span class="nc" id="L77">        User user = new User();</span>
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if ( userDTO.id() != null ) {</span>
+<span class="nc" id="L80">            user.setId( userDTO.id() );</span>
+        }
+<span class="nc" id="L82">        user.setUsername( userDTO.username() );</span>
+<span class="nc" id="L83">        user.setEmail( userDTO.email() );</span>
+<span class="nc" id="L84">        user.setPassword( userDTO.password() );</span>
+<span class="nc" id="L85">        user.setAvatar( userDTO.avatar() );</span>
+<span class="nc" id="L86">        List&lt;Long&gt; list = userDTO.likedPosts();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if ( list != null ) {</span>
+<span class="nc" id="L88">            user.setLikedPosts( new ArrayList&lt;Long&gt;( list ) );</span>
+        }
+<span class="nc" id="L90">        List&lt;Long&gt; list1 = userDTO.likedComments();</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if ( list1 != null ) {</span>
+<span class="nc" id="L92">            user.setLikedComments( new ArrayList&lt;Long&gt;( list1 ) );</span>
+        }
+<span class="nc" id="L94">        List&lt;String&gt; list2 = userDTO.roles();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if ( list2 != null ) {</span>
+<span class="nc" id="L96">            user.setRoles( new ArrayList&lt;String&gt;( list2 ) );</span>
+        }
+
+<span class="nc" id="L99">        return user;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

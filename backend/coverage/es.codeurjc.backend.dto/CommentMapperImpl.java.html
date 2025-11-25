@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommentMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.dto</a> &gt; <span class="el_source">CommentMapperImpl.java</span></div><h1>CommentMapperImpl.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.dto;
+
+import es.codeurjc.backend.model.Comment;
+import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.model.User;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2025-11-25T18:59:29+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
+)
+@Component
+<span class="fc" id="L19">public class CommentMapperImpl implements CommentMapper {</span>
+
+    @Override
+    public CommentDTO toDTO(Comment Comment) {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if ( Comment == null ) {</span>
+<span class="nc" id="L24">            return null;</span>
+        }
+
+<span class="nc" id="L27">        Long id = null;</span>
+<span class="nc" id="L28">        String content = null;</span>
+<span class="nc" id="L29">        LocalDateTime createdAt = null;</span>
+<span class="nc" id="L30">        LocalDateTime updatedAt = null;</span>
+<span class="nc" id="L31">        User author = null;</span>
+<span class="nc" id="L32">        Post post = null;</span>
+<span class="nc" id="L33">        Comment commentId = null;</span>
+<span class="nc" id="L34">        int likes = 0;</span>
+<span class="nc" id="L35">        List&lt;Long&gt; usersThatLiked = null;</span>
+
+<span class="nc" id="L37">        id = Comment.getId();</span>
+<span class="nc" id="L38">        content = Comment.getContent();</span>
+<span class="nc" id="L39">        createdAt = Comment.getCreatedAt();</span>
+<span class="nc" id="L40">        updatedAt = Comment.getUpdatedAt();</span>
+<span class="nc" id="L41">        author = Comment.getAuthor();</span>
+<span class="nc" id="L42">        post = Comment.getPost();</span>
+<span class="nc" id="L43">        commentId = Comment.getCommentId();</span>
+<span class="nc" id="L44">        likes = Comment.getLikes();</span>
+<span class="nc" id="L45">        List&lt;Long&gt; list = Comment.getUsersThatLiked();</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if ( list != null ) {</span>
+<span class="nc" id="L47">            usersThatLiked = new ArrayList&lt;Long&gt;( list );</span>
+        }
+
+<span class="nc" id="L50">        CommentDTO commentDTO = new CommentDTO( id, content, createdAt, updatedAt, author, post, commentId, likes, usersThatLiked );</span>
+
+<span class="nc" id="L52">        return commentDTO;</span>
+    }
+
+    @Override
+    public List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; Comments) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if ( Comments == null ) {</span>
+<span class="nc" id="L58">            return null;</span>
+        }
+
+<span class="nc" id="L61">        List&lt;CommentDTO&gt; list = new ArrayList&lt;CommentDTO&gt;( Comments.size() );</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        for ( Comment comment : Comments ) {</span>
+<span class="nc" id="L63">            list.add( toDTO( comment ) );</span>
+        }
+
+<span class="nc" id="L66">        return list;</span>
+    }
+
+    @Override
+    public Comment toDomain(CommentDTO CommentDTO) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( CommentDTO == null ) {</span>
+<span class="nc" id="L72">            return null;</span>
+        }
+
+<span class="nc" id="L75">        Comment comment = new Comment();</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if ( CommentDTO.id() != null ) {</span>
+<span class="nc" id="L78">            comment.setId( CommentDTO.id() );</span>
+        }
+<span class="nc" id="L80">        comment.setContent( CommentDTO.content() );</span>
+<span class="nc" id="L81">        comment.setCreatedAt( CommentDTO.createdAt() );</span>
+<span class="nc" id="L82">        comment.setUpdatedAt( CommentDTO.updatedAt() );</span>
+<span class="nc" id="L83">        comment.setAuthor( CommentDTO.author() );</span>
+<span class="nc" id="L84">        comment.setPost( CommentDTO.post() );</span>
+<span class="nc" id="L85">        comment.setCommentId( CommentDTO.commentId() );</span>
+<span class="nc" id="L86">        comment.setLikes( CommentDTO.likes() );</span>
+<span class="nc" id="L87">        List&lt;Long&gt; list = CommentDTO.usersThatLiked();</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( list != null ) {</span>
+<span class="nc" id="L89">            comment.setUsersThatLiked( new ArrayList&lt;Long&gt;( list ) );</span>
+        }
+
+<span class="nc" id="L92">        return comment;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
