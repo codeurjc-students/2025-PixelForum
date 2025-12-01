@@ -21,9 +21,11 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
 @Tag("e2e")
 @DisplayName("Selenium UI Test")
+@ActiveProfiles("test")
 public class UISystemTest {
     @LocalServerPort
     int port;

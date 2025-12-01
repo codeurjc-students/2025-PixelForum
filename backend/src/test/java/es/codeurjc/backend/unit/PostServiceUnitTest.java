@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.test.context.ActiveProfiles;
 
 import es.codeurjc.backend.dto.PostDTO;
 import es.codeurjc.backend.dto.PostMapper;
@@ -22,6 +23,7 @@ import es.codeurjc.backend.service.PostService;
 
 @Tag("unit")
 @DisplayName("PostService Unitary tests")
+@ActiveProfiles("test")
 public class PostServiceUnitTest {
 
     private PostService postService;
