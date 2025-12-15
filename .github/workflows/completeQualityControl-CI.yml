@@ -170,7 +170,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -185,6 +185,12 @@ jobs:
           npx wait-on http://localhost:4200
         working-directory: ./frontend
 
+      - name: Start backend
+        run:
+            mvn spring-boot:run "-Dspring-boot.run.profiles=test" &
+            until nc -z localhost 8080; do sleep 2; done
+        working-directory: ./backend
+        
       - name: Run system tests
         run: mvn -Dtest=UISystemTest test
         working-directory: ./backend
