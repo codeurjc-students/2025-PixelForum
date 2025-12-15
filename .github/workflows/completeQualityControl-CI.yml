@@ -176,12 +176,9 @@ jobs:
 
       - name: Serve Angular in background
         run: npm start &
-        working-directory: ./frontend
-
-      - name: Wait for Angular to be ready
-        run: npx wait-on http://localhost:4200
+          npx wait-on http://localhost:4200
         working-directory: ./frontend
 
       - name: Run system tests
-        run: mvn -Dtest=UISystemTest test
+        run: mvn -Dspring-boot.run.profiles=test -Dtest=UISystemTest test
         working-directory: ./backend
