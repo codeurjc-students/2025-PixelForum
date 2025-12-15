@@ -151,7 +151,7 @@ jobs:
       - name: Start backend
         run:
             mvn spring-boot:run "-Dspring-boot.run.profiles=test" &
-            until nc -z localhost 8080; do sleep 1; done
+            until nc -z localhost 8080; do sleep 2; done
         working-directory: ./backend
 
       - name: Run integration tests
@@ -175,7 +175,7 @@ jobs:
         working-directory: ./frontend
 
       - name: Serve Angular in background
-        run: npm start
+        run: npm start &
         working-directory: ./frontend
 
       - name: Wait for Angular to be ready
