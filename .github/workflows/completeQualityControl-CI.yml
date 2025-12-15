@@ -150,7 +150,7 @@ jobs:
 
       - name: Start backend
         run:
-            mvn spring-boot:run &
+            mvn spring-boot:run "-Dspring-boot.run.profiles=test" &
             until nc -z localhost 8080; do sleep 1; done
         working-directory: ./backend
 
