@@ -1,4 +1,14 @@
 # PixelForum
+## 📑 Index
+- [Summary](#-Summary)
+- [Objectives](#-Objectives)
+- [Methodology](#%EF%B8%8F-methodology)
+- [Detailed-Functionalities](#-Detailed-Functionalities)
+- [Analysis](#-Analysis)
+- [Tracking / Progress](#-Tracking--Progress)
+- [Author](#-Author)
+- [Development Guide](docs/developmentGuide.md)
+
 ## 📝 Summary
 🎮 This video game forum web application is designed for players 👾 who want to share their experiences, discuss their favorite titles, and connect with other gamers around the world 🌍.
 Instead of a large generic forum where all kinds of unrelated topics are mixed ❌, this platform is focused exclusively on video games 🕹️, creating a dedicated space for players.
