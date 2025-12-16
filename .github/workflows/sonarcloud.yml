@@ -1,0 +1,43 @@
+name: SonarCloud
+on:
+    push:
+        paths:
+            - backend/src/**
+            - backend/pom.xml
+            - frontend/src/**
+            - frontend/angular.json
+        branches:
+            - main
+    workflow_dispatch:
+    pull_request:
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build and analyze
+        working-directory: ./backend
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn clean verify sonar:sonar \
+          -Dsonar.projectKey=codeurjc-students_2025-PixelForum \
+          -Dsonar.organization=codeurjc-students \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=$SONAR_TOKEN
