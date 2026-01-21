@@ -32,6 +32,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Serve Angular in background
+        run: npm start &
+          npx wait-on http://localhost:4200
+        working-directory: ./frontend
+
       - name: Build and analyze
         working-directory: ./backend
         env:
