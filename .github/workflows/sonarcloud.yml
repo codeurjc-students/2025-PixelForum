@@ -46,12 +46,6 @@ jobs:
           npx wait-on http://localhost:4200
         working-directory: ./frontend
 
-      - name: Start backend
-        run:
-            mvn spring-boot:run "-Dspring-boot.run.profiles=test" &
-            until nc -z localhost 8080; do sleep 2; done
-        working-directory: ./backend
-
       - name: Build and analyze
         working-directory: ./backend
         env:
