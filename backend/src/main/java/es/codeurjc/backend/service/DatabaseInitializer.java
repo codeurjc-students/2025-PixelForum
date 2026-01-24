@@ -1,9 +1,7 @@
 package es.codeurjc.backend.service;
 
-import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import es.codeurjc.backend.model.Post;
@@ -15,20 +13,20 @@ import jakarta.annotation.PostConstruct;
 @Component
 public class DatabaseInitializer {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+	private final UserService userService;
+	private final TopicService topicService;
+	// private final CommentService commentService;
 
-    @Autowired
-    private UserService userService;
-
-    //@Autowired
-    //private CommentService commentService;
-
-    @Autowired
-    private TopicService topicService;
+	public DatabaseInitializer(PostService postService, UserService userService, TopicService topicService) {
+		this.postService = postService;
+		this.userService = userService;
+		this.topicService = topicService;
+		// this.commentService = commentService;
+	}
 
     @PostConstruct
-    public void init() throws IOException {
+    public void init() {
         
         User admin = new User("admin", "admin@host", "admin", "ADMIN", "USER");
         User usuario1 = new User("martin", "martin@gmail.com", "martin", "USER");

@@ -3,7 +3,6 @@ package es.codeurjc.backend.controller.rest;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,8 +16,11 @@ import es.codeurjc.backend.service.PostService;
 @RequestMapping("/api/posts")
 public class PostRestController {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+
+    public PostRestController(PostService postService) {
+        this.postService = postService;
+    }
 
     // Get all posts
     @GetMapping("/")

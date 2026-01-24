@@ -26,7 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Tag("selenium")
 @DisplayName("Selenium UI Test")
 @ActiveProfiles("test")
-public class UISystemIT {
+class UISystemIT {
     @LocalServerPort
     int port;
 
@@ -34,7 +34,7 @@ public class UISystemIT {
     private WebDriverWait wait;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         port = 4200;
         String browser = System.getenv("BROWSER");
         if ("firefox".equalsIgnoreCase(browser)) {
@@ -54,18 +54,18 @@ public class UISystemIT {
     }
 
     @AfterEach
-    public void tearDown(){
+    void tearDown(){
         driver.quit();
     }
 
     @Test
-    public void mainPageSeleniumTest(){
+    void mainPageSeleniumTest(){
         driver.get("http://localhost:" + port + "/");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-root")));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
 
         WebElement postTitle = driver.findElement(By.id("post-title"));
-        assertEquals(postTitle.getText(), "GTA VI Massive leak");
+        assertEquals("GTA VI Massive leak", postTitle.getText());
     }
 
 }

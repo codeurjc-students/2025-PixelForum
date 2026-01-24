@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-01-21T14:47:28+0100&quot;,
-    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
+    date = &quot;2026-01-24T23:25:29+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
 )
 @Component
 <span class="fc" id="L16">public class TopicMapperImpl implements TopicMapper {</span>
 
     @Override
-    public TopicDTO toDTO(Topic Topic) {
-<span class="nc bnc" id="L20" title="All 2 branches missed.">        if ( Topic == null ) {</span>
+    public TopicDTO toDTO(Topic topic) {
+<span class="nc bnc" id="L20" title="All 2 branches missed.">        if ( topic == null ) {</span>
 <span class="nc" id="L21">            return null;</span>
         }
 
@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L25">        String name = null;</span>
 <span class="nc" id="L26">        String description = null;</span>
 
-<span class="nc" id="L28">        id = Topic.getId();</span>
-<span class="nc" id="L29">        name = Topic.getName();</span>
-<span class="nc" id="L30">        description = Topic.getDescription();</span>
+<span class="nc" id="L28">        id = topic.getId();</span>
+<span class="nc" id="L29">        name = topic.getName();</span>
+<span class="nc" id="L30">        description = topic.getDescription();</span>
 
 <span class="nc" id="L32">        TopicDTO topicDTO = new TopicDTO( id, name, description );</span>
 
@@ -35,32 +35,32 @@ import org.springframework.stereotype.Component;
     }
 
     @Override
-    public List&lt;TopicDTO&gt; toDTOs(Collection&lt;Topic&gt; Topics) {
-<span class="nc bnc" id="L39" title="All 2 branches missed.">        if ( Topics == null ) {</span>
+    public List&lt;TopicDTO&gt; toDTOs(Collection&lt;Topic&gt; topics) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if ( topics == null ) {</span>
 <span class="nc" id="L40">            return null;</span>
         }
 
-<span class="nc" id="L43">        List&lt;TopicDTO&gt; list = new ArrayList&lt;TopicDTO&gt;( Topics.size() );</span>
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        for ( Topic topic : Topics ) {</span>
+<span class="nc" id="L43">        List&lt;TopicDTO&gt; list = new ArrayList&lt;TopicDTO&gt;( topics.size() );</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        for ( Topic topic : topics ) {</span>
 <span class="nc" id="L45">            list.add( toDTO( topic ) );</span>
-<span class="nc" id="L46">        }</span>
+        }
 
 <span class="nc" id="L48">        return list;</span>
     }
 
     @Override
-    public Topic toDomain(TopicDTO TopicDTO) {
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        if ( TopicDTO == null ) {</span>
+    public Topic toDomain(TopicDTO topicDTO) {
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if ( topicDTO == null ) {</span>
 <span class="nc" id="L54">            return null;</span>
         }
 
 <span class="nc" id="L57">        Topic topic = new Topic();</span>
 
-<span class="nc bnc" id="L59" title="All 2 branches missed.">        if ( TopicDTO.id() != null ) {</span>
-<span class="nc" id="L60">            topic.setId( TopicDTO.id() );</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if ( topicDTO.id() != null ) {</span>
+<span class="nc" id="L60">            topic.setId( topicDTO.id() );</span>
         }
-<span class="nc" id="L62">        topic.setName( TopicDTO.name() );</span>
-<span class="nc" id="L63">        topic.setDescription( TopicDTO.description() );</span>
+<span class="nc" id="L62">        topic.setName( topicDTO.name() );</span>
+<span class="nc" id="L63">        topic.setDescription( topicDTO.description() );</span>
 
 <span class="nc" id="L65">        return topic;</span>
     }

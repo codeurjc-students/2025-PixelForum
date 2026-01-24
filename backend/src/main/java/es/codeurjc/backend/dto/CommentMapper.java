@@ -10,10 +10,10 @@ import es.codeurjc.backend.model.Comment;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    CommentDTO toDTO(Comment Comment);
+    CommentDTO toDTO(Comment comment);
 
-    List<CommentDTO> toDTOs(Collection<Comment> Comments);
+    List<CommentDTO> toDTOs(Collection<Comment> comments);
 
-    Comment toDomain(CommentDTO CommentDTO);
+    Comment toDomain(CommentDTO commentDTO);
 
 }

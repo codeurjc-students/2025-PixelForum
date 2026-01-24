@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.backend.dto.PostDTO;
@@ -16,67 +15,63 @@ import jakarta.transaction.Transactional;
 @Service
 public class PostService {
 
-	@Autowired
-    private PostMapper mapper;
+	private final PostMapper mapper;
+	private final PostRepository postRepository;
 
-    @Autowired
-    private PostRepository postRepository;
-
-
-<span class="fc" id="L26">	public PostService(PostRepository postRepository, PostMapper mapper) {</span>
-<span class="fc" id="L27">        this.postRepository = postRepository;</span>
-<span class="fc" id="L28">        this.mapper = mapper;</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L21">	public PostService(PostMapper mapper, PostRepository postRepository) {</span>
+<span class="fc" id="L22">		this.mapper = mapper;</span>
+<span class="fc" id="L23">		this.postRepository = postRepository;</span>
+<span class="fc" id="L24">	}</span>
 
 	public Optional&lt;Post&gt; findById(long id) {
-<span class="fc" id="L32">		return postRepository.findById(id);</span>
+<span class="fc" id="L27">		return postRepository.findById(id);</span>
 	}
 
 	public boolean exist(long id) {
-<span class="fc" id="L36">		return postRepository.existsById(id);</span>
+<span class="fc" id="L31">		return postRepository.existsById(id);</span>
 	}
 
 	public List&lt;Post&gt; findAll() {
-<span class="fc" id="L40">		return postRepository.findAll();</span>
+<span class="fc" id="L35">		return postRepository.findAll();</span>
 	}
 
 	public Post save(Post post){
-<span class="fc" id="L44">		return postRepository.save(post);</span>
+<span class="fc" id="L39">		return postRepository.save(post);</span>
 	}
 
     @Transactional 
     public void deleteById(Long id) {
-<span class="nc" id="L49">        Optional&lt;Post&gt; postOptional = postRepository.findById(id);</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (postOptional.isPresent()) {</span>
-<span class="nc" id="L51">            Post post = postOptional.get();</span>
-<span class="nc" id="L52">			postRepository.delete(post);</span>
+<span class="nc" id="L44">        Optional&lt;Post&gt; postOptional = postRepository.findById(id);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (postOptional.isPresent()) {</span>
+<span class="nc" id="L46">            Post post = postOptional.get();</span>
+<span class="nc" id="L47">			postRepository.delete(post);</span>
         }
-<span class="nc" id="L54">    }</span>
+<span class="nc" id="L49">    }</span>
 
 	private PostDTO toDTO (Post post) {
-<span class="fc" id="L57">        return mapper.toDTO(post);</span>
+<span class="fc" id="L52">        return mapper.toDTO(post);</span>
     }
 
     private Post toDomain (PostDTO postDTO) {
-<span class="nc" id="L61">        return mapper.toDomain(postDTO);</span>
+<span class="nc" id="L56">        return mapper.toDomain(postDTO);</span>
     }
 
     private List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; posts){
-<span class="nc" id="L65">        return mapper.toDTOs(posts);</span>
+<span class="nc" id="L60">        return mapper.toDTOs(posts);</span>
     }
 
 	public Collection&lt;PostDTO&gt; getposts() {
-<span class="nc" id="L69">		return toDTOs(postRepository.findAll());</span>
+<span class="nc" id="L64">		return toDTOs(postRepository.findAll());</span>
 	}
 
 	public PostDTO getPost(long id) {
-<span class="fc" id="L73">		return toDTO(postRepository.findById(id).orElseThrow());</span>
+<span class="fc" id="L68">		return toDTO(postRepository.findById(id).orElseThrow());</span>
 	}
 
 	public PostDTO createPost(PostDTO postDTO) {
-<span class="nc" id="L77">		Post post = toDomain(postDTO);</span>
-<span class="nc" id="L78"> 		this.save(post);</span>
-<span class="nc" id="L79"> 		return toDTO(post);</span>
+<span class="nc" id="L72">		Post post = toDomain(postDTO);</span>
+<span class="nc" id="L73"> 		this.save(post);</span>
+<span class="nc" id="L74"> 		return toDTO(post);</span>
 	}
 
 }

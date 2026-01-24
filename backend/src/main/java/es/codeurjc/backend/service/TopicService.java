@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.backend.dto.TopicDTO;
@@ -16,12 +15,13 @@ import jakarta.transaction.Transactional;
 @Service
 public class TopicService {
 
-	@Autowired
-    private TopicMapper mapper;
+	private final TopicMapper mapper;
+	private final TopicRepository topicRepository;
 
-    @Autowired
-    private TopicRepository topicRepository;
-
+	public TopicService(TopicMapper mapper, TopicRepository topicRepository) {
+		this.mapper = mapper;
+		this.topicRepository = topicRepository;
+	}
 	
 	public Optional<Topic> findById(long id) {
 		return topicRepository.findById(id);

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.backend.dto.UserDTO;
@@ -18,17 +17,17 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-	@Autowired
-    private UserMapper mapper;
+	private final UserMapper mapper;
+	private final UserRepository userRepository;
+	private final PostRepository postRepository;
+	private final CommentRepository commentRepository;
 
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private CommentRepository commentRepository;
+	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository, CommentRepository commentRepository) {
+		this.mapper = mapper;
+		this.userRepository = userRepository;
+		this.postRepository = postRepository;
+		this.commentRepository = commentRepository;
+	}
 	
 	public Optional<User> findById(long id) {
 		return userRepository.findById(id);
@@ -51,15 +50,6 @@ public class UserService {
 	}
 
 	public User save(User user){
-		/*String password = user.getPassword();
-        String encodedPassword = passwordEncoder.encode(password);
-        user.setPassword(encodedPassword);
-		if (user.getUsername().equals("admin")) {
-			user.setRoles(List.of("USER", "ADMIN"));
-		} else {
-			user.setRoles(List.of("USER"));
-		}*/
-		
 		return userRepository.save(user);
 	}	
 

@@ -51,9 +51,8 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-            mvn clean verify sonar:sonar \
-              -Dsonar.projectKey=codeurjc-students_2025-PixelForum \
-              -Dsonar.organization=codeurjc-students \
-              -Dsonar.host.url=https://sonarcloud.io \
+            mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
               -Dsonar.login=$SONAR_TOKEN \
-              -Dsonar.exclusions=**/target/**,**/coverage/**,**/docs/**
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.organization=codeurjc-students \
+              -Dsonar.projectKey=codeurjc-students_2025-PixelForum

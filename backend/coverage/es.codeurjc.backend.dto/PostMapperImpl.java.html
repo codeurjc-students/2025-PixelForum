@@ -13,15 +13,15 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-01-21T14:47:28+0100&quot;,
-    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
+    date = &quot;2026-01-24T23:25:29+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
 )
 @Component
 <span class="fc" id="L20">public class PostMapperImpl implements PostMapper {</span>
 
     @Override
-    public PostDTO toDTO(Post Post) {
-<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if ( Post == null ) {</span>
+    public PostDTO toDTO(Post post) {
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if ( post == null ) {</span>
 <span class="nc" id="L25">            return null;</span>
         }
 
@@ -36,22 +36,22 @@ import org.springframework.stereotype.Component;
 <span class="fc" id="L36">        List&lt;Long&gt; usersThatLiked = null;</span>
 <span class="fc" id="L37">        List&lt;Blob&gt; images = null;</span>
 
-<span class="fc" id="L39">        id = Post.getId();</span>
-<span class="fc" id="L40">        title = Post.getTitle();</span>
-<span class="fc" id="L41">        content = Post.getContent();</span>
-<span class="fc" id="L42">        createdAt = Post.getCreatedAt();</span>
-<span class="fc" id="L43">        updatedAt = Post.getUpdatedAt();</span>
-<span class="fc" id="L44">        author = Post.getAuthor();</span>
-<span class="fc" id="L45">        List&lt;Topic&gt; list = Post.getTopics();</span>
+<span class="fc" id="L39">        id = post.getId();</span>
+<span class="fc" id="L40">        title = post.getTitle();</span>
+<span class="fc" id="L41">        content = post.getContent();</span>
+<span class="fc" id="L42">        createdAt = post.getCreatedAt();</span>
+<span class="fc" id="L43">        updatedAt = post.getUpdatedAt();</span>
+<span class="fc" id="L44">        author = post.getAuthor();</span>
+<span class="fc" id="L45">        List&lt;Topic&gt; list = post.getTopics();</span>
 <span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if ( list != null ) {</span>
 <span class="fc" id="L47">            topics = new ArrayList&lt;Topic&gt;( list );</span>
         }
-<span class="fc" id="L49">        likes = Post.getLikes();</span>
-<span class="fc" id="L50">        List&lt;Long&gt; list1 = Post.getUsersThatLiked();</span>
+<span class="fc" id="L49">        likes = post.getLikes();</span>
+<span class="fc" id="L50">        List&lt;Long&gt; list1 = post.getUsersThatLiked();</span>
 <span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if ( list1 != null ) {</span>
 <span class="nc" id="L52">            usersThatLiked = new ArrayList&lt;Long&gt;( list1 );</span>
         }
-<span class="fc" id="L54">        List&lt;Blob&gt; list2 = Post.getImages();</span>
+<span class="fc" id="L54">        List&lt;Blob&gt; list2 = post.getImages();</span>
 <span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if ( list2 != null ) {</span>
 <span class="nc" id="L56">            images = new ArrayList&lt;Blob&gt;( list2 );</span>
         }
@@ -62,45 +62,45 @@ import org.springframework.stereotype.Component;
     }
 
     @Override
-    public List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; Posts) {
-<span class="nc bnc" id="L66" title="All 2 branches missed.">        if ( Posts == null ) {</span>
+    public List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; posts) {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if ( posts == null ) {</span>
 <span class="nc" id="L67">            return null;</span>
         }
 
-<span class="nc" id="L70">        List&lt;PostDTO&gt; list = new ArrayList&lt;PostDTO&gt;( Posts.size() );</span>
-<span class="nc bnc" id="L71" title="All 2 branches missed.">        for ( Post post : Posts ) {</span>
+<span class="nc" id="L70">        List&lt;PostDTO&gt; list = new ArrayList&lt;PostDTO&gt;( posts.size() );</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for ( Post post : posts ) {</span>
 <span class="nc" id="L72">            list.add( toDTO( post ) );</span>
-<span class="nc" id="L73">        }</span>
+        }
 
 <span class="nc" id="L75">        return list;</span>
     }
 
     @Override
-    public Post toDomain(PostDTO PostDTO) {
-<span class="nc bnc" id="L80" title="All 2 branches missed.">        if ( PostDTO == null ) {</span>
+    public Post toDomain(PostDTO postDTO) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if ( postDTO == null ) {</span>
 <span class="nc" id="L81">            return null;</span>
         }
 
 <span class="nc" id="L84">        Post post = new Post();</span>
 
-<span class="nc bnc" id="L86" title="All 2 branches missed.">        if ( PostDTO.id() != null ) {</span>
-<span class="nc" id="L87">            post.setId( PostDTO.id() );</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if ( postDTO.id() != null ) {</span>
+<span class="nc" id="L87">            post.setId( postDTO.id() );</span>
         }
-<span class="nc" id="L89">        post.setTitle( PostDTO.title() );</span>
-<span class="nc" id="L90">        post.setContent( PostDTO.content() );</span>
-<span class="nc" id="L91">        post.setCreatedAt( PostDTO.createdAt() );</span>
-<span class="nc" id="L92">        post.setUpdatedAt( PostDTO.updatedAt() );</span>
-<span class="nc" id="L93">        List&lt;Blob&gt; list = PostDTO.images();</span>
+<span class="nc" id="L89">        post.setTitle( postDTO.title() );</span>
+<span class="nc" id="L90">        post.setContent( postDTO.content() );</span>
+<span class="nc" id="L91">        post.setCreatedAt( postDTO.createdAt() );</span>
+<span class="nc" id="L92">        post.setUpdatedAt( postDTO.updatedAt() );</span>
+<span class="nc" id="L93">        List&lt;Blob&gt; list = postDTO.images();</span>
 <span class="nc bnc" id="L94" title="All 2 branches missed.">        if ( list != null ) {</span>
 <span class="nc" id="L95">            post.setImages( new ArrayList&lt;Blob&gt;( list ) );</span>
         }
-<span class="nc" id="L97">        post.setAuthor( PostDTO.author() );</span>
-<span class="nc" id="L98">        List&lt;Topic&gt; list1 = PostDTO.topics();</span>
+<span class="nc" id="L97">        post.setAuthor( postDTO.author() );</span>
+<span class="nc" id="L98">        List&lt;Topic&gt; list1 = postDTO.topics();</span>
 <span class="nc bnc" id="L99" title="All 2 branches missed.">        if ( list1 != null ) {</span>
 <span class="nc" id="L100">            post.setTopics( new ArrayList&lt;Topic&gt;( list1 ) );</span>
         }
-<span class="nc" id="L102">        post.setLikes( PostDTO.likes() );</span>
-<span class="nc" id="L103">        List&lt;Long&gt; list2 = PostDTO.usersThatLiked();</span>
+<span class="nc" id="L102">        post.setLikes( postDTO.likes() );</span>
+<span class="nc" id="L103">        List&lt;Long&gt; list2 = postDTO.usersThatLiked();</span>
 <span class="nc bnc" id="L104" title="All 2 branches missed.">        if ( list2 != null ) {</span>
 <span class="nc" id="L105">            post.setUsersThatLiked( new ArrayList&lt;Long&gt;( list2 ) );</span>
         }

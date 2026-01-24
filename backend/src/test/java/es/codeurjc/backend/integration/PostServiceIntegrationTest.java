@@ -2,6 +2,7 @@ package es.codeurjc.backend.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,20 +22,20 @@ import es.codeurjc.backend.service.PostService;
 @DisplayName("PostService Integration tests")
 @ActiveProfiles("test")
 @SpringBootTest
-public class PostServiceIntegrationTest {
+class PostServiceIntegrationTest {
     @Autowired
     PostRepository postRepository;
 
     PostService postService;
 
     @BeforeEach
-    public void init() {
+    void init() {
         PostMapper postMapper = Mappers.getMapper(PostMapper.class);
-        postService = new PostService(postRepository, postMapper);
+        postService = new PostService(postMapper, postRepository);
     }
 
     @Test
-    public void savePostIntTest(){
+    void savePostIntTest(){
         int numPostsBefore = postService.findAll().size();
 
         Post post = new Post();
@@ -43,10 +44,10 @@ public class PostServiceIntegrationTest {
 
         Post savedpost = postService.save(post);
         assertNotNull(savedpost);
-        assertNotNull(savedpost.getId());
+        assertTrue(savedpost.getId() > 0);
 
         int numPostsAfter = postService.findAll().size();
         assertEquals(numPostsAfter, (numPostsBefore + 1));
-        assertEquals(postService.exist(savedpost.getId()), true);
+        assertEquals(true, postService.exist(savedpost.getId()));
     }
 }

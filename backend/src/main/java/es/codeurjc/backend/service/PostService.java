@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.backend.dto.PostDTO;
@@ -16,17 +15,13 @@ import jakarta.transaction.Transactional;
 @Service
 public class PostService {
 
-	@Autowired
-    private PostMapper mapper;
+	private final PostMapper mapper;
+	private final PostRepository postRepository;
 
-    @Autowired
-    private PostRepository postRepository;
-
-
-	public PostService(PostRepository postRepository, PostMapper mapper) {
-        this.postRepository = postRepository;
-        this.mapper = mapper;
-    }
+	public PostService(PostMapper mapper, PostRepository postRepository) {
+		this.mapper = mapper;
+		this.postRepository = postRepository;
+	}
 
 	public Optional<Post> findById(long id) {
 		return postRepository.findById(id);

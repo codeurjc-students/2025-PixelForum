@@ -10,10 +10,10 @@ import es.codeurjc.backend.model.Post;
 @Mapper(componentModel = "spring")
 public interface PostMapper {
 
-    PostDTO toDTO(Post Post);
+    PostDTO toDTO(Post post);
 
-    List<PostDTO> toDTOs(Collection<Post> Posts);
+    List<PostDTO> toDTOs(Collection<Post> posts);
 
-    Post toDomain(PostDTO PostDTO);
-
+    Post toDomain(PostDTO postDTO);
+    
 }

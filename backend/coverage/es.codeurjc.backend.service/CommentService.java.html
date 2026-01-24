@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.backend.dto.CommentDTO;
@@ -14,14 +13,15 @@ import es.codeurjc.backend.repository.CommentRepository;
 import jakarta.transaction.Transactional;
 
 @Service
-<span class="fc" id="L17">public class CommentService {</span>
+public class CommentService {
 
-	@Autowired
-    private CommentMapper mapper;
+	private final CommentMapper mapper;
+	private final CommentRepository commentRepository;
 
-    @Autowired
-    private CommentRepository commentRepository;
-
+<span class="fc" id="L21">	public CommentService(CommentMapper mapper, CommentRepository commentRepository) {</span>
+<span class="fc" id="L22">		this.mapper = mapper;</span>
+<span class="fc" id="L23">		this.commentRepository = commentRepository;</span>
+<span class="fc" id="L24">	}</span>
 	
 	public Optional&lt;Comment&gt; findById(long id) {
 <span class="nc" id="L27">		return commentRepository.findById(id);</span>

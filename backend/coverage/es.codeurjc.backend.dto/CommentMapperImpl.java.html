@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-01-21T14:47:27+0100&quot;,
-    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
+    date = &quot;2026-01-24T23:25:29+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
 )
 @Component
 <span class="fc" id="L19">public class CommentMapperImpl implements CommentMapper {</span>
 
     @Override
-    public CommentDTO toDTO(Comment Comment) {
-<span class="nc bnc" id="L23" title="All 2 branches missed.">        if ( Comment == null ) {</span>
+    public CommentDTO toDTO(Comment comment) {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if ( comment == null ) {</span>
 <span class="nc" id="L24">            return null;</span>
         }
 
@@ -34,15 +34,15 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L34">        int likes = 0;</span>
 <span class="nc" id="L35">        List&lt;Long&gt; usersThatLiked = null;</span>
 
-<span class="nc" id="L37">        id = Comment.getId();</span>
-<span class="nc" id="L38">        content = Comment.getContent();</span>
-<span class="nc" id="L39">        createdAt = Comment.getCreatedAt();</span>
-<span class="nc" id="L40">        updatedAt = Comment.getUpdatedAt();</span>
-<span class="nc" id="L41">        author = Comment.getAuthor();</span>
-<span class="nc" id="L42">        post = Comment.getPost();</span>
-<span class="nc" id="L43">        commentId = Comment.getCommentId();</span>
-<span class="nc" id="L44">        likes = Comment.getLikes();</span>
-<span class="nc" id="L45">        List&lt;Long&gt; list = Comment.getUsersThatLiked();</span>
+<span class="nc" id="L37">        id = comment.getId();</span>
+<span class="nc" id="L38">        content = comment.getContent();</span>
+<span class="nc" id="L39">        createdAt = comment.getCreatedAt();</span>
+<span class="nc" id="L40">        updatedAt = comment.getUpdatedAt();</span>
+<span class="nc" id="L41">        author = comment.getAuthor();</span>
+<span class="nc" id="L42">        post = comment.getPost();</span>
+<span class="nc" id="L43">        commentId = comment.getCommentId();</span>
+<span class="nc" id="L44">        likes = comment.getLikes();</span>
+<span class="nc" id="L45">        List&lt;Long&gt; list = comment.getUsersThatLiked();</span>
 <span class="nc bnc" id="L46" title="All 2 branches missed.">        if ( list != null ) {</span>
 <span class="nc" id="L47">            usersThatLiked = new ArrayList&lt;Long&gt;( list );</span>
         }
@@ -53,38 +53,38 @@ import org.springframework.stereotype.Component;
     }
 
     @Override
-    public List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; Comments) {
-<span class="nc bnc" id="L57" title="All 2 branches missed.">        if ( Comments == null ) {</span>
+    public List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if ( comments == null ) {</span>
 <span class="nc" id="L58">            return null;</span>
         }
 
-<span class="nc" id="L61">        List&lt;CommentDTO&gt; list = new ArrayList&lt;CommentDTO&gt;( Comments.size() );</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">        for ( Comment comment : Comments ) {</span>
+<span class="nc" id="L61">        List&lt;CommentDTO&gt; list = new ArrayList&lt;CommentDTO&gt;( comments.size() );</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        for ( Comment comment : comments ) {</span>
 <span class="nc" id="L63">            list.add( toDTO( comment ) );</span>
-<span class="nc" id="L64">        }</span>
+        }
 
 <span class="nc" id="L66">        return list;</span>
     }
 
     @Override
-    public Comment toDomain(CommentDTO CommentDTO) {
-<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( CommentDTO == null ) {</span>
+    public Comment toDomain(CommentDTO commentDTO) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( commentDTO == null ) {</span>
 <span class="nc" id="L72">            return null;</span>
         }
 
 <span class="nc" id="L75">        Comment comment = new Comment();</span>
 
-<span class="nc bnc" id="L77" title="All 2 branches missed.">        if ( CommentDTO.id() != null ) {</span>
-<span class="nc" id="L78">            comment.setId( CommentDTO.id() );</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if ( commentDTO.id() != null ) {</span>
+<span class="nc" id="L78">            comment.setId( commentDTO.id() );</span>
         }
-<span class="nc" id="L80">        comment.setContent( CommentDTO.content() );</span>
-<span class="nc" id="L81">        comment.setCreatedAt( CommentDTO.createdAt() );</span>
-<span class="nc" id="L82">        comment.setUpdatedAt( CommentDTO.updatedAt() );</span>
-<span class="nc" id="L83">        comment.setAuthor( CommentDTO.author() );</span>
-<span class="nc" id="L84">        comment.setPost( CommentDTO.post() );</span>
-<span class="nc" id="L85">        comment.setCommentId( CommentDTO.commentId() );</span>
-<span class="nc" id="L86">        comment.setLikes( CommentDTO.likes() );</span>
-<span class="nc" id="L87">        List&lt;Long&gt; list = CommentDTO.usersThatLiked();</span>
+<span class="nc" id="L80">        comment.setContent( commentDTO.content() );</span>
+<span class="nc" id="L81">        comment.setCreatedAt( commentDTO.createdAt() );</span>
+<span class="nc" id="L82">        comment.setUpdatedAt( commentDTO.updatedAt() );</span>
+<span class="nc" id="L83">        comment.setAuthor( commentDTO.author() );</span>
+<span class="nc" id="L84">        comment.setPost( commentDTO.post() );</span>
+<span class="nc" id="L85">        comment.setCommentId( commentDTO.commentId() );</span>
+<span class="nc" id="L86">        comment.setLikes( commentDTO.likes() );</span>
+<span class="nc" id="L87">        List&lt;Long&gt; list = commentDTO.usersThatLiked();</span>
 <span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( list != null ) {</span>
 <span class="nc" id="L89">            comment.setUsersThatLiked( new ArrayList&lt;Long&gt;( list ) );</span>
         }

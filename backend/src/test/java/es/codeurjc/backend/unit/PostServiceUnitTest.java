@@ -24,21 +24,21 @@ import es.codeurjc.backend.service.PostService;
 @Tag("unit")
 @DisplayName("PostService Unitary tests")
 @ActiveProfiles("test")
-public class PostServiceUnitTest {
+class PostServiceUnitTest {
 
     private PostService postService;
     private PostRepository postRepository;
     private PostMapper postMapper;
 
     @BeforeEach
-    public void init() {
+    void init() {
         this.postRepository = mock(PostRepository.class);
         this.postMapper = Mappers.getMapper(PostMapper.class);
-        this.postService = new PostService(postRepository, postMapper);
+        this.postService = new PostService(postMapper, postRepository);
     }
 
     @Test
-    public void findPostByIdTest() {
+    void findPostByIdTest() {
         //GIVEN
         long id = 1;
         Topic topic = new Topic("GTA VI", "All news about Grand Theft Auto VI");

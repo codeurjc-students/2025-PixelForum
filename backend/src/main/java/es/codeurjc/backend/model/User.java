@@ -106,11 +106,11 @@ public class User {
 		this.avatar = avatar;
 	}
 
-    public void setLikedPosts(ArrayList<Long> likedPosts) {
+    public void setLikedPosts(List<Long> likedPosts) {
         this.likedPosts = likedPosts;
     }
 
-    public void setLikedComments(ArrayList<Long> likedComments) {
+    public void setLikedComments(List<Long> likedComments) {
         this.likedComments = likedComments;
     }
 
