@@ -1,0 +1,39 @@
+.header {
+	height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 1.5rem;
+	background: #e5e5e5;
+	border-bottom: 1px solid #ccc;
+}
+
+.logo {
+	font-weight: bold;
+	font-size: 1.2rem;
+}
+
+.search input {
+	width: 350px;
+	padding: 0.5rem 1rem;
+	border-radius: 20px;
+	border: 1px solid #bbb;
+}
+
+.right {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.create {
+	border: none;
+	background: none;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.icon {
+	font-size: 1.3rem;
+	cursor: pointer;
+}

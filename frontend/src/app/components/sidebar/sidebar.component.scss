@@ -1,0 +1,21 @@
+.sidebar {
+	width: 220px;
+	height: 100vh;
+	background: white;
+	border-right: 1px solid #ccc;
+	padding: 1rem;
+}
+
+.item {
+	display: block;
+	padding: 0.75rem;
+	margin-bottom: 0.5rem;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.item:hover,
+.active {
+	background: #eaeaea;
+	font-weight: 500;
+}
