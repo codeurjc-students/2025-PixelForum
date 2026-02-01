@@ -8,9 +8,9 @@
 .item {
 	display: block;
 	padding: 0.75rem;
-	margin-bottom: 0.5rem;
 	border-radius: 6px;
 	cursor: pointer;
+	transition: background-color 0.15s ease;
 }
 
 .item:not(.active):hover {
@@ -22,6 +22,16 @@
 	font-weight: 500;
 }
 
-.item {
-	transition: background-color 0.15s ease;
+.icon {
+	width: 16px;
+	height: 16px;
+	stroke-width: 2;
+	stroke: currentColor;
+	fill: none;
+	vertical-align:text-bottom;
+}
+
+.text {
+	vertical-align: middle;
+	margin-left: 0.75rem;
 }
