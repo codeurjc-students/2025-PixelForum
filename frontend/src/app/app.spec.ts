@@ -41,7 +41,7 @@ describe('App', () => {
 		fixture.detectChanges();
 		const compiled = fixture.nativeElement as HTMLElement;
 
-		// check for the title
+		// Check for the title
 		expect(compiled.textContent).toContain('Latest posts');
 	});
 });

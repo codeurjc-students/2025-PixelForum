@@ -1,0 +1,37 @@
+.sidebar {
+	width: 220px;
+	height: 100%;
+	background: white;
+	padding: 1rem;
+}
+
+.item {
+	display: block;
+	padding: 0.75rem;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+
+.item:not(.active):hover {
+	background: #f2f2f2;
+}
+
+.active {
+	background: #e5e5e5;
+	font-weight: 500;
+}
+
+.icon {
+	width: 16px;
+	height: 16px;
+	stroke-width: 2;
+	stroke: currentColor;
+	fill: none;
+	vertical-align:text-bottom;
+}
+
+.text {
+	vertical-align: middle;
+	margin-left: 0.75rem;
+}

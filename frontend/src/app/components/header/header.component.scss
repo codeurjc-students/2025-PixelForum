@@ -1,0 +1,112 @@
+.header {
+	height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 1.5rem;
+	background: #e5e5e5;
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	height: 3.5em;
+	cursor: pointer;
+}
+
+.logo-text {
+	font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 1.6rem;
+	font-weight: 800;
+	letter-spacing: -0.015em;
+	color: #111;
+}
+
+.search {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.search input:hover {
+	background-color: #eaf3ff;;
+}
+
+.search input {
+	width: 350px;
+	padding: 0.5rem 1rem;
+	border-radius: 20px;
+	border: 2px solid #8BC34A;
+	padding-left: 36px;
+}
+
+.search input:focus {
+	outline: none;
+	border-color: #9ec5ff;
+	box-shadow: 0 0 0 2px rgba(158, 197, 255, 0.3);
+}
+
+.search-icon {
+	position: absolute;
+	left: 12px;
+	width: 16px;
+	height: 16px;
+	color: #888;
+	pointer-events: none;
+}
+
+.right {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	height: 40px;
+	padding: 0 15px;
+	border-radius: 999px;
+	border: 0;
+	background: #e5e5e5;
+	color: #111;
+	font-size: 1.5rem;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+	background: #d6d6d6;
+}
+
+.btn-icon {
+	width: 24px;
+	height: 24px;
+	stroke-width: 2.5;
+	stroke: currentColor;
+	fill: none;
+}
+
+.avatar {
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	border: 0;
+	background: #e5e5e5;
+	color: #111;
+	font-size: 1.5rem;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.avatar:hover {
+	background: #eaf3ff;
+}
+
+.btn-icon.avatar {
+	width: 45px;
+	height: 45px;
+	stroke-width: 1.5;
+}
