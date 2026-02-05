@@ -40,14 +40,18 @@ class UISystemIT {
         if ("firefox".equalsIgnoreCase(browser)) {
             FirefoxOptions options = new FirefoxOptions();
             options.addArguments("--headless");
+            options.setAcceptInsecureCerts(true);
             driver = new FirefoxDriver(options);
         } else if ("edge".equalsIgnoreCase(browser)) {
             EdgeOptions options = new EdgeOptions();
             options.addArguments("--headless");
+            options.setAcceptInsecureCerts(true);
             driver = new EdgeDriver(options);
         } else {
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
+            options.addArguments("--ignore-certificate-errors");
+            options.setAcceptInsecureCerts(true);
             driver = new ChromeDriver(options);
         }
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -60,7 +64,7 @@ class UISystemIT {
 
     @Test
     void mainPageSeleniumTest(){
-        driver.get("http://localhost:" + port + "/");
+        driver.get("https://localhost:" + port + "/");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-root")));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
 
