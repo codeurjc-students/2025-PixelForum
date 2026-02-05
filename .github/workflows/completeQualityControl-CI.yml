@@ -181,8 +181,8 @@ jobs:
         working-directory: ./frontend
 
       - name: Serve Angular in background
-        run: npm start &
-          npx wait-on http://localhost:4200
+        run: npm run start:test &
+          npx wait-on https://localhost:4200
         working-directory: ./frontend
 
       - name: Start backend

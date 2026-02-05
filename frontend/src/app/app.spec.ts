@@ -36,12 +36,14 @@ describe('App', () => {
 		expect(app).toBeTruthy();
 	});
 
-	it('should render latest posts title', () => {
+	it('should render home page', () => {
 		const fixture = TestBed.createComponent(App);
 		fixture.detectChanges();
 		const compiled = fixture.nativeElement as HTMLElement;
 
-		// Check for the title
-		expect(compiled.textContent).toContain('Latest posts');
+		// Check for presence of child components
+		expect(compiled.querySelector('app-header')).not.toBeNull();
+		expect(compiled.querySelector('app-sidebar')).not.toBeNull();
+		expect(compiled.querySelector('app-post-list')).not.toBeNull();
 	});
 });

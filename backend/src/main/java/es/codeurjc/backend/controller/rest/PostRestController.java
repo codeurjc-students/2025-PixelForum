@@ -13,7 +13,7 @@ import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.service.PostService;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/v1/posts")
 public class PostRestController {
 
     private final PostService postService;

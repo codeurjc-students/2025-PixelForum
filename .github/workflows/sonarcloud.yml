@@ -9,7 +9,6 @@ on:
         branches:
             - main
     workflow_dispatch:
-    pull_request:
 
 jobs:
   sonarcloud:
@@ -43,7 +42,7 @@ jobs:
 
       - name: Serve Angular in background
         run: npm start &
-          npx wait-on http://localhost:4200
+          npx wait-on https://localhost:4200
         working-directory: ./frontend
 
       - name: Build and analyze
