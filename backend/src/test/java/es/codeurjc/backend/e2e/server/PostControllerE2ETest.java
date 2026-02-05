@@ -16,7 +16,7 @@ import io.restassured.RestAssured;
 @DisplayName("PostServer System Test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class PostServerControllerTest {
+class PostControllerE2ETest {
     
     @LocalServerPort
     private int port;
@@ -24,14 +24,14 @@ class PostServerControllerTest {
     @BeforeEach
         void setUp() {
         RestAssured.port = port;
-        RestAssured.baseURI = "http://localhost";
+        RestAssured.baseURI = "http://localhost/api/v1/";
     }
 
     @Test
     void getPostsSystemTest() {
         given()
         .when()
-            .get("/api/posts/")
+            .get("posts/")
         .then()
             .statusCode(200)
             .body("content", not(empty()))
@@ -44,7 +44,7 @@ class PostServerControllerTest {
         long id = 1L;
         given()
         .when()
-            .get("/api/posts/{id}", id)
+            .get("posts/{id}", id)
         .then()
             .statusCode(200)
             .body("id", equalTo(Math.toIntExact(id)))

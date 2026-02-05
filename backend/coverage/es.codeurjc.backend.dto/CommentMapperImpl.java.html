@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-01-24T23:25:29+0100&quot;,
-    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
+    date = &quot;2026-02-03T12:43:35+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
 <span class="fc" id="L19">public class CommentMapperImpl implements CommentMapper {</span>
@@ -61,7 +61,7 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L61">        List&lt;CommentDTO&gt; list = new ArrayList&lt;CommentDTO&gt;( comments.size() );</span>
 <span class="nc bnc" id="L62" title="All 2 branches missed.">        for ( Comment comment : comments ) {</span>
 <span class="nc" id="L63">            list.add( toDTO( comment ) );</span>
-        }
+<span class="nc" id="L64">        }</span>
 
 <span class="nc" id="L66">        return list;</span>
     }

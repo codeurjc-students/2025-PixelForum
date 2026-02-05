@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-01-24T23:25:29+0100&quot;,
-    comments = &quot;version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)&quot;
+    date = &quot;2026-02-03T12:43:34+0100&quot;,
+    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
 <span class="fc" id="L16">public class TopicMapperImpl implements TopicMapper {</span>
@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L43">        List&lt;TopicDTO&gt; list = new ArrayList&lt;TopicDTO&gt;( topics.size() );</span>
 <span class="nc bnc" id="L44" title="All 2 branches missed.">        for ( Topic topic : topics ) {</span>
 <span class="nc" id="L45">            list.add( toDTO( topic ) );</span>
-        }
+<span class="nc" id="L46">        }</span>
 
 <span class="nc" id="L48">        return list;</span>
     }
