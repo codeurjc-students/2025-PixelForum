@@ -29,7 +29,19 @@ module.exports = function (config) {
       ]
     },
     reporters: ['progress', 'kjhtml'],
-    browsers: ['Chrome'],
+    browsers: ['ChromeHeadlessNoSandbox'],
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--ignore-certificate-errors',
+          '--allow-insecure-localhost',
+          '--disable-web-security'
+        ]
+      }
+    },
     restartOnFileChange: true
   });
 };
