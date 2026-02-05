@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Serve Angular in background
-        run: npm start &
+        run: npm run start:test &
           npx wait-on https://localhost:4200
         working-directory: ./frontend
 
