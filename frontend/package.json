@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --proxy-config proxy.conf.json --ssl true",
+    "start": "ng serve",
+    "start:test": "ng serve --configuration=test",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "test:unit": "ng test --include 'src/**/*.unit.spec.ts' --watch=false --browsers=ChromeHeadless --no-progress",
-		"test:integration": "ng test --include 'src/**/*.integration.spec.ts' --watch=false --browsers=ChromeHeadlessNoSandbox --no-progress",
-    "test:coverage": "ng test --code-coverage --watch=false"
+    "test": "ng test --configuration=test",
+    "test:unit": "ng test --configuration=test --include 'src/**/*.unit.spec.ts' --watch=false --browsers=ChromeHeadless --no-progress",
+		"test:integration": "ng test --configuration=test --include 'src/**/*.integration.spec.ts' --watch=false --browsers=ChromeHeadlessNoSandbox --no-progress",
+    "test:coverage": "ng test --configuration=test --code-coverage --watch=false"
   },
   "prettier": {
     "printWidth": 100,
