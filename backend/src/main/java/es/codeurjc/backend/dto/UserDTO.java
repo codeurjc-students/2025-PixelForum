@@ -1,6 +1,5 @@
 package es.codeurjc.backend.dto;
 
-import java.sql.Blob;
 import java.util.List;
 
 public record UserDTO (
@@ -8,7 +7,6 @@ public record UserDTO (
     String username,
 	String email,
     String password,
-    Blob avatar,
     List<Long> likedPosts,
     List<Long> likedComments,
     List<String> roles) {

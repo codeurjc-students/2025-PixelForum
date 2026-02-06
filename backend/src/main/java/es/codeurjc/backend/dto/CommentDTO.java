@@ -15,6 +15,6 @@ public record CommentDTO (
     User author,
     Post post,
     Comment commentId,
-    int likes,
+    Integer likes,
     List<Long> usersThatLiked) {
 }
