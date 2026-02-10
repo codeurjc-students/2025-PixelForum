@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Post } from '../../models/post.model';
 import { PostComponent } from '../post/post.component';
-import { PostService } from '../../service/post.service';
+import { PostService } from '../../services/post.service';
 
 @Component({
 	selector: 'app-post-list',

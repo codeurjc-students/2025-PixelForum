@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
-import { PostService } from './service/post.service';
+import { PostService } from './services/post.service';
 import { Post } from './models/post.model';
 
 describe('App', () => {

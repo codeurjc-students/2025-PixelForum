@@ -1,6 +1,6 @@
 <header class="header">
-	<a class="logo">
-		<svg width="auto" height="auto" viewBox="0 0 24 24" fill="none" stroke="#8BC34A" stroke-width="2" stroke-linecap="round">
+	<a routerLink="/posts" class="logo">
+		<svg viewBox="0 0 24 24" class="logo-icon">
 			<line x1="6" x2="10" y1="11" y2="11"/>
 			<line x1="8" x2="8" y1="9" y2="13"/>
 			<line x1="15" x2="15.01" y1="12" y2="12"/>
@@ -11,7 +11,7 @@
 	</a>
 
 	<div class="search">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+		<svg viewBox="0 0 24 24" class="search-icon">
 			<path d="m21 21-4.34-4.34"/>
 			<circle cx="11" cy="11" r="8"/>
 		</svg>
@@ -19,25 +19,39 @@
 	</div>
 
 	<div class="right">
-		<button class="btn">
-			<svg class="btn-icon" viewBox="0 0 24 24">
-				<path d="M5 12h14"/>
-				<path d="M12 5v14"/>
-			</svg> 
-			Create
-		</button>
-		<button class="btn">
-			<svg class="btn-icon" viewBox="0 0 24 24">
-				<path d="M10.268 21a2 2 0 0 0 3.464 0"/>
-				<path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
-			</svg>
-		</button>
-		<button class="avatar">
-			<svg class="btn-icon avatar" viewBox="0 0 24 24">
-				<path d="M18 20a6 6 0 0 0-12 0"/>
-				<circle cx="12" cy="10" r="4"/>
-				<circle cx="12" cy="12" r="10"/>
-			</svg>
-		</button>
-	</div>
+		<!-- LOGGED -->
+        <ng-container *ngIf="authService.isAuthenticated(); else notLogged">
+			<button class="btn">
+				<svg class="btn-icon" viewBox="0 0 24 24">
+					<path d="M5 12h14"/>
+					<path d="M12 5v14"/>
+				</svg> 
+				Create
+			</button>
+			<button class="btn">
+				<svg class="btn-icon" viewBox="0 0 24 24">
+					<path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+					<path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
+				</svg>
+			</button>
+			<button class="avatar">
+				<svg class="btn-icon avatar" viewBox="0 0 24 24">
+					<path d="M18 20a6 6 0 0 0-12 0"/>
+					<circle cx="12" cy="10" r="4"/>
+					<circle cx="12" cy="12" r="10"/>
+				</svg>
+			</button>
+			<button class="btn" (click)="authService.logout()">
+                Logout
+            </button>
+        </ng-container>
+
+		<!-- NO LOGUEADO -->
+        <ng-template #notLogged>
+            <a routerLink="/login" class="btn">
+                Login
+            </a>
+        </ng-template>
+    </div>
+
 </header>
