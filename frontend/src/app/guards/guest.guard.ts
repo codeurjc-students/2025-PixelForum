@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { catchError, map, of } from 'rxjs';
 
-@Injectable({
-	providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class GuestGuard implements CanActivate {
 
 	constructor(
@@ -12,12 +11,13 @@ export class GuestGuard implements CanActivate {
 		private router: Router
 	) {}
 
-	canActivate(): boolean {
-		if (!this.authService.isAuthenticated()) {
-			return true;
-		}
-
-		this.router.navigate(['/posts']);
-		return false;
+	canActivate() {
+		return this.authService.me().pipe(
+			map(() => {
+				this.router.navigate(['/posts']);
+				return false;
+			}),
+			catchError(() => of(true))
+		);
 	}
 }

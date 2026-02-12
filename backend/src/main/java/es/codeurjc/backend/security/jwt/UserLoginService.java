@@ -3,6 +3,7 @@ package es.codeurjc.backend.security.jwt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,10 +57,18 @@ public class UserLoginService {
 	public ResponseEntity<AuthResponse> refresh(HttpServletResponse response, String refreshToken) {
 		try {
 			var claims = jwtTokenProvider.validateToken(refreshToken);
+			if (!jwtTokenProvider.isTokenType(claims, TokenType.REFRESH)) {
+				log.error("Token is not a refresh token");
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new AuthResponse(AuthResponse.Status.FAILURE, "Invalid token type"));
+			}
 			UserDetails user = userDetailsService.loadUserByUsername(claims.getSubject());
 
 			var newAccessToken = jwtTokenProvider.generateAccessToken(user);
 			response.addCookie(buildTokenCookie(TokenType.ACCESS, newAccessToken));
+
+			var newRefreshToken = jwtTokenProvider.generateRefreshToken(user);
+        	response.addCookie(buildTokenCookie(TokenType.REFRESH, newRefreshToken));
 
 			AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.SUCCESS,
 					"Auth successful. Tokens are created in cookie.");
@@ -69,7 +78,7 @@ public class UserLoginService {
 			log.error("Error while processing refresh token", e);
 			AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.FAILURE,
 					"Failure while processing refresh token");
-			return ResponseEntity.ok().body(loginResponse);
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(loginResponse);
 		}
 	}
 
@@ -78,7 +87,7 @@ public class UserLoginService {
 		response.addCookie(removeTokenCookie(TokenType.ACCESS));
 		response.addCookie(removeTokenCookie(TokenType.REFRESH));
 
-		return "logout successfully";
+		return "Logout successfully";
 	}
 
 	private Cookie buildTokenCookie(TokenType type, String token) {
@@ -86,6 +95,8 @@ public class UserLoginService {
 		cookie.setMaxAge((int) type.duration.getSeconds());
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
+		cookie.setAttribute("SameSite", "None");
+		cookie.setSecure(true);
 		return cookie;
 	}
 
@@ -94,6 +105,8 @@ public class UserLoginService {
 		cookie.setMaxAge(0);
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
+		cookie.setAttribute("SameSite", "None");
+		cookie.setSecure(true);
 		return cookie;
 	}
 }

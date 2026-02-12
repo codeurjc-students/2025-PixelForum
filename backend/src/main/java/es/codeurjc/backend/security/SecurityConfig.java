@@ -3,7 +3,6 @@ package es.codeurjc.backend.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -44,16 +43,12 @@ public class SecurityConfig {
 
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-		authProvider.setUserDetailsService(userDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder());
-
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
 		return authProvider;
 	}
 
 	@Bean
-	@Order(1)
 	public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 		
 		http.authenticationProvider(authenticationProvider());
@@ -73,7 +68,7 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll()
 					.requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("USER")
 					.requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("USER")
-					.requestMatchers(HttpMethod.GET, "/api/v1/auth/me").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/v1/auth/me").hasRole("USER")
 					// DOCUMENTATION
 					.requestMatchers("/v3/api-docs/**").permitAll()
 					.requestMatchers("/swagger-ui.html").permitAll()

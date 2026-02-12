@@ -12,4 +12,8 @@ import { RouterModule } from '@angular/router';
 })
 export class HeaderComponent {
 	constructor(public authService: AuthService) {}
+
+	onLogout() {
+		this.authService.logout().subscribe();
+	}
 }

@@ -1,37 +1,55 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { BehaviorSubject, catchError, of, tap } from 'rxjs';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
 
-    private baseUrl = environment.apiUrl + 'auth/';
+	private baseUrl = environment.apiUrl + 'auth/';
 
-    constructor(private http: HttpClient) {}
+    private loggedInSubject = new BehaviorSubject<boolean>(false);
+	loggedIn$ = this.loggedInSubject.asObservable();
+    
+	constructor(private http: HttpClient) {}
+    
+	login(username: string, password: string) {
+		return this.http.post(
+		    this.baseUrl + 'login',
+			{ username, password },
+			{ withCredentials: true }
+		).pipe(
+			tap(() => this.loggedInSubject.next(true))
+		);
+	}
 
-    login(username: string, password: string) {
-        return this.http.post<{ token: string }>(
-            this.baseUrl + 'login',
-            { username, password }
-        ).pipe(
-            tap(response => {
-                localStorage.setItem('jwt', response.token);
-            })
-        );
-    }
+	logout() {
+		return this.http.post(
+			this.baseUrl + 'logout',
+			{},
+			{ withCredentials: true }
+		).pipe(
+			tap(() => { 
+				this.loggedInSubject.next(false); 
+				window.location.href = '/posts';
+			})	
+		);
+	}
 
-    logout(): void {
-        localStorage.removeItem('jwt');
-    }
+	me() {
+		return this.http.get(
+			this.baseUrl + 'me',
+			{ withCredentials: true }
+		);
+	}
 
-    getToken(): string | null {
-        return localStorage.getItem('jwt');
-    }
-
-    isAuthenticated(): boolean {
-        return this.getToken() !== null;
-    }
+	checkAuth() {
+		return this.me().pipe(
+			tap(() => this.loggedInSubject.next(true)),
+			catchError(() => {
+				this.loggedInSubject.next(false);
+				return of(null);
+			})
+		);
+	}
 }

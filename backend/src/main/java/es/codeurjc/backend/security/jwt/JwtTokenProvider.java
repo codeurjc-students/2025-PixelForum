@@ -82,4 +82,14 @@ public class JwtTokenProvider {
 				.expiration(expiryDate)
 				.signWith(jwtSecret);
 	}
+
+	public boolean isTokenType(Claims claims, TokenType expectedType) {
+        String tokenType = claims.get("type", String.class);
+        return expectedType.name().equals(tokenType);
+    }
+
+    public boolean isTokenType(String token, TokenType expectedType) {
+        Claims claims = validateToken(token);
+        return isTokenType(claims, expectedType);
+    }
 }

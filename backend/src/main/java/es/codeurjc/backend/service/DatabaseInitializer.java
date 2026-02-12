@@ -28,7 +28,7 @@ public class DatabaseInitializer {
     @PostConstruct
     public void init() {
         
-        User admin = new User("admin", "admin@host", "admin", "ADMIN", "USER");
+        User admin = new User("admin", "admin@host", "admin0", "ADMIN", "USER");
         User usuario1 = new User("martin", "martin@gmail.com", "user", "USER");
         User usuario2 = new User("robert", "robert@gmail.com", "user", "USER");
         User usuario3 = new User("daniel", "daniel@gmail.com", "user", "USER");

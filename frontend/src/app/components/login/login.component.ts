@@ -26,12 +26,17 @@ export class LoginComponent {
 		this.errorMessage = '';
 
 		this.authService.login(this.username, this.password).subscribe({
-			next: () => {
-				this.router.navigate(['/']);
-			},
-			error: () => {
-				this.errorMessage = 'Usuario o contraseña incorrectos';
+			next: () => this.router.navigate(['/']),
+			error: err => {
+				if (err.status === 401) {
+					this.errorMessage = 'Invalid username or password';
+				} else if (err.status === 0) {
+					this.errorMessage = 'Unable to connect to the server';
+				} else {
+					this.errorMessage = 'Unexpected error. Please try again later';
+				}
 			}
 		});
 	}
+
 }

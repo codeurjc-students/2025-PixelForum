@@ -20,7 +20,7 @@
 
 	<div class="right">
 		<!-- LOGGED -->
-        <ng-container *ngIf="authService.isAuthenticated(); else notLogged">
+        <ng-container *ngIf="authService.loggedIn$ | async; else notLogged">
 			<button class="btn">
 				<svg class="btn-icon" viewBox="0 0 24 24">
 					<path d="M5 12h14"/>
@@ -41,7 +41,7 @@
 					<circle cx="12" cy="12" r="10"/>
 				</svg>
 			</button>
-			<button class="btn" (click)="authService.logout()">
+			<button class="btn" (click)="onLogout()">
                 Logout
             </button>
         </ng-container>
