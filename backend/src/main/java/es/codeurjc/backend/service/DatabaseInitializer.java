@@ -16,23 +16,21 @@ public class DatabaseInitializer {
     private final PostService postService;
 	private final UserService userService;
 	private final TopicService topicService;
-	// private final CommentService commentService;
 
 	public DatabaseInitializer(PostService postService, UserService userService, TopicService topicService) {
 		this.postService = postService;
 		this.userService = userService;
 		this.topicService = topicService;
-		// this.commentService = commentService;
 	}
 
     @PostConstruct
     public void init() {
         
-        User admin = new User("admin", "admin@host", "admin", "ADMIN", "USER");
-        User usuario1 = new User("martin", "martin@gmail.com", "martin", "USER");
-        User usuario2 = new User("robert","robert@gmail.com", "robert", "USER");
-        User usuario3 = new User("daniel","daniel@gmail.com", "daniel", "USER");
-        User usuario4 = new User("alvaro","alvaro@gmail.com", "alvaro", "USER");
+        User admin = new User("admin", "admin@host", "admin0", "ADMIN", "USER");
+        User usuario1 = new User("martin", "martin@gmail.com", "user", "USER");
+        User usuario2 = new User("robert", "robert@gmail.com", "user", "USER");
+        User usuario3 = new User("daniel", "daniel@gmail.com", "user", "USER");
+        User usuario4 = new User("alvaro", "alvaro@gmail.com", "user", "USER");
 
         userService.save(admin);
         userService.save(usuario1);

@@ -22,9 +22,10 @@ class PostControllerE2ETest {
     private int port;
     
     @BeforeEach
-        void setUp() {
+    void setUp() {
         RestAssured.port = port;
-        RestAssured.baseURI = "http://localhost/api/v1/";
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.basePath = "/api/v1/";
     }
 
     @Test

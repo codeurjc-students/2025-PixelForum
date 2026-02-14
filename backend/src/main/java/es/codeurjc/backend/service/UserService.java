@@ -2,8 +2,12 @@ package es.codeurjc.backend.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.backend.dto.UserDTO;
@@ -21,12 +25,14 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository, CommentRepository commentRepository) {
+	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository, CommentRepository commentRepository, PasswordEncoder passwordEncoder) {
 		this.mapper = mapper;
 		this.userRepository = userRepository;
 		this.postRepository = postRepository;
 		this.commentRepository = commentRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 	
 	public Optional<User> findById(long id) {
@@ -50,8 +56,40 @@ public class UserService {
 	}
 
 	public User save(User user){
+		String password = user.getPassword();
+        String encodedPassword = passwordEncoder.encode(password);
+        user.setPassword(encodedPassword);
+        if (user.getUsername().equals("admin")) {
+            user.setRoles(List.of("USER", "ADMIN"));
+        } else {
+            user.setRoles(List.of("USER"));
+        }
 		return userRepository.save(user);
 	}	
+
+	public UserDTO getLoggedUserDTO() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        return toDTO(userRepository.findByUsername(username).orElseThrow());
+	}
+
+	public User getLoggedUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        return userRepository.findByUsername(username).orElseThrow(() -> new NoSuchElementException("User not logged or registered"));
+	}
 
     @Transactional 
     public void deleteById(Long id) {
@@ -62,13 +100,11 @@ public class UserService {
             if (user.getId()!= 1){
 				postRepository.deleteByAuthor(user);
 				commentRepository.deleteByAuthor(user);
-				
 				userRepository.delete(user);
 			}
-            
         }
-    
     }
+
 	private UserDTO toDTO (User user) {
         return mapper.toDTO(user);
     }

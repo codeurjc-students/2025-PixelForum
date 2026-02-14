@@ -5,6 +5,13 @@
 	justify-content: space-between;
 	padding: 0 1.5rem;
 	background: #e5e5e5;
+	position: fixed;
+	top: 0;
+    left: 0;
+    right: 0;
+	z-index: 1000;
+	height: 64px;
+    border-bottom: 1px solid #ccc;
 }
 
 .logo {
@@ -13,6 +20,17 @@
 	gap: 0.6rem;
 	height: 3.5em;
 	cursor: pointer;
+	text-decoration: none;
+	color: inherit;
+}
+
+.logo-icon {
+	width: 45px;
+	height: 45px;
+	stroke-width: 2;
+	stroke: #8BC34A;
+	stroke-linecap: round;
+	fill: none;
 }
 
 .logo-text {
@@ -54,6 +72,9 @@
 	height: 16px;
 	color: #888;
 	pointer-events: none;
+	fill:none;
+	stroke: currentColor;
+	stroke-width: 2;
 }
 
 .right {
@@ -75,6 +96,8 @@
 	font-size: 1.5rem;
 	cursor: pointer;
 	transition: background 0.15s ease, border-color 0.15s ease;
+	text-decoration: none;
+	color: inherit;
 }
 
 .btn:hover {

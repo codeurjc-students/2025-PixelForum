@@ -15,7 +15,7 @@ public record PostDTO (
     LocalDateTime updatedAt,
     User author,
     List<Topic> topics,
-    int likes,
+    Integer likes,
     List<Long> usersThatLiked,
     List<Blob> images) {
 }

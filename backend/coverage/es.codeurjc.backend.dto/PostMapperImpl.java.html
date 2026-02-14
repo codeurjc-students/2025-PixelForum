@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-02-03T12:43:35+0100&quot;,
+    date = &quot;2026-02-14T14:13:30+0100&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 <span class="fc" id="L32">        LocalDateTime updatedAt = null;</span>
 <span class="fc" id="L33">        User author = null;</span>
 <span class="fc" id="L34">        List&lt;Topic&gt; topics = null;</span>
-<span class="fc" id="L35">        int likes = 0;</span>
+<span class="fc" id="L35">        Integer likes = null;</span>
 <span class="fc" id="L36">        List&lt;Long&gt; usersThatLiked = null;</span>
 <span class="fc" id="L37">        List&lt;Blob&gt; images = null;</span>
 
@@ -99,13 +99,15 @@ import org.springframework.stereotype.Component;
 <span class="nc bnc" id="L99" title="All 2 branches missed.">        if ( list1 != null ) {</span>
 <span class="nc" id="L100">            post.setTopics( new ArrayList&lt;Topic&gt;( list1 ) );</span>
         }
-<span class="nc" id="L102">        post.setLikes( postDTO.likes() );</span>
-<span class="nc" id="L103">        List&lt;Long&gt; list2 = postDTO.usersThatLiked();</span>
-<span class="nc bnc" id="L104" title="All 2 branches missed.">        if ( list2 != null ) {</span>
-<span class="nc" id="L105">            post.setUsersThatLiked( new ArrayList&lt;Long&gt;( list2 ) );</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if ( postDTO.likes() != null ) {</span>
+<span class="nc" id="L103">            post.setLikes( postDTO.likes() );</span>
+        }
+<span class="nc" id="L105">        List&lt;Long&gt; list2 = postDTO.usersThatLiked();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if ( list2 != null ) {</span>
+<span class="nc" id="L107">            post.setUsersThatLiked( new ArrayList&lt;Long&gt;( list2 ) );</span>
         }
 
-<span class="nc" id="L108">        return post;</span>
+<span class="nc" id="L110">        return post;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

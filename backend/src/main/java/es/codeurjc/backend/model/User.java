@@ -22,11 +22,13 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-    @Column (unique = true)
+    @Column (unique = true, nullable = false)
     private String username;
 
-    @Column (unique = true)
+    @Column (unique = true, nullable = false)
     private String email;
+
+    @Column (nullable = false)
     private String password;
 
     @Lob
@@ -117,11 +119,5 @@ public class User {
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
 	}
-
-    @Override
-    public String toString() {
-        return "User [id=" + id + ", username=" + username + ", mail=" + email + ", password=" + password;
-                
-    }
 
 }

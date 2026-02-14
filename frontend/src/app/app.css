@@ -1,34 +1,7 @@
-html, body {
-	height: 100%;
-	margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-app-header {
-	position: fixed;
-	top: 0;
-    left: 0;
-    right: 0;
-	z-index: 1000;
-	height: 64px;
-    border-bottom: 1px solid #ccc;
-}
-
-app-sidebar {
-	position: fixed;
-	top: 64px;
-    left: 0;
-    bottom: 0;
-    z-index: 500;
-	overflow-y: auto;
-    border-right: 1px solid #ccc;
-}
-
 .feed {
     position: fixed;
     top: 64px;
-    left: 0;
+    left: 250px;
     right: 0;
     bottom: 0;
     overflow-y: auto;

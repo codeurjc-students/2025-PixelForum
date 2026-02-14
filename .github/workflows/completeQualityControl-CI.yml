@@ -192,5 +192,5 @@ jobs:
         working-directory: ./backend
         
       - name: Run system tests
-        run: mvn -Dtest=UISystemIT test
+        run: mvn test -Dgroups='selenium'
         working-directory: ./backend
