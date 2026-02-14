@@ -26,7 +26,11 @@ export class LoginComponent {
 		this.errorMessage = '';
 
 		this.authService.login(this.username, this.password).subscribe({
-			next: () => this.router.navigate(['/']),
+			next: () => {
+				this.authService.checkAuth().subscribe(() => {
+					this.router.navigate(['/']);
+				});
+			},
 			error: err => {
 				if (err.status === 401) {
 					this.errorMessage = 'Invalid username or password';
