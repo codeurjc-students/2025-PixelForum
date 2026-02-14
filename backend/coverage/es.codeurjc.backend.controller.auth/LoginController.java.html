@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.controller.auth</a> &gt; <span class="el_source">LoginController.java</span></div><h1>LoginController.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.controller.auth;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import es.codeurjc.backend.dto.UserDTO;
+import es.codeurjc.backend.security.jwt.AuthResponse;
+import es.codeurjc.backend.security.jwt.AuthResponse.Status;
+import es.codeurjc.backend.security.jwt.LoginRequest;
+import es.codeurjc.backend.security.jwt.UserLoginService;
+import es.codeurjc.backend.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@RestController
+@RequestMapping(&quot;/api/v1/auth&quot;)
+public class LoginController {
+    
+    private final UserLoginService userLoginService;
+	private final UserService userService;
+
+<span class="fc" id="L27">	public LoginController(UserLoginService userLoginService, UserService userService) {</span>
+<span class="fc" id="L28">		this.userLoginService = userLoginService;</span>
+<span class="fc" id="L29">		this.userService = userService;</span>
+<span class="fc" id="L30">	}</span>
+
+    @PostMapping(&quot;/login&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; login (@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+<span class="fc" id="L34">        return userLoginService.login(response, loginRequest);</span>
+    }
+
+    @PostMapping(&quot;/refresh&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; refreshToken(@CookieValue(name = &quot;RefreshToken&quot;, required = false) String refreshToken, HttpServletResponse response) {
+<span class="fc" id="L39">            return userLoginService.refresh(response, refreshToken);</span>
+    }
+
+    @PostMapping(&quot;/logout&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; logOut(HttpServletResponse response) {
+<span class="fc" id="L44">        return ResponseEntity.ok(new AuthResponse(Status.SUCCESS, userLoginService.logout(response)));</span>
+    }
+
+    @GetMapping(&quot;/me&quot;)
+    public UserDTO me(HttpServletRequest request) {
+<span class="fc" id="L49">        return userService.getLoggedUserDTO();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -70,8 +70,8 @@ public class UserService {
 	public UserDTO getLoggedUserDTO() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
+        if (principal instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
         } else {
             username = principal.toString();
         }
@@ -82,8 +82,8 @@ public class UserService {
 	public User getLoggedUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
+        if (principal instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
         } else {
             username = principal.toString();
         }

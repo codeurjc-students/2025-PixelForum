@@ -5,7 +5,6 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 import java.net.URI;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +22,13 @@ import es.codeurjc.backend.service.UserService;
 @RequestMapping("/api/v1/users")
 public class UserRestController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+	private final UserMapper mapper;
 
-    @Autowired
-    private UserMapper mapper;
+	public UserRestController(UserService userService, UserMapper mapper) {
+		this.userService = userService;
+		this.mapper = mapper;
+	}
     
     @GetMapping("/me")
 	public UserDTO me() {

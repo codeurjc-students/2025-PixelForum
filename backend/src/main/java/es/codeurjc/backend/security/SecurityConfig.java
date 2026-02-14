@@ -1,6 +1,5 @@
 package es.codeurjc.backend.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,6 +8,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,14 +22,24 @@ import es.codeurjc.backend.security.jwt.UnauthorizedHandlerJwt;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Autowired
-	private JwtRequestFilter jwtRequestFilter;
-	
-	@Autowired
-	RepositoryUserDetailsService userDetailsService;
+	// API ENDPOINTS
+    private static final String API_V = "/api/v1";
+    private static final String API_POSTS = API_V + "/posts/**";
+    private static final String API_USERS = API_V + "/users/**";
 
-	@Autowired
-	private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
+	private final JwtRequestFilter jwtRequestFilter;
+	private final RepositoryUserDetailsService userDetailsService;
+	private final UnauthorizedHandlerJwt unauthorizedHandlerJwt;
+
+	public SecurityConfig(
+			JwtRequestFilter jwtRequestFilter,
+			RepositoryUserDetailsService userDetailsService,
+			UnauthorizedHandlerJwt unauthorizedHandlerJwt
+	) {
+		this.jwtRequestFilter = jwtRequestFilter;
+		this.userDetailsService = userDetailsService;
+		this.unauthorizedHandlerJwt = unauthorizedHandlerJwt;
+	}
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -59,34 +69,40 @@ public class SecurityConfig {
 		
 		http
 			.authorizeHttpRequests(authorize -> authorize
-                    // PRIVATE ENDPOINTS
-					.requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
-					.requestMatchers(HttpMethod.POST, "/api/v1/posts/**").hasRole("USER")
-					.requestMatchers(HttpMethod.DELETE, "/api/v1/posts/**").hasRole("USER")
-					.requestMatchers(HttpMethod.PUT, "/api/v1/posts/**").hasRole("USER")
-                    .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("USER")
-					.requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll()
-					.requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("USER")
-					.requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("USER")
-					.requestMatchers(HttpMethod.GET, "/api/v1/auth/me").hasRole("USER")
+					// POSTS
+					.requestMatchers(HttpMethod.GET, API_POSTS).permitAll()
+					.requestMatchers(HttpMethod.POST, API_POSTS).hasRole("USER")
+					.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole("USER")
+					.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole("USER")
+					
+					// USERS
+					.requestMatchers(HttpMethod.GET, API_USERS).hasRole("USER")
+					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
+					.requestMatchers(HttpMethod.PUT, API_USERS).hasRole("USER")
+					.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole("USER")
+					
+					// AUTH
+					.requestMatchers(HttpMethod.GET, API_V + "/auth/me").hasRole("USER")
+					
 					// DOCUMENTATION
 					.requestMatchers("/v3/api-docs/**").permitAll()
 					.requestMatchers("/swagger-ui.html").permitAll()
 					.requestMatchers("/swagger-ui/**").permitAll()
 					.requestMatchers("/v3/api-docs.yaml").permitAll()
 					.requestMatchers("/api-docs/**").permitAll()
-					// PUBLIC ENDPOINTS
+					
+					// Otros
 					.anyRequest().permitAll()
 			);
 		
         // Disable Form login Authentication
-        http.formLogin(formLogin -> formLogin.disable());
+        http.formLogin(AbstractHttpConfigurer::disable);
 
         // Disable CSRF protection (it is difficult to implement in REST APIs)
-        http.csrf(csrf -> csrf.disable());
+        http.csrf(AbstractHttpConfigurer::disable);
 
         // Disable Basic Authentication
-        http.httpBasic(httpBasic -> httpBasic.disable());
+        http.httpBasic(AbstractHttpConfigurer::disable);
 
         // Stateless session
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

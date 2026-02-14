@@ -16,50 +16,48 @@ public class DatabaseInitializer {
     private final PostService postService;
 	private final UserService userService;
 	private final TopicService topicService;
-	// private final CommentService commentService;
 
-<span class="fc" id="L21">	public DatabaseInitializer(PostService postService, UserService userService, TopicService topicService) {</span>
-<span class="fc" id="L22">		this.postService = postService;</span>
-<span class="fc" id="L23">		this.userService = userService;</span>
-<span class="fc" id="L24">		this.topicService = topicService;</span>
-		// this.commentService = commentService;
-<span class="fc" id="L26">	}</span>
+<span class="fc" id="L20">	public DatabaseInitializer(PostService postService, UserService userService, TopicService topicService) {</span>
+<span class="fc" id="L21">		this.postService = postService;</span>
+<span class="fc" id="L22">		this.userService = userService;</span>
+<span class="fc" id="L23">		this.topicService = topicService;</span>
+<span class="fc" id="L24">	}</span>
 
     @PostConstruct
     public void init() {
         
-<span class="fc" id="L31">        User admin = new User(&quot;admin&quot;, &quot;admin@host&quot;, &quot;admin&quot;, &quot;ADMIN&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L32">        User usuario1 = new User(&quot;martin&quot;, &quot;martin@gmail.com&quot;, &quot;martin&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L33">        User usuario2 = new User(&quot;robert&quot;,&quot;robert@gmail.com&quot;, &quot;robert&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L34">        User usuario3 = new User(&quot;daniel&quot;,&quot;daniel@gmail.com&quot;, &quot;daniel&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L35">        User usuario4 = new User(&quot;alvaro&quot;,&quot;alvaro@gmail.com&quot;, &quot;alvaro&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L29">        User admin = new User(&quot;admin&quot;, &quot;admin@host&quot;, &quot;admin0&quot;, &quot;ADMIN&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L30">        User usuario1 = new User(&quot;martin&quot;, &quot;martin@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L31">        User usuario2 = new User(&quot;robert&quot;, &quot;robert@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L32">        User usuario3 = new User(&quot;daniel&quot;, &quot;daniel@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L33">        User usuario4 = new User(&quot;alvaro&quot;, &quot;alvaro@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
 
-<span class="fc" id="L37">        userService.save(admin);</span>
-<span class="fc" id="L38">        userService.save(usuario1);</span>
-<span class="fc" id="L39">        userService.save(usuario2);</span>
-<span class="fc" id="L40">        userService.save(usuario3);</span>
-<span class="fc" id="L41">        userService.save(usuario4);</span>
+<span class="fc" id="L35">        userService.save(admin);</span>
+<span class="fc" id="L36">        userService.save(usuario1);</span>
+<span class="fc" id="L37">        userService.save(usuario2);</span>
+<span class="fc" id="L38">        userService.save(usuario3);</span>
+<span class="fc" id="L39">        userService.save(usuario4);</span>
 
-<span class="fc" id="L43">        Topic topic1 = new Topic(&quot;GTA VI&quot;, &quot;All news about Grand Theft Auto VI&quot;);</span>
-<span class="fc" id="L44">        topicService.save(topic1);</span>
+<span class="fc" id="L41">        Topic topic1 = new Topic(&quot;GTA VI&quot;, &quot;All news about Grand Theft Auto VI&quot;);</span>
+<span class="fc" id="L42">        topicService.save(topic1);</span>
 
-<span class="fc" id="L46">        Post post1 = new Post(&quot;GTA VI Massive leak&quot;, &quot;A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.&quot;, </span>
-<span class="fc" id="L47">            List.of(topic1));</span>
-<span class="fc" id="L48">        postService.save(post1);</span>
+<span class="fc" id="L44">        Post post1 = new Post(&quot;GTA VI Massive leak&quot;, &quot;A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.&quot;, </span>
+<span class="fc" id="L45">            List.of(topic1));</span>
+<span class="fc" id="L46">        postService.save(post1);</span>
 
-<span class="fc" id="L50">        Post post2 = new Post(&quot;GTA VI official 2nd trailer&quot;, &quot;Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.&quot;, </span>
-<span class="fc" id="L51">            List.of(topic1));</span>
-<span class="fc" id="L52">        postService.save(post2);</span>
+<span class="fc" id="L48">        Post post2 = new Post(&quot;GTA VI official 2nd trailer&quot;, &quot;Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.&quot;, </span>
+<span class="fc" id="L49">            List.of(topic1));</span>
+<span class="fc" id="L50">        postService.save(post2);</span>
 
-<span class="fc" id="L54">        Post post3 = new Post(&quot;GTA VI release date rumors&quot;, &quot;Rumors are swirling about the potential release date for Grand Theft Auto VI, with speculation pointing towards a launch in late 2024 or early 2025. Fans are eagerly awaiting official confirmation from Rockstar Games.&quot;, </span>
-<span class="fc" id="L55">            List.of(topic1));</span>
-<span class="fc" id="L56">        postService.save(post3);</span>
+<span class="fc" id="L52">        Post post3 = new Post(&quot;GTA VI release date rumors&quot;, &quot;Rumors are swirling about the potential release date for Grand Theft Auto VI, with speculation pointing towards a launch in late 2024 or early 2025. Fans are eagerly awaiting official confirmation from Rockstar Games.&quot;, </span>
+<span class="fc" id="L53">            List.of(topic1));</span>
+<span class="fc" id="L54">        postService.save(post3);</span>
 
-<span class="fc" id="L58">        Post post4 = new Post(&quot;GTA VI map details&quot;, &quot;New details about the map of Grand Theft Auto VI have emerged, suggesting a vast and diverse open world that includes multiple cities and rural areas, offering players a rich and immersive gaming experience.&quot;, </span>
-<span class="fc" id="L59">            List.of(topic1));</span>
-<span class="fc" id="L60">        postService.save(post4);</span>
+<span class="fc" id="L56">        Post post4 = new Post(&quot;GTA VI map details&quot;, &quot;New details about the map of Grand Theft Auto VI have emerged, suggesting a vast and diverse open world that includes multiple cities and rural areas, offering players a rich and immersive gaming experience.&quot;, </span>
+<span class="fc" id="L57">            List.of(topic1));</span>
+<span class="fc" id="L58">        postService.save(post4);</span>
     
-<span class="fc" id="L62">    }   </span>
+<span class="fc" id="L60">    }   </span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

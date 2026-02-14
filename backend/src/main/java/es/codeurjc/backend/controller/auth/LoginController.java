@@ -1,6 +1,5 @@
 package es.codeurjc.backend.controller.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +21,13 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/api/v1/auth")
 public class LoginController {
     
-    @Autowired
-    private UserLoginService userLoginService;
+    private final UserLoginService userLoginService;
+	private final UserService userService;
 
-    @Autowired
-    private UserService userService;
+	public LoginController(UserLoginService userLoginService, UserService userService) {
+		this.userLoginService = userLoginService;
+		this.userService = userService;
+	}
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login (@RequestBody LoginRequest loginRequest, HttpServletResponse response) {

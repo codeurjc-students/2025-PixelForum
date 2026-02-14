@@ -22,11 +22,13 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-    @Column (unique = true)
+    @Column (unique = true, nullable = false)
     private String username;
 
-    @Column (unique = true)
+    @Column (unique = true, nullable = false)
     private String email;
+
+    @Column (nullable = false)
     private String password;
 
     @Lob
@@ -38,91 +40,85 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
 	private List&lt;String&gt; roles;
     
-<span class="fc" id="L41">    public User(){</span>
+<span class="fc" id="L43">    public User(){</span>
         
-<span class="fc" id="L43">    }</span>
+<span class="fc" id="L45">    }</span>
 
-<span class="fc" id="L45">    public User(String username, String email, String password, String... roles) {</span>
-<span class="fc" id="L46">        this.username = username;</span>
-<span class="fc" id="L47">        this.email = email;</span>
-<span class="fc" id="L48">        this.password = password;</span>
-<span class="fc" id="L49">        likedPosts = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L50">        likedComments = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L51">        this.roles = List.of(roles);</span>
-<span class="fc" id="L52">    }</span>
+<span class="fc" id="L47">    public User(String username, String email, String password, String... roles) {</span>
+<span class="fc" id="L48">        this.username = username;</span>
+<span class="fc" id="L49">        this.email = email;</span>
+<span class="fc" id="L50">        this.password = password;</span>
+<span class="fc" id="L51">        likedPosts = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L52">        likedComments = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L53">        this.roles = List.of(roles);</span>
+<span class="fc" id="L54">    }</span>
 
     // Getters
     public long getId() {
-<span class="nc" id="L56">        return id;</span>
+<span class="fc" id="L58">        return id;</span>
     }
 
     public String getUsername(){
-<span class="nc" id="L60">        return this.username;</span>
+<span class="fc" id="L62">        return this.username;</span>
     }
 
     public String getEmail() {
-<span class="nc" id="L64">        return this.email;</span>
+<span class="fc" id="L66">        return this.email;</span>
     }
 
     public String getPassword() {
-<span class="nc" id="L68">        return this.password;</span>
+<span class="fc" id="L70">        return this.password;</span>
     }
 
     public Blob getAvatar() {
-<span class="nc" id="L72">		return avatar;</span>
+<span class="nc" id="L74">		return avatar;</span>
 	}
 
     public List&lt;Long&gt; getLikedPosts() {
-<span class="nc" id="L76">		return likedPosts;</span>
+<span class="fc" id="L78">		return likedPosts;</span>
 	}
 
     public List&lt;Long&gt; getLikedComments() {
-<span class="nc" id="L80">		return likedComments;</span>
+<span class="fc" id="L82">		return likedComments;</span>
 	}
 
     public List&lt;String&gt; getRoles() {
-<span class="nc" id="L84">		return roles;</span>
+<span class="fc" id="L86">		return roles;</span>
 	}
 
     //Setters
 
     public void setId(long id) {
-<span class="nc" id="L90">        this.id = id;</span>
-<span class="nc" id="L91">    }</span>
+<span class="nc" id="L92">        this.id = id;</span>
+<span class="nc" id="L93">    }</span>
 
     public void setUsername(String username) {
-<span class="nc" id="L94">        this.username = username;</span>
-<span class="nc" id="L95">    }</span>
+<span class="nc" id="L96">        this.username = username;</span>
+<span class="nc" id="L97">    }</span>
 
     public void setEmail(String email) {
-<span class="nc" id="L98">        this.email = email;</span>
-<span class="nc" id="L99">    }</span>
+<span class="nc" id="L100">        this.email = email;</span>
+<span class="nc" id="L101">    }</span>
 
     public void setPassword(String password) {
-<span class="nc" id="L102">        this.password = password;</span>
-<span class="nc" id="L103">    }</span>
+<span class="fc" id="L104">        this.password = password;</span>
+<span class="fc" id="L105">    }</span>
 
     public void setAvatar(Blob avatar) {
-<span class="nc" id="L106">		this.avatar = avatar;</span>
-<span class="nc" id="L107">	}</span>
+<span class="nc" id="L108">		this.avatar = avatar;</span>
+<span class="nc" id="L109">	}</span>
 
     public void setLikedPosts(List&lt;Long&gt; likedPosts) {
-<span class="nc" id="L110">        this.likedPosts = likedPosts;</span>
-<span class="nc" id="L111">    }</span>
+<span class="nc" id="L112">        this.likedPosts = likedPosts;</span>
+<span class="nc" id="L113">    }</span>
 
     public void setLikedComments(List&lt;Long&gt; likedComments) {
-<span class="nc" id="L114">        this.likedComments = likedComments;</span>
-<span class="nc" id="L115">    }</span>
+<span class="nc" id="L116">        this.likedComments = likedComments;</span>
+<span class="nc" id="L117">    }</span>
 
 	public void setRoles(List&lt;String&gt; roles) {
-<span class="nc" id="L118">		this.roles = roles;</span>
-<span class="nc" id="L119">	}</span>
-
-    @Override
-    public String toString() {
-<span class="nc" id="L123">        return &quot;User [id=&quot; + id + &quot;, username=&quot; + username + &quot;, mail=&quot; + email + &quot;, password=&quot; + password;</span>
-                
-    }
+<span class="fc" id="L120">		this.roles = roles;</span>
+<span class="fc" id="L121">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

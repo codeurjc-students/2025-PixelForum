@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtTokenProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.security.jwt</a> &gt; <span class="el_source">JwtTokenProvider.java</span></div><h1>JwtTokenProvider.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.security.jwt;
+
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
+@Component
+<span class="fc" id="L19">public class JwtTokenProvider {</span>
+
+<span class="fc" id="L21">	private final SecretKey jwtSecret = Jwts.SIG.HS256.key().build();</span>
+<span class="fc" id="L22">	private final JwtParser jwtParser = Jwts.parser().verifyWith(jwtSecret).build();</span>
+
+	public String tokenStringFromHeaders(HttpServletRequest req){
+<span class="nc" id="L25">		String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">		if (bearerToken == null) {</span>
+<span class="nc" id="L27">			throw new IllegalArgumentException(&quot;Missing Authorization header&quot;);</span>
+		}
+<span class="nc bnc" id="L29" title="All 2 branches missed.">		if(!bearerToken.startsWith(&quot;Bearer &quot;)){</span>
+<span class="nc" id="L30">			throw new IllegalArgumentException(&quot;Authorization header does not start with Bearer: &quot; + bearerToken);</span>
+		}
+<span class="nc" id="L32">		return bearerToken.substring(7);</span>
+	}
+
+	private String tokenStringFromCookies(HttpServletRequest request) {
+<span class="fc" id="L36">		var cookies = request.getCookies();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">		if (cookies == null) {</span>
+<span class="fc" id="L38">			throw new IllegalArgumentException(&quot;No cookies found in request&quot;);</span>
+		}
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">		for (Cookie cookie : cookies) {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">			if (TokenType.ACCESS.cookieName.equals(cookie.getName())) {</span>
+<span class="fc" id="L43">				String accessToken = cookie.getValue();</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">				if (accessToken == null) {</span>
+<span class="nc" id="L45">					throw new IllegalArgumentException(&quot;Cookie %s has null value&quot;.formatted(TokenType.ACCESS.cookieName));</span>
+				}
+
+<span class="fc" id="L48">				return accessToken;</span>
+			}
+		}
+<span class="fc" id="L51">		throw new IllegalArgumentException(&quot;No access token cookie found in request&quot;);</span>
+	}
+
+	public Claims validateToken(HttpServletRequest req, boolean fromCookie){
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">		var token = fromCookie?</span>
+<span class="fc" id="L56">				tokenStringFromCookies(req):</span>
+<span class="pc" id="L57">				tokenStringFromHeaders(req);</span>
+<span class="fc" id="L58">		return validateToken(token);</span>
+	}
+
+	public Claims validateToken(String token) {
+<span class="fc" id="L62">		return jwtParser.parseSignedClaims(token).getPayload();</span>
+	}
+
+	public String generateAccessToken(UserDetails userDetails) {
+<span class="fc" id="L66">		return buildToken(TokenType.ACCESS, userDetails).compact();</span>
+	}
+
+	public String generateRefreshToken(UserDetails userDetails) {
+<span class="fc" id="L70">		var token = buildToken(TokenType.REFRESH, userDetails);</span>
+<span class="fc" id="L71">        return token.compact();</span>
+	}
+
+	private JwtBuilder buildToken(TokenType tokenType, UserDetails userDetails) {
+<span class="fc" id="L75">		var currentDate = new Date();</span>
+<span class="fc" id="L76">		var expiryDate = Date.from(new Date().toInstant().plus(tokenType.duration));</span>
+<span class="fc" id="L77">		return Jwts.builder()</span>
+<span class="fc" id="L78">				.claim(&quot;roles&quot;, userDetails.getAuthorities())</span>
+<span class="fc" id="L79">				.claim(&quot;type&quot;, tokenType.name())</span>
+<span class="fc" id="L80">				.subject(userDetails.getUsername())</span>
+<span class="fc" id="L81">				.issuedAt(currentDate)</span>
+<span class="fc" id="L82">				.expiration(expiryDate)</span>
+<span class="fc" id="L83">				.signWith(jwtSecret);</span>
+	}
+
+	public boolean isTokenType(Claims claims, TokenType expectedType) {
+<span class="fc" id="L87">        String tokenType = claims.get(&quot;type&quot;, String.class);</span>
+<span class="fc" id="L88">        return expectedType.name().equals(tokenType);</span>
+    }
+
+    public boolean isTokenType(String token, TokenType expectedType) {
+<span class="fc" id="L92">        Claims claims = validateToken(token);</span>
+<span class="fc" id="L93">        return isTokenType(claims, expectedType);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

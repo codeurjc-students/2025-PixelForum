@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-02-03T12:43:35+0100&quot;,
+    date = &quot;2026-02-14T14:13:28+0100&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L31">        User author = null;</span>
 <span class="nc" id="L32">        Post post = null;</span>
 <span class="nc" id="L33">        Comment commentId = null;</span>
-<span class="nc" id="L34">        int likes = 0;</span>
+<span class="nc" id="L34">        Integer likes = null;</span>
 <span class="nc" id="L35">        List&lt;Long&gt; usersThatLiked = null;</span>
 
 <span class="nc" id="L37">        id = comment.getId();</span>
@@ -83,13 +83,15 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L83">        comment.setAuthor( commentDTO.author() );</span>
 <span class="nc" id="L84">        comment.setPost( commentDTO.post() );</span>
 <span class="nc" id="L85">        comment.setCommentId( commentDTO.commentId() );</span>
-<span class="nc" id="L86">        comment.setLikes( commentDTO.likes() );</span>
-<span class="nc" id="L87">        List&lt;Long&gt; list = commentDTO.usersThatLiked();</span>
-<span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( list != null ) {</span>
-<span class="nc" id="L89">            comment.setUsersThatLiked( new ArrayList&lt;Long&gt;( list ) );</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if ( commentDTO.likes() != null ) {</span>
+<span class="nc" id="L87">            comment.setLikes( commentDTO.likes() );</span>
+        }
+<span class="nc" id="L89">        List&lt;Long&gt; list = commentDTO.usersThatLiked();</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( list != null ) {</span>
+<span class="nc" id="L91">            comment.setUsersThatLiked( new ArrayList&lt;Long&gt;( list ) );</span>
         }
 
-<span class="nc" id="L92">        return comment;</span>
+<span class="nc" id="L94">        return comment;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

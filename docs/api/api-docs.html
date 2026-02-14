@@ -844,6 +844,30 @@ ul.nav-tabs {
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+    defs["AuthResponse"] = {
+  "properties" : {
+    "status" : {
+      "type" : "string",
+      "enum" : [ "SUCCESS", "FAILURE" ]
+    },
+    "message" : {
+      "type" : "string"
+    },
+    "error" : {
+      "type" : "string"
+    }
+  }
+};
+    defs["LoginRequest"] = {
+  "properties" : {
+    "username" : {
+      "type" : "string"
+    },
+    "password" : {
+      "type" : "string"
+    }
+  }
+};
     defs["Post"] = {
   "properties" : {
     "id" : {
@@ -953,6 +977,43 @@ ul.nav-tabs {
     }
   }
 };
+    defs["UserDTO"] = {
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "username" : {
+      "type" : "string"
+    },
+    "email" : {
+      "type" : "string"
+    },
+    "password" : {
+      "type" : "string"
+    },
+    "likedPosts" : {
+      "type" : "array",
+      "items" : {
+        "type" : "integer",
+        "format" : "int64"
+      }
+    },
+    "likedComments" : {
+      "type" : "array",
+      "items" : {
+        "type" : "integer",
+        "format" : "int64"
+      }
+    },
+    "roles" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  }
+};
 
 
     var errs = {};
@@ -972,12 +1033,41 @@ ul.nav-tabs {
             -->
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
+                  <li class="nav-header" data-group="LoginController"><a href="#api-LoginController">API Methods - LoginController</a></li>
+                    <li data-group="LoginController" data-name="logOut" class="">
+                      <a href="#api-LoginController-logOut">logOut</a>
+                    </li>
+                    <li data-group="LoginController" data-name="login" class="">
+                      <a href="#api-LoginController-login">login</a>
+                    </li>
+                    <li data-group="LoginController" data-name="me1" class="">
+                      <a href="#api-LoginController-me1">me1</a>
+                    </li>
+                    <li data-group="LoginController" data-name="refreshToken" class="">
+                      <a href="#api-LoginController-refreshToken">refreshToken</a>
+                    </li>
                   <li class="nav-header" data-group="PostRestController"><a href="#api-PostRestController">API Methods - PostRestController</a></li>
                     <li data-group="PostRestController" data-name="getAllPosts" class="">
                       <a href="#api-PostRestController-getAllPosts">getAllPosts</a>
                     </li>
                     <li data-group="PostRestController" data-name="getPostById" class="">
                       <a href="#api-PostRestController-getPostById">getPostById</a>
+                    </li>
+                  <li class="nav-header" data-group="UserRestController"><a href="#api-UserRestController">API Methods - UserRestController</a></li>
+                    <li data-group="UserRestController" data-name="createUser" class="">
+                      <a href="#api-UserRestController-createUser">createUser</a>
+                    </li>
+                    <li data-group="UserRestController" data-name="deleteUser" class="">
+                      <a href="#api-UserRestController-deleteUser">deleteUser</a>
+                    </li>
+                    <li data-group="UserRestController" data-name="getUser" class="">
+                      <a href="#api-UserRestController-getUser">getUser</a>
+                    </li>
+                    <li data-group="UserRestController" data-name="getUsers" class="">
+                      <a href="#api-UserRestController-getUsers">getUsers</a>
+                    </li>
+                    <li data-group="UserRestController" data-name="me" class="">
+                      <a href="#api-UserRestController-me">me</a>
                     </li>
           </ul>
         </nav>
@@ -1000,6 +1090,1386 @@ ul.nav-tabs {
           </div>
         </div>
         <div id="sections">
+                <section id="api-LoginController">
+                  <h1>LoginController</h1>
+                    <div id="api-LoginController-logOut">
+                      <article id="api-LoginController-logOut-0" data-group="User" data-name="logOut" data-version="0">
+                        <div class="pull-left">
+                          <h1>logOut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/auth/logout</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-LoginController-logOut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-logOut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-LoginController-logOut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-logOut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-LoginController-logOut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-python">Python</a></li>
+                          <li class=""><a href="#examples-LoginController-logOut-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-LoginController-logOut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/auth/logout"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-LoginController-logOut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.LoginControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        LoginControllerApi apiInstance = new LoginControllerApi();
+
+        try {
+            AuthResponse result = apiInstance.logOut();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#logOut");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-logOut-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+
+try {
+    final result = await api_instance.logOut();
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->logOut: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-logOut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.LoginControllerApi;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+        LoginControllerApi apiInstance = new LoginControllerApi();
+
+        try {
+            AuthResponse result = apiInstance.logOut();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#logOut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-LoginController-logOut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+LoginControllerApi *apiInstance = [[LoginControllerApi alloc] init];
+
+[apiInstance logOutWithCompletionHandler: 
+              ^(AuthResponse output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.LoginControllerApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.logOut(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-LoginController-logOut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class logOutExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new LoginControllerApi();
+
+            try {
+                AuthResponse result = apiInstance.logOut();
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling LoginControllerApi.logOut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\LoginControllerApi();
+
+try {
+    $result = $api_instance->logOut();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling LoginControllerApi->logOut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::LoginControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::LoginControllerApi->new();
+
+eval {
+    my $result = $api_instance->logOut();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling LoginControllerApi->logOut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.LoginControllerApi()
+
+try:
+    api_response = api_instance.log_out()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling LoginControllerApi->logOut: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-logOut-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate LoginControllerApi;
+
+pub fn main() {
+
+    let mut context = LoginControllerApi::Context::default();
+    let result = client.logOut(&context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-LoginController-logOut-title-200"></h3>
+                            <p id="examples-LoginController-logOut-description-200" class="marked"></p>
+                            <script>
+                              var responseLoginController200_description = `OK`;
+                              var responseLoginController200_description_break = responseLoginController200_description.indexOf('\n');
+                              if (responseLoginController200_description_break == -1) {
+                                $("#examples-LoginController-logOut-title-200").text("Status: 200 - " + responseLoginController200_description);
+                              } else {
+                                $("#examples-LoginController-logOut-title-200").text("Status: 200 - " + responseLoginController200_description.substring(0, responseLoginController200_description_break));
+                                $("#examples-LoginController-logOut-description-200").html(responseLoginController200_description.substring(responseLoginController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-LoginController-logOut-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-LoginController-logOut-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-LoginController-logOut-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-LoginController-logOut-200-schema">
+                                <div id="responses-LoginController-logOut-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/AuthResponse"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-LoginController-logOut-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-LoginController-logOut-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-LoginController-logOut-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-LoginController-login">
+                      <article id="api-LoginController-login-0" data-group="User" data-name="login" data-version="0">
+                        <div class="pull-left">
+                          <h1>login</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/auth/login</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-LoginController-login-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-java">Java</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-login-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-LoginController-login-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-login-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-LoginController-login-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-python">Python</a></li>
+                          <li class=""><a href="#examples-LoginController-login-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-LoginController-login-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ -H "Content-Type: application/json" \
+ "http://localhost:8080/api/v1/auth/login" \
+ -d '{
+  &quot;password&quot; : &quot;password&quot;,
+  &quot;username&quot; : &quot;username&quot;
+}'
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-LoginController-login-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.LoginControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        LoginControllerApi apiInstance = new LoginControllerApi();
+        LoginRequest loginRequest = ; // LoginRequest | 
+
+        try {
+            AuthResponse result = apiInstance.login(loginRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#login");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-login-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final LoginRequest loginRequest = new LoginRequest(); // LoginRequest | 
+
+try {
+    final result = await api_instance.login(loginRequest);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->login: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-login-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.LoginControllerApi;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+        LoginControllerApi apiInstance = new LoginControllerApi();
+        LoginRequest loginRequest = ; // LoginRequest | 
+
+        try {
+            AuthResponse result = apiInstance.login(loginRequest);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#login");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-LoginController-login-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-LoginController-login-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+LoginControllerApi *apiInstance = [[LoginControllerApi alloc] init];
+LoginRequest *loginRequest = ; // 
+
+[apiInstance loginWith:loginRequest
+              completionHandler: ^(AuthResponse output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-login-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.LoginControllerApi()
+var loginRequest = ; // {LoginRequest} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.login(loginRequest, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-LoginController-login-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-LoginController-login-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class loginExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new LoginControllerApi();
+            var loginRequest = new LoginRequest(); // LoginRequest | 
+
+            try {
+                AuthResponse result = apiInstance.login(loginRequest);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling LoginControllerApi.login: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-login-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\LoginControllerApi();
+$loginRequest = ; // LoginRequest | 
+
+try {
+    $result = $api_instance->login($loginRequest);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling LoginControllerApi->login: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-login-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::LoginControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::LoginControllerApi->new();
+my $loginRequest = WWW::OPenAPIClient::Object::LoginRequest->new(); # LoginRequest | 
+
+eval {
+    my $result = $api_instance->login(loginRequest => $loginRequest);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling LoginControllerApi->login: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-login-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.LoginControllerApi()
+loginRequest =  # LoginRequest | 
+
+try:
+    api_response = api_instance.login(loginRequest)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling LoginControllerApi->login: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-login-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate LoginControllerApi;
+
+pub fn main() {
+    let loginRequest = ; // LoginRequest
+
+    let mut context = LoginControllerApi::Context::default();
+    let result = client.login(loginRequest, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">loginRequest <span style="color:red;">*</span></td>
+<td>
+<p class="marked"></p>
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/LoginRequest"
+      }
+    }
+  },
+  "required" : true
+};
+
+  var schema = findNode('schema',schemaWrapper).schema;
+  if (!schema) {
+    schema = schemaWrapper.schema;
+  }
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else if (schema.items != null && schema.items.$ref != null) {
+    schema.items = defsParser.$refs.get(schema.items.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_login_loginRequest');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_login_loginRequest"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-LoginController-login-title-200"></h3>
+                            <p id="examples-LoginController-login-description-200" class="marked"></p>
+                            <script>
+                              var responseLoginController200_description = `OK`;
+                              var responseLoginController200_description_break = responseLoginController200_description.indexOf('\n');
+                              if (responseLoginController200_description_break == -1) {
+                                $("#examples-LoginController-login-title-200").text("Status: 200 - " + responseLoginController200_description);
+                              } else {
+                                $("#examples-LoginController-login-title-200").text("Status: 200 - " + responseLoginController200_description.substring(0, responseLoginController200_description_break));
+                                $("#examples-LoginController-login-description-200").html(responseLoginController200_description.substring(responseLoginController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-LoginController-login-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-LoginController-login-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-LoginController-login-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-LoginController-login-200-schema">
+                                <div id="responses-LoginController-login-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/AuthResponse"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-LoginController-login-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-LoginController-login-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-LoginController-login-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-LoginController-me1">
+                      <article id="api-LoginController-me1-0" data-group="User" data-name="me1" data-version="0">
+                        <div class="pull-left">
+                          <h1>me1</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/auth/me</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-LoginController-me1-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-java">Java</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-me1-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-LoginController-me1-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-me1-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-LoginController-me1-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-python">Python</a></li>
+                          <li class=""><a href="#examples-LoginController-me1-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-LoginController-me1-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/auth/me"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-LoginController-me1-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.LoginControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        LoginControllerApi apiInstance = new LoginControllerApi();
+
+        try {
+            UserDTO result = apiInstance.me1();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#me1");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-me1-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+
+try {
+    final result = await api_instance.me1();
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->me1: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-me1-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.LoginControllerApi;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+        LoginControllerApi apiInstance = new LoginControllerApi();
+
+        try {
+            UserDTO result = apiInstance.me1();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#me1");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-LoginController-me1-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-LoginController-me1-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+LoginControllerApi *apiInstance = [[LoginControllerApi alloc] init];
+
+[apiInstance me1WithCompletionHandler: 
+              ^(UserDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-me1-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.LoginControllerApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.me1(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-LoginController-me1-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-LoginController-me1-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class me1Example
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new LoginControllerApi();
+
+            try {
+                UserDTO result = apiInstance.me1();
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling LoginControllerApi.me1: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-me1-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\LoginControllerApi();
+
+try {
+    $result = $api_instance->me1();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling LoginControllerApi->me1: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-me1-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::LoginControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::LoginControllerApi->new();
+
+eval {
+    my $result = $api_instance->me1();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling LoginControllerApi->me1: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-me1-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.LoginControllerApi()
+
+try:
+    api_response = api_instance.me1()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling LoginControllerApi->me1: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-me1-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate LoginControllerApi;
+
+pub fn main() {
+
+    let mut context = LoginControllerApi::Context::default();
+    let result = client.me1(&context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-LoginController-me1-title-200"></h3>
+                            <p id="examples-LoginController-me1-description-200" class="marked"></p>
+                            <script>
+                              var responseLoginController200_description = `OK`;
+                              var responseLoginController200_description_break = responseLoginController200_description.indexOf('\n');
+                              if (responseLoginController200_description_break == -1) {
+                                $("#examples-LoginController-me1-title-200").text("Status: 200 - " + responseLoginController200_description);
+                              } else {
+                                $("#examples-LoginController-me1-title-200").text("Status: 200 - " + responseLoginController200_description.substring(0, responseLoginController200_description_break));
+                                $("#examples-LoginController-me1-description-200").html(responseLoginController200_description.substring(responseLoginController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-LoginController-me1-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-LoginController-me1-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-LoginController-me1-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-LoginController-me1-200-schema">
+                                <div id="responses-LoginController-me1-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/UserDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-LoginController-me1-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-LoginController-me1-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-LoginController-me1-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-LoginController-refreshToken">
+                      <article id="api-LoginController-refreshToken-0" data-group="User" data-name="refreshToken" data-version="0">
+                        <div class="pull-left">
+                          <h1>refreshToken</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/auth/refresh</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-LoginController-refreshToken-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-java">Java</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-refreshToken-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-LoginController-refreshToken-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-python">Python</a></li>
+                          <li class=""><a href="#examples-LoginController-refreshToken-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-LoginController-refreshToken-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/auth/refresh"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-LoginController-refreshToken-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.LoginControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        LoginControllerApi apiInstance = new LoginControllerApi();
+        String refreshToken = refreshToken_example; // String | 
+
+        try {
+            AuthResponse result = apiInstance.refreshToken(refreshToken);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#refreshToken");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-refreshToken-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final String refreshToken = new String(); // String | 
+
+try {
+    final result = await api_instance.refreshToken(refreshToken);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->refreshToken: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-LoginController-refreshToken-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.LoginControllerApi;
+
+public class LoginControllerApiExample {
+    public static void main(String[] args) {
+        LoginControllerApi apiInstance = new LoginControllerApi();
+        String refreshToken = refreshToken_example; // String | 
+
+        try {
+            AuthResponse result = apiInstance.refreshToken(refreshToken);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LoginControllerApi#refreshToken");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-LoginController-refreshToken-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+LoginControllerApi *apiInstance = [[LoginControllerApi alloc] init];
+String *refreshToken = refreshToken_example; //  (optional) (default to null)
+
+[apiInstance refreshTokenWith:refreshToken
+              completionHandler: ^(AuthResponse output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.LoginControllerApi()
+var opts = {
+  'refreshToken': refreshToken_example // {String} 
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.refreshToken(opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-LoginController-refreshToken-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class refreshTokenExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new LoginControllerApi();
+            var refreshToken = refreshToken_example;  // String |  (optional)  (default to null)
+
+            try {
+                AuthResponse result = apiInstance.refreshToken(refreshToken);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling LoginControllerApi.refreshToken: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\LoginControllerApi();
+$refreshToken = refreshToken_example; // String | 
+
+try {
+    $result = $api_instance->refreshToken($refreshToken);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling LoginControllerApi->refreshToken: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::LoginControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::LoginControllerApi->new();
+my $refreshToken = refreshToken_example; # String | 
+
+eval {
+    my $result = $api_instance->refreshToken(refreshToken => $refreshToken);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling LoginControllerApi->refreshToken: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.LoginControllerApi()
+refreshToken = refreshToken_example # String |  (optional) (default to null)
+
+try:
+    api_response = api_instance.refresh_token(refreshToken=refreshToken)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling LoginControllerApi->refreshToken: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-LoginController-refreshToken-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate LoginControllerApi;
+
+pub fn main() {
+    let refreshToken = refreshToken_example; // String
+
+    let mut context = LoginControllerApi::Context::default();
+    let result = client.refreshToken(refreshToken, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-LoginController-refreshToken-title-200"></h3>
+                            <p id="examples-LoginController-refreshToken-description-200" class="marked"></p>
+                            <script>
+                              var responseLoginController200_description = `OK`;
+                              var responseLoginController200_description_break = responseLoginController200_description.indexOf('\n');
+                              if (responseLoginController200_description_break == -1) {
+                                $("#examples-LoginController-refreshToken-title-200").text("Status: 200 - " + responseLoginController200_description);
+                              } else {
+                                $("#examples-LoginController-refreshToken-title-200").text("Status: 200 - " + responseLoginController200_description.substring(0, responseLoginController200_description_break));
+                                $("#examples-LoginController-refreshToken-description-200").html(responseLoginController200_description.substring(responseLoginController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-LoginController-refreshToken-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-LoginController-refreshToken-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-LoginController-refreshToken-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-LoginController-refreshToken-200-schema">
+                                <div id="responses-LoginController-refreshToken-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/AuthResponse"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-LoginController-refreshToken-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-LoginController-refreshToken-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-LoginController-refreshToken-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
                 <section id="api-PostRestController">
                   <h1>PostRestController</h1>
                     <div id="api-PostRestController-getAllPosts">
@@ -1014,7 +2484,7 @@ ul.nav-tabs {
                         <p class="marked"></p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/posts/</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/posts/</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -1038,7 +2508,7 @@ ul.nav-tabs {
                           <div class="tab-pane active" id="examples-PostRestController-getAllPosts-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: */*" \
- "http://localhost:8080/api/posts/"
+ "http://localhost:8080/api/v1/posts/"
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-PostRestController-getAllPosts-0-java">
@@ -1342,7 +2812,7 @@ pub fn main() {
                         <p class="marked"></p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/posts/{id}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/posts/{id}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -1366,7 +2836,7 @@ pub fn main() {
                           <div class="tab-pane active" id="examples-PostRestController-getPostById-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: */*" \
- "http://localhost:8080/api/posts/{id}"
+ "http://localhost:8080/api/v1/posts/{id}"
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-PostRestController-getPostById-0-java">
@@ -1691,6 +3161,1788 @@ pub fn main() {
                                   </script>
                                 </div>
                                 <input id='responses-PostRestController-getPostById-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
+                <section id="api-UserRestController">
+                  <h1>UserRestController</h1>
+                    <div id="api-UserRestController-createUser">
+                      <article id="api-UserRestController-createUser-0" data-group="User" data-name="createUser" data-version="0">
+                        <div class="pull-left">
+                          <h1>createUser</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/users/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-createUser-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-createUser-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-createUser-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-createUser-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-createUser-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-createUser-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-createUser-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ -H "Content-Type: application/json" \
+ "http://localhost:8080/api/v1/users/" \
+ -d '{
+  &quot;likedComments&quot; : [ 1, 1 ],
+  &quot;password&quot; : &quot;password&quot;,
+  &quot;likedPosts&quot; : [ 6, 6 ],
+  &quot;roles&quot; : [ &quot;roles&quot;, &quot;roles&quot; ],
+  &quot;id&quot; : 0,
+  &quot;email&quot; : &quot;email&quot;,
+  &quot;username&quot; : &quot;username&quot;
+}'
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-createUser-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        UserDTO userDTO = ; // UserDTO | 
+
+        try {
+            UserDTO result = apiInstance.createUser(userDTO);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#createUser");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-createUser-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final UserDTO userDTO = new UserDTO(); // UserDTO | 
+
+try {
+    final result = await api_instance.createUser(userDTO);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->createUser: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-createUser-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        UserDTO userDTO = ; // UserDTO | 
+
+        try {
+            UserDTO result = apiInstance.createUser(userDTO);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#createUser");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-createUser-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+UserDTO *userDTO = ; // 
+
+[apiInstance createUserWith:userDTO
+              completionHandler: ^(UserDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var userDTO = ; // {UserDTO} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.createUser(userDTO, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-createUser-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class createUserExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+            var userDTO = new UserDTO(); // UserDTO | 
+
+            try {
+                UserDTO result = apiInstance.createUser(userDTO);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.createUser: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+$userDTO = ; // UserDTO | 
+
+try {
+    $result = $api_instance->createUser($userDTO);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->createUser: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+my $userDTO = WWW::OPenAPIClient::Object::UserDTO->new(); # UserDTO | 
+
+eval {
+    my $result = $api_instance->createUser(userDTO => $userDTO);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->createUser: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+userDTO =  # UserDTO | 
+
+try:
+    api_response = api_instance.create_user(userDTO)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->createUser: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-createUser-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+    let userDTO = ; // UserDTO
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.createUser(userDTO, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">userDTO <span style="color:red;">*</span></td>
+<td>
+<p class="marked"></p>
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/UserDTO"
+      }
+    }
+  },
+  "required" : true
+};
+
+  var schema = findNode('schema',schemaWrapper).schema;
+  if (!schema) {
+    schema = schemaWrapper.schema;
+  }
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else if (schema.items != null && schema.items.$ref != null) {
+    schema.items = defsParser.$refs.get(schema.items.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_createUser_userDTO');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_createUser_userDTO"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-createUser-title-200"></h3>
+                            <p id="examples-UserRestController-createUser-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-createUser-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-createUser-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-createUser-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-createUser-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-createUser-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-createUser-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-createUser-200-schema">
+                                <div id="responses-UserRestController-createUser-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/UserDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-createUser-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-createUser-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-createUser-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-UserRestController-deleteUser">
+                      <article id="api-UserRestController-deleteUser-0" data-group="User" data-name="deleteUser" data-version="0">
+                        <div class="pull-left">
+                          <h1>deleteUser</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/api/v1/users/{id}</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-deleteUser-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-deleteUser-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-deleteUser-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-deleteUser-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-deleteUser-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/users/{id}"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-deleteUser-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+
+        try {
+            UserDTO result = apiInstance.deleteUser(id);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#deleteUser");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-deleteUser-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long id = new Long(); // Long | 
+
+try {
+    final result = await api_instance.deleteUser(id);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->deleteUser: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-deleteUser-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+
+        try {
+            UserDTO result = apiInstance.deleteUser(id);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#deleteUser");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-deleteUser-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+Long *id = 789; //  (default to null)
+
+[apiInstance deleteUserWith:id
+              completionHandler: ^(UserDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var id = 789; // {Long} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.deleteUser(id, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-deleteUser-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class deleteUserExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+            var id = 789;  // Long |  (default to null)
+
+            try {
+                UserDTO result = apiInstance.deleteUser(id);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.deleteUser: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+$id = 789; // Long | 
+
+try {
+    $result = $api_instance->deleteUser($id);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->deleteUser: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+my $id = 789; # Long | 
+
+eval {
+    my $result = $api_instance->deleteUser(id => $id);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->deleteUser: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+id = 789 # Long |  (default to null)
+
+try:
+    api_response = api_instance.delete_user(id)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->deleteUser: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-deleteUser-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+    let id = 789; // Long
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.deleteUser(id, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+<td>
+
+
+    <div id="d2e199_deleteUser_id">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-deleteUser-title-200"></h3>
+                            <p id="examples-UserRestController-deleteUser-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-deleteUser-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-deleteUser-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-deleteUser-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-deleteUser-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-deleteUser-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-deleteUser-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-deleteUser-200-schema">
+                                <div id="responses-UserRestController-deleteUser-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/UserDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-deleteUser-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-deleteUser-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-deleteUser-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-UserRestController-getUser">
+                      <article id="api-UserRestController-getUser-0" data-group="User" data-name="getUser" data-version="0">
+                        <div class="pull-left">
+                          <h1>getUser</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/users/{id}</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-getUser-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getUser-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getUser-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getUser-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getUser-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUser-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-getUser-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/users/{id}"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-getUser-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+
+        try {
+            UserDTO result = apiInstance.getUser(id);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getUser");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getUser-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long id = new Long(); // Long | 
+
+try {
+    final result = await api_instance.getUser(id);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->getUser: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getUser-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+
+        try {
+            UserDTO result = apiInstance.getUser(id);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getUser");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-getUser-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+Long *id = 789; //  (default to null)
+
+[apiInstance getUserWith:id
+              completionHandler: ^(UserDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var id = 789; // {Long} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getUser(id, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-getUser-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getUserExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+            var id = 789;  // Long |  (default to null)
+
+            try {
+                UserDTO result = apiInstance.getUser(id);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.getUser: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+$id = 789; // Long | 
+
+try {
+    $result = $api_instance->getUser($id);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->getUser: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+my $id = 789; # Long | 
+
+eval {
+    my $result = $api_instance->getUser(id => $id);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->getUser: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+id = 789 # Long |  (default to null)
+
+try:
+    api_response = api_instance.get_user(id)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->getUser: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUser-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+    let id = 789; // Long
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.getUser(id, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+<td>
+
+
+    <div id="d2e199_getUser_id">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-getUser-title-200"></h3>
+                            <p id="examples-UserRestController-getUser-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-getUser-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-getUser-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-getUser-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-getUser-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-getUser-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-getUser-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-getUser-200-schema">
+                                <div id="responses-UserRestController-getUser-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/UserDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-getUser-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-getUser-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-getUser-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-UserRestController-getUsers">
+                      <article id="api-UserRestController-getUsers-0" data-group="User" data-name="getUsers" data-version="0">
+                        <div class="pull-left">
+                          <h1>getUsers</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/users/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-getUsers-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getUsers-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getUsers-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUsers-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-getUsers-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/users/"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-getUsers-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+
+        try {
+            array[UserDTO] result = apiInstance.getUsers();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getUsers");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getUsers-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+
+try {
+    final result = await api_instance.getUsers();
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->getUsers: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getUsers-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+
+        try {
+            array[UserDTO] result = apiInstance.getUsers();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getUsers");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-getUsers-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+
+[apiInstance getUsersWithCompletionHandler: 
+              ^(array[UserDTO] output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getUsers(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-getUsers-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getUsersExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+
+            try {
+                array[UserDTO] result = apiInstance.getUsers();
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.getUsers: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+
+try {
+    $result = $api_instance->getUsers();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->getUsers: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+
+eval {
+    my $result = $api_instance->getUsers();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->getUsers: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+
+try:
+    api_response = api_instance.get_users()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->getUsers: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUsers-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.getUsers(&context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-getUsers-title-200"></h3>
+                            <p id="examples-UserRestController-getUsers-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-getUsers-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-getUsers-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-getUsers-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-getUsers-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-getUsers-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-getUsers-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-getUsers-200-schema">
+                                <div id="responses-UserRestController-getUsers-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/UserDTO"
+        }
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-getUsers-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-getUsers-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-getUsers-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-UserRestController-me">
+                      <article id="api-UserRestController-me-0" data-group="User" data-name="me" data-version="0">
+                        <div class="pull-left">
+                          <h1>me</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/users/me</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-me-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-me-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-me-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-me-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-me-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-me-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-me-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/users/me"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-me-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+
+        try {
+            UserDTO result = apiInstance.me();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#me");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-me-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+
+try {
+    final result = await api_instance.me();
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->me: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-me-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+
+        try {
+            UserDTO result = apiInstance.me();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#me");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-me-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-me-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+
+[apiInstance meWithCompletionHandler: 
+              ^(UserDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-me-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.me(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-me-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-me-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class meExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+
+            try {
+                UserDTO result = apiInstance.me();
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.me: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-me-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+
+try {
+    $result = $api_instance->me();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->me: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-me-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+
+eval {
+    my $result = $api_instance->me();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->me: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-me-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+
+try:
+    api_response = api_instance.me()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->me: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-me-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.me(&context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-me-title-200"></h3>
+                            <p id="examples-UserRestController-me-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-me-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-me-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-me-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-me-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-me-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-me-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-me-200-schema">
+                                <div id="responses-UserRestController-me-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/UserDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-me-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-me-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-me-200-schema-data' type='hidden' value=''></input>
                               </div>
                             </div>
                         </article>
