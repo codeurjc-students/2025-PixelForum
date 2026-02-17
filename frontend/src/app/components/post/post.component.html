@@ -28,9 +28,9 @@
 	</div>
 
 	<!-- Topics -->
-	<div *ngIf="post.topics?.length" class="post-topics">
-		<span *ngFor="let topic of post.topics" class="topic-badge">
-			#{{ topic.name }}
+	<div *ngIf="post.topic" class="post-topics">
+		<span class="topic-badge">
+			#{{ post.topic.name }}
 		</span>
 	</div>
 
