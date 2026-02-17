@@ -9,7 +9,7 @@ export interface Post {
 	updatedAt?: string;
 	images?: string[];
 	author?: User;
-	topics: Topic[];
+	topic: Topic;
 	likes?: number;
 	usersThatLiked?: number[];
 }

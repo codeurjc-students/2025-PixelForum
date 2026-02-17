@@ -9,7 +9,7 @@ export class PostService {
 
 	private baseUrl = environment.apiUrl + 'posts/';
 
-	constructor(private http: HttpClient) {}
+	constructor(private http: HttpClient) { }
 
 	getAll(): Observable<Post[]> {
 		return this.http.get<Post[]>(this.baseUrl, { withCredentials: true });
@@ -29,5 +29,15 @@ export class PostService {
 
 	delete(id: number): Observable<void> {
 		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
+	}
+
+	uploadImages(files: File[]): Observable<{ urls: string[] }> {
+		const formData = new FormData();
+		files.forEach((file) => {
+			formData.append('files', file);
+		});
+		return this.http.post<{ urls: string[] }>(`${this.baseUrl}upload`, formData, {
+			withCredentials: true
+		});
 	}
 }

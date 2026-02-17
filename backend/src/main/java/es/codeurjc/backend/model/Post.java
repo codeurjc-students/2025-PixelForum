@@ -1,6 +1,5 @@
 package es.codeurjc.backend.model;
 
-import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,9 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -27,29 +24,25 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @Lob
-    private List<Blob> images;
+    private List<String> images;
 
     @ManyToOne
 	@JoinColumn(name = "user_id")
 	private User author;
 
-    @ManyToMany
-	@JoinTable(
-		name = "post_topics",
-		joinColumns = @JoinColumn(name = "post_id"),
-		inverseJoinColumns = @JoinColumn(name = "topic_id")
-	)
-	private List<Topic> topics;
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    private Topic topic;
 
     private int likes;
     private List<Long> usersThatLiked;
 
     public Post() {
     }
-    public Post(String title, String content, List<Topic> topics) {
+    public Post(String title, String content, Topic topic) {
         this.title = title;
         this.content = content;
-        this.topics = topics;
+        this.topic = topic;
     }
     public long getId() {
         return id;
@@ -81,10 +74,10 @@ public class Post {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-    public List<Blob> getImages() {
+    public List<String> getImages() {
         return images;
     }
-    public void setImages(List<Blob> images) {
+    public void setImages(List<String> images) {
         this.images = images;
     }
     public User getAuthor() {
@@ -93,11 +86,11 @@ public class Post {
     public void setAuthor(User author) {
         this.author = author;
     }
-    public List<Topic> getTopics() {
-        return topics;
+    public Topic getTopic() {
+        return topic;
     }
-    public void setTopics(List<Topic> topics) {
-        this.topics = topics;
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
     public int getLikes() {
         return likes;

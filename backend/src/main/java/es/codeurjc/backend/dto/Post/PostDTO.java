@@ -1,11 +1,10 @@
-package es.codeurjc.backend.dto;
+package es.codeurjc.backend.dto.Post;
 
-import java.sql.Blob;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import es.codeurjc.backend.dto.User.BasicUserDTO;
 import es.codeurjc.backend.model.Topic;
-import es.codeurjc.backend.model.User;
 
 public record PostDTO (
     Long id,
@@ -13,9 +12,9 @@ public record PostDTO (
     String content,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    User author,
-    List<Topic> topics,
+    BasicUserDTO author,
+    Topic topic,
     Integer likes,
     List<Long> usersThatLiked,
-    List<Blob> images) {
+    List<String> images) {
 }

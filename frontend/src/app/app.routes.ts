@@ -8,8 +8,8 @@ import { PostListComponent } from './components/post-list/post-list.component';
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent, canActivate: [GuestGuard] },
     { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-
 	{ path: 'posts', component: PostListComponent },
+	{ path: 'create-post', loadComponent: () => import('./components/create-post/create-post.component').then(m => m.CreatePostComponent), canActivate: [AuthGuard] },
 
 	{ path: '', redirectTo: 'posts', pathMatch: 'full' }
 ];

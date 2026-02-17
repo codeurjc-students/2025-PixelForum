@@ -38,23 +38,28 @@ public class DatabaseInitializer {
         userService.save(usuario3);
         userService.save(usuario4);
 
-        Topic topic1 = new Topic("GTA VI", "All news about Grand Theft Auto VI");
-        topicService.save(topic1);
+        List<Topic> topics = List.of(
+            new Topic("GTA VI", "All news about Grand Theft Auto VI"),
+            new Topic("Cyberpunk", "All news about Cyberpunk"),
+            new Topic("The Witcher", "All news about The Witcher")
+        );
+
+        topics.forEach(topicService::save);
 
         Post post1 = new Post("GTA VI Massive leak", "A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.", 
-            List.of(topic1));
+            topics.get(0));
         postService.save(post1);
 
         Post post2 = new Post("GTA VI official 2nd trailer", "Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.", 
-            List.of(topic1));
+            topics.get(0));
         postService.save(post2);
 
         Post post3 = new Post("GTA VI release date rumors", "Rumors are swirling about the potential release date for Grand Theft Auto VI, with speculation pointing towards a launch in late 2024 or early 2025. Fans are eagerly awaiting official confirmation from Rockstar Games.", 
-            List.of(topic1));
+            topics.get(0));
         postService.save(post3);
 
         Post post4 = new Post("GTA VI map details", "New details about the map of Grand Theft Auto VI have emerged, suggesting a vast and diverse open world that includes multiple cities and rural areas, offering players a rich and immersive gaming experience.", 
-            List.of(topic1));
+            topics.get(0));
         postService.save(post4);
     
     }   

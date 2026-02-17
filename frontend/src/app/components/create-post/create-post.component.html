@@ -1,0 +1,95 @@
+<div class="create-post-container">
+	<div class="create-post-header">
+		<h1>Create Post</h1>
+	</div>
+
+	<!-- Messages -->
+	<div *ngIf="errorMessage" class="alert alert-error">
+		{{ errorMessage }}
+	</div>
+	<div *ngIf="successMessage" class="alert alert-success">
+		{{ successMessage }}
+	</div>
+
+	<!-- Form -->
+	<form [formGroup]="createPostForm" (ngSubmit)="createPost()" class="post-form">
+
+		<!-- Title -->
+		<div class="form-group">
+			<label for="title">Title *</label>
+			<input id="title" type="text" formControlName="title" placeholder="Write a title for your post"
+				class="form-input" maxlength="300" />
+			<div class="char-count">{{ titleLength }}/300</div>
+			<div *ngIf="createPostForm.get('title')?.invalid && createPostForm.get('title')?.touched" class="error-text">
+				<span *ngIf="createPostForm.get('title')?.errors?.['required']">The title is required</span>
+				<span *ngIf="createPostForm.get('title')?.errors?.['minlength']">Minimum 5 characters</span>
+				<span *ngIf="createPostForm.get('title')?.errors?.['maxlength']">Maximum 300 characters</span>
+			</div>
+		</div>
+
+		<!-- Content -->
+		<div class="form-group">
+			<label for="content">Content *</label>
+			<textarea id="content" formControlName="content" placeholder="Describe your post here..." class="form-textarea"
+				rows="8"></textarea>
+			<div class="char-count">{{ contentLength }}/5000</div>
+			<div *ngIf="createPostForm.get('content')?.invalid && createPostForm.get('content')?.touched" class="error-text">
+				<span *ngIf="createPostForm.get('content')?.errors?.['required']">The content is required</span>
+				<span *ngIf="createPostForm.get('content')?.errors?.['minlength']">Minimum 10 characters</span>
+				<span *ngIf="createPostForm.get('content')?.errors?.['maxlength']">Maximum 5000 characters</span>
+			</div>
+		</div>
+
+		<!-- Images -->
+		<div class="form-group">
+			<label for="images">Images (optional)</label>
+			<div class="image-upload-section">
+				<input id="images" #fileInput type="file" multiple accept="image/*" (change)="onImageSelected($event)"
+					style="display: none" />
+				<button type="button" class="upload-btn" (click)="fileInput.click()">
+					📤 Select Images
+				</button>
+				<p class="upload-hint">Maximum 5 images. Supported formats: JPG, PNG, GIF, WebP</p>
+			</div>
+
+			<!-- Image Previews -->
+			<div *ngIf="previewUrls.length > 0" class="image-preview-grid">
+				<div *ngFor="let preview of previewUrls; let i = index" class="image-preview-item">
+					<img [src]="preview" alt="Preview" class="preview-image" />
+					<button type="button" class="remove-image-btn" (click)="removeImage(i)" title="Eliminar imagen">
+						×
+					</button>
+				</div>
+			</div>
+
+			<div *ngIf="selectedImages.length > 0" class="image-count">
+				{{ selectedImages.length }} image(s) selected
+			</div>
+		</div>
+
+		<!-- Topics (Dropdown) -->
+		<div class="form-group">
+			<label for="topic-select">Topic *</label>
+			<select id="topic-select" formControlName="topics" class="form-select" (change)="selectTopic($event)">
+				<option [value]="null">Select a topic</option>
+				<option *ngFor="let topic of topics" [value]="topic.id">
+					{{ topic.name }}
+				</option>
+			</select>
+			<div *ngIf="createPostForm.get('topics')?.invalid && createPostForm.get('topics')?.touched" class="error-text">
+				<span>Select a topic</span>
+			</div>
+		</div>
+
+		<!-- Buttons -->
+		<div class="form-actions">
+			<button type="button" class="btn btn-secondary" (click)="createPostForm.reset()" [disabled]="isLoading">
+				Cancel
+			</button>
+			<button type="submit" class="btn btn-primary" [disabled]="!createPostForm.valid || isLoading">
+				<span *ngIf="isLoading" class="spinner"></span>
+				{{ isLoading ? 'Creating...' : 'Create Post' }}
+			</button>
+		</div>
+	</form>
+</div>

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import es.codeurjc.backend.dto.PostMapper;
+import es.codeurjc.backend.dto.Post.PostMapper;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.service.PostService;

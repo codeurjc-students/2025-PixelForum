@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.codeurjc.backend.dto.UserDTO;
+import es.codeurjc.backend.dto.User.UserDTO;
 import es.codeurjc.backend.security.jwt.AuthResponse;
 import es.codeurjc.backend.security.jwt.AuthResponse.Status;
 import es.codeurjc.backend.security.jwt.LoginRequest;

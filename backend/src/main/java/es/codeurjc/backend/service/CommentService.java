@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import es.codeurjc.backend.dto.CommentDTO;
-import es.codeurjc.backend.dto.CommentMapper;
+import es.codeurjc.backend.dto.Comment.CommentDTO;
+import es.codeurjc.backend.dto.Comment.CommentMapper;
 import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.repository.CommentRepository;
 import jakarta.transaction.Transactional;

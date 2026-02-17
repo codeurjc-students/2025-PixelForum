@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.test.context.ActiveProfiles;
 
-import es.codeurjc.backend.dto.PostDTO;
-import es.codeurjc.backend.dto.PostMapper;
+import es.codeurjc.backend.dto.Post.PostDTO;
+import es.codeurjc.backend.dto.Post.PostMapper;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.repository.PostRepository;
@@ -43,7 +42,7 @@ class PostServiceUnitTest {
         long id = 1;
         Topic topic = new Topic("GTA VI", "All news about Grand Theft Auto VI");
         Post post = new Post("GTA VI Massive Leak", "A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.", 
-            List.of(topic));
+            topic);
         post.setId(id);
         Optional<Post> optionalPost = Optional.of(post);
         //WHEN
