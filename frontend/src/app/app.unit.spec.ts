@@ -19,7 +19,10 @@ describe('App', () => {
 			id: 1,
 			title: 'Test Post',
 			content: 'This is a test',
-			topics: []
+			topic: {
+				id: 1,
+				name: 'Test Topic'
+			}
 		}
 	];
 

@@ -12,9 +12,7 @@ describe('PostComponent', () => {
       id: 1,
       title: 'GTA VI Massive Leak',
       content: 'A massive leak has revealed details...',
-      topics: [
-        { id: 1, name: 'GTA VI' } as any
-      ],
+      topic: { id: 1, name: 'GTA VI' } as any,
     };
 
   beforeEach(async () => {
