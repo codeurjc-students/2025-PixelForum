@@ -13,7 +13,6 @@
 
 	<!-- Form -->
 	<form [formGroup]="createPostForm" (ngSubmit)="createPost()" class="post-form">
-
 		<!-- Title -->
 		<div class="form-group">
 			<label for="title">Title *</label>
@@ -61,32 +60,73 @@
 					</button>
 				</div>
 			</div>
-
 			<div *ngIf="selectedImages.length > 0" class="image-count">
 				{{ selectedImages.length }} image(s) selected
 			</div>
 		</div>
 
-		<!-- Topics (Dropdown) -->
+		<!-- Topic Search (Autocomplete) -->
 		<div class="form-group">
-			<label for="topic-select">Topic *</label>
-			<select id="topic-select" formControlName="topics" class="form-select" (change)="selectTopic($event)">
-				<option [value]="null">Select a topic</option>
-				<option *ngFor="let topic of topics" [value]="topic.id">
-					{{ topic.name }}
-				</option>
-			</select>
-			<div *ngIf="createPostForm.get('topics')?.invalid && createPostForm.get('topics')?.touched" class="error-text">
-				<span>Select a topic</span>
+			<label for="topic-search">Topic *</label>
+			<div class="topic-search-container">
+				<div class="topic-input-wrapper">
+					<input 
+						id="topic-search"
+						type="text" 
+						formControlName="topicSearch"
+						placeholder="Search or select a topic..."
+						class="form-input topic-search-input"
+						(input)="onTopicSearchChange($event)"
+						(focus)="showTopicDropdown = filteredTopics.length > 0"
+						autocomplete="off"
+					/>
+					<button 
+						*ngIf="selectedTopic"
+						type="button" 
+						class="clear-btn"
+						(click)="clearSelectedTopic()"
+						title="Clear selection"
+					>
+						✕
+					</button>
+				</div>
+
+				<!-- Topic Dropdown -->
+				<div *ngIf="showTopicDropdown" class="topic-dropdown">
+					<div *ngIf="filteredTopics.length > 0">
+						<button 
+							*ngFor="let topic of filteredTopics"
+							type="button"
+							class="topic-option"
+							[class.selected]="selectedTopic?.id === topic.id"
+							(click)="selectTopic(topic)"
+						>
+							{{ topic.name }}
+						</button>
+					</div>
+					<div *ngIf="filteredTopics.length === 0" class="topic-no-results">
+						No topics found
+					</div>
+				</div>
+
+				<!-- Selected Topic Badge -->
+				<div *ngIf="selectedTopic" class="selected-topic-badge">
+					{{ selectedTopic.name }}
+				</div>
+			</div>
+
+			<!-- Error Message -->
+			<div *ngIf="createPostForm.get('topicSearch')?.invalid && createPostForm.get('topicSearch')?.touched && !selectedTopic" class="error-text">
+				<span>Please select a topic</span>
 			</div>
 		</div>
 
 		<!-- Buttons -->
 		<div class="form-actions">
-			<button type="button" class="btn btn-secondary" (click)="createPostForm.reset()" [disabled]="isLoading">
+			<button type="button" class="btn btn-secondary" (click)="createPostForm.reset(); clearSelectedTopic()" [disabled]="isLoading">
 				Cancel
 			</button>
-			<button type="submit" class="btn btn-primary" [disabled]="!createPostForm.valid || isLoading">
+			<button type="submit" class="btn btn-primary" [disabled]="!createPostForm.valid || !selectedTopic || isLoading">
 				<span *ngIf="isLoading" class="spinner"></span>
 				{{ isLoading ? 'Creating...' : 'Create Post' }}
 			</button>

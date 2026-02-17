@@ -5,7 +5,6 @@ import { Post } from '../../models/post.model';
 import { Topic } from '../../models/topic.model';
 import { PostService } from '../../services/post.service';
 import { TopicService } from '../../services/topic.service';
-import { Router } from '@angular/router';
 
 @Component({
 	selector: 'app-create-post',
@@ -16,18 +15,20 @@ import { Router } from '@angular/router';
 })
 export class CreatePostComponent implements OnInit {
 	createPostForm!: FormGroup;
-	topics: Topic[] = [];
+	allTopics: Topic[] = [];
+	filteredTopics: Topic[] = [];
 	selectedImages: File[] = [];
 	previewUrls: string[] = [];
 	isLoading = false;
 	errorMessage: string | null = null;
 	successMessage: string | null = null;
+	showTopicDropdown = false;
+	selectedTopic: Topic | null = null;
 
 	constructor(
 		private fb: FormBuilder,
 		private postService: PostService,
-		private topicService: TopicService,
-		private router: Router
+		private topicService: TopicService
 	) { }
 
 	ngOnInit(): void {
@@ -39,20 +40,52 @@ export class CreatePostComponent implements OnInit {
 		this.createPostForm = this.fb.group({
 			title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(300)]],
 			content: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(5000)]],
-			topics: ['', Validators.required]
+			topicSearch: ['', Validators.required]
 		});
 	}
 
 	private loadTopics(): void {
 		this.topicService.getAll().subscribe({
 			next: (data) => {
-				this.topics = data;
+				this.allTopics = data;
+				this.filteredTopics = data;
 			},
 			error: (err) => {
 				console.error('Error loading topics:', err);
 				this.errorMessage = 'Error loading topics';
 			}
 		});
+	}
+
+	onTopicSearchChange(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		const searchTerm = input.value.toLowerCase();
+
+		if (searchTerm) {
+			this.filteredTopics = this.allTopics.filter(topic =>
+				topic.name.toLowerCase().includes(searchTerm)
+			);
+			this.showTopicDropdown = true;
+		} else {
+			this.filteredTopics = this.allTopics;
+			this.showTopicDropdown = this.allTopics.length > 0;
+		}
+	}
+
+	selectTopic(topic: Topic): void {
+		this.selectedTopic = topic;
+		this.createPostForm.patchValue({
+			topicSearch: topic.name
+		});
+		this.showTopicDropdown = false;
+	}
+
+	clearSelectedTopic(): void {
+		this.selectedTopic = null;
+		this.createPostForm.patchValue({
+			topicSearch: ''
+		});
+		this.filteredTopics = this.allTopics;
 	}
 
 	onImageSelected(event: Event): void {
@@ -94,16 +127,8 @@ export class CreatePostComponent implements OnInit {
 		this.previewUrls.splice(index, 1);
 	}
 
-	selectTopic(event: Event): void {
-		const selectElement = event.target as HTMLSelectElement;
-		const topicId = selectElement.value ? parseInt(selectElement.value, 10) : '';
-		this.createPostForm.patchValue({
-			topics: topicId
-		});
-	}
-
 	async createPost(): Promise<void> {
-		if (!this.createPostForm.valid) {
+		if (!this.createPostForm.valid || !this.selectedTopic) {
 			this.errorMessage = 'Please fill in all required fields correctly';
 			return;
 		}
@@ -122,7 +147,7 @@ export class CreatePostComponent implements OnInit {
 						.uploadImages(this.selectedImages)
 						.toPromise();
 
-					if (uploadResponse?.urls) {
+					if (uploadResponse?.urls && uploadResponse.urls.length > 0) {
 						imageUrls = uploadResponse.urls;
 					}
 				} catch (uploadError) {
@@ -134,18 +159,16 @@ export class CreatePostComponent implements OnInit {
 			}
 
 			// Create post
-			const formValue = this.createPostForm.value;
-			const selectedTopicId = formValue.topics;
-
 			const newPost: Post = {
-				title: formValue.title,
-				content: formValue.content,
-				topic: {
-					id: formValue.topics,
-					name: ''
-				},
-				images: imageUrls
+				title: this.createPostForm.get('title')?.value,
+				content: this.createPostForm.get('content')?.value,
+				topic: this.selectedTopic
 			};
+
+			// Only add images if there are any
+			if (imageUrls.length > 0) {
+				newPost.images = imageUrls;
+			}
 
 			this.postService.create(newPost).subscribe({
 				next: (createdPost) => {
@@ -153,12 +176,12 @@ export class CreatePostComponent implements OnInit {
 					this.createPostForm.reset();
 					this.selectedImages = [];
 					this.previewUrls = [];
+					this.selectedTopic = null;
 					this.isLoading = false;
 
 					// Clear success message after 3 seconds
 					setTimeout(() => {
 						this.successMessage = null;
-						this.router.navigate(['/posts']);
 					}, 3000);
 				},
 				error: (err) => {
