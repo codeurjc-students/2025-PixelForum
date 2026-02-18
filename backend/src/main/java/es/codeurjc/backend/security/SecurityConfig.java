@@ -26,6 +26,7 @@ public class SecurityConfig {
     private static final String API_V = "/api/v1";
     private static final String API_POSTS = API_V + "/posts/**";
     private static final String API_USERS = API_V + "/users/**";
+	private static final String API_IMAGES = API_V + "/images/**";
 
 	private final JwtRequestFilter jwtRequestFilter;
 	private final RepositoryUserDetailsService userDetailsService;
@@ -74,6 +75,11 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.POST, API_POSTS).hasRole("USER")
 					.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole("USER")
 					.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole("USER")
+					
+					// IMAGES
+					.requestMatchers(HttpMethod.GET, API_IMAGES).permitAll()
+					.requestMatchers(HttpMethod.POST, API_IMAGES).hasRole("USER")
+					.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole("USER")
 					
 					// USERS
 					.requestMatchers(HttpMethod.GET, API_USERS).hasRole("USER")

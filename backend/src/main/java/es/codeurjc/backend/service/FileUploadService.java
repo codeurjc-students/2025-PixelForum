@@ -28,6 +28,10 @@ public class FileUploadService {
     }
 
     public String uploadFile(MultipartFile file) throws IOException {
+        return uploadFile(file, "default");
+    }
+
+    public String uploadFile(MultipartFile file, String category) throws IOException {
         // Validate file is not empty
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
@@ -46,15 +50,34 @@ public class FileUploadService {
             throw new IllegalArgumentException("File type not allowed. Allowed types: " + allowedExtensions);
         }
 
+        // Create category directory if it doesn't exist
+        Path categoryDir = Paths.get(uploadDir, category);
+        Files.createDirectories(categoryDir);
+
+        // Sanitize filename: remove spaces and special characters
+        String sanitizedFilename = sanitizeFilename(originalFilename);
+
         // Generate unique filename to avoid conflicts
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + originalFilename;
-        Path filepath = Paths.get(uploadDir, uniqueFilename);
+        String uniqueFilename = UUID.randomUUID().toString() + "_" + sanitizedFilename;
+        Path filepath = categoryDir.resolve(uniqueFilename);
 
         // Save file to disk
         Files.write(filepath, file.getBytes());
 
-        // Return relative URL path (will be served by Spring static resource handler)
-        return "/api/v1/posts/image/" + uniqueFilename;
+        // Return relative URL path
+        return "/api/v1/images/" + category + "/" + uniqueFilename;
+    }
+
+    private String sanitizeFilename(String filename) {
+        // Replace spaces with underscores
+        String sanitized = filename.replaceAll("\\s+", "_");
+        // Remove special characters, keep only alphanumeric, underscore, hyphen, and dot
+        sanitized = sanitized.replaceAll("[^a-zA-Z0-9._-]", "");
+        // Remove multiple consecutive dots
+        sanitized = sanitized.replaceAll("\\.{2,}", ".");
+        // Remove leading/trailing dots
+        sanitized = sanitized.replaceAll("^\\.+|\\.+$", "");
+        return sanitized;
     }
 
     private String getFileExtension(String filename) {
@@ -73,7 +96,11 @@ public class FileUploadService {
     }
 
     public void deleteFile(String filename) throws IOException {
-        Path filepath = Paths.get(uploadDir, filename);
+        deleteFile(filename, "default");
+    }
+
+    public void deleteFile(String filename, String category) throws IOException {
+        Path filepath = Paths.get(uploadDir, category, filename);
         if (Files.exists(filepath)) {
             Files.delete(filepath);
         }

@@ -31,13 +31,4 @@ export class PostService {
 		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
 	}
 
-	uploadImages(files: File[]): Observable<{ urls: string[] }> {
-		const formData = new FormData();
-		files.forEach((file) => {
-			formData.append('files', file);
-		});
-		return this.http.post<{ urls: string[] }>(`${this.baseUrl}upload`, formData, {
-			withCredentials: true
-		});
-	}
 }

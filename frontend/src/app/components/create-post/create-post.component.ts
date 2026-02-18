@@ -5,6 +5,7 @@ import { Post } from '../../models/post.model';
 import { Topic } from '../../models/topic.model';
 import { PostService } from '../../services/post.service';
 import { TopicService } from '../../services/topic.service';
+import { ImageService } from '../../services/image.service';
 
 @Component({
 	selector: 'app-create-post',
@@ -28,7 +29,8 @@ export class CreatePostComponent implements OnInit {
 	constructor(
 		private fb: FormBuilder,
 		private postService: PostService,
-		private topicService: TopicService
+		private topicService: TopicService,
+		private imageService: ImageService
 	) { }
 
 	ngOnInit(): void {
@@ -143,8 +145,8 @@ export class CreatePostComponent implements OnInit {
 			// Upload images if any are selected
 			if (this.selectedImages.length > 0) {
 				try {
-					const uploadResponse = await this.postService
-						.uploadImages(this.selectedImages)
+					const uploadResponse = await this.imageService
+						.uploadImages(this.selectedImages, 'posts')
 						.toPromise();
 
 					if (uploadResponse?.urls && uploadResponse.urls.length > 0) {
