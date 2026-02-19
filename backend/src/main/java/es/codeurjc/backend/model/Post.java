@@ -50,6 +50,15 @@ public class Post {
         this.topic = topic;
     }
 
+    public Post(String title, String content, LocalDateTime createdAt, List<String> images, User author, Topic topic) {
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.images = images;
+        this.author = author;
+        this.topic = topic;
+    }
+
     public long getId() {
         return id;
     }

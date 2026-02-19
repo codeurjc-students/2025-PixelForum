@@ -3,40 +3,40 @@ import { PostComponent } from './post.component';
 import { Post } from '../../models/post.model';
 
 describe('PostComponent', () => {
-  let fixture: ComponentFixture<PostComponent>;
-  let compiled: HTMLElement;
-  let component: PostComponent;
+	let fixture: ComponentFixture<PostComponent>;
+	let compiled: HTMLElement;
+	let component: PostComponent;
 
-  // Mock of a Post object
-    const mockPost: Post = {
-      id: 1,
-      title: 'GTA VI Massive Leak',
-      content: 'A massive leak has revealed details...',
-      topic: { id: 1, name: 'GTA VI' } as any,
-    };
+	// Mock of a Post object
+	const mockPost: Post = {
+		id: 1,
+		title: 'GTA VI Massive Leak',
+		content: 'A massive leak has revealed details...',
+		topic: { id: 1, name: 'GTA VI' } as any,
+	};
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [PostComponent]
-    }).compileComponents();
+	beforeEach(async () => {
+		await TestBed.configureTestingModule({
+			imports: [PostComponent]
+		}).compileComponents();
 
-    fixture = TestBed.createComponent(PostComponent);
-    component = fixture.componentInstance;
-    component.post = mockPost;
-    fixture.detectChanges();
-    compiled = fixture.nativeElement; 
-  });
+		fixture = TestBed.createComponent(PostComponent);
+		component = fixture.componentInstance;
+		component.post = mockPost;
+		fixture.detectChanges();
+		compiled = fixture.nativeElement;
+	});
 
-  it('should charge posts', () => {
+	it('should charge posts', () => {
 
-    // Title
-    const title = compiled.querySelector('#post-title');
-    expect(title?.textContent).toContain(mockPost.title);
+		// Title
+		const title = compiled.querySelector('#post-title');
+		expect(title?.textContent).toContain(mockPost.title);
 
-    // Content
-    expect(compiled.textContent).toContain(mockPost.content);
+		// Content
+		expect(compiled.textContent).toContain(mockPost.content);
 
-    // Topics
-    expect(compiled.textContent).toContain('#GTA VI');
-  });
+		// Topics
+		expect(compiled.textContent).toContain('#GTA VI');
+	});
 });

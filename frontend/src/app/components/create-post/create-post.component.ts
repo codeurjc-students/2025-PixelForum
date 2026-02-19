@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Post } from '../../models/post.model';
@@ -15,6 +15,8 @@ import { ImageService } from '../../services/image.service';
 	styleUrls: ['./create-post.component.scss']
 })
 export class CreatePostComponent implements OnInit {
+	@ViewChild('formContainer') formContainer!: ElementRef<HTMLDivElement>;
+	@ViewChild('errorMessageRef') errorMessageRef!: ElementRef<HTMLDivElement>;
 	createPostForm!: FormGroup;
 	allTopics: Topic[] = [];
 	filteredTopics: Topic[] = [];
@@ -25,6 +27,8 @@ export class CreatePostComponent implements OnInit {
 	successMessage: string | null = null;
 	showTopicDropdown = false;
 	selectedTopic: Topic | null = null;
+	isDragOver = false;
+	private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 	constructor(
 		private fb: FormBuilder,
@@ -40,9 +44,9 @@ export class CreatePostComponent implements OnInit {
 
 	private initializeForm(): void {
 		this.createPostForm = this.fb.group({
-			title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(300)]],
-			content: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(5000)]],
-			topicSearch: ['', Validators.required]
+			title: ['', [Validators.required, Validators.maxLength(300)]],
+			content: [null, [Validators.maxLength(5000)]],
+			topicSearch: ['']
 		});
 	}
 
@@ -54,9 +58,18 @@ export class CreatePostComponent implements OnInit {
 			},
 			error: (err) => {
 				console.error('Error loading topics:', err);
-				this.errorMessage = 'Error loading topics';
+				this.setError('Error loading topics');
 			}
 		});
+	}
+
+	get isTopicInvalid(): boolean {
+		const control = this.createPostForm.get('topicSearch');
+		return (
+			!this.selectedTopic &&
+			!!control?.touched &&
+			!this.showTopicDropdown
+		);
 	}
 
 	onTopicSearchChange(event: Event): void {
@@ -74,11 +87,38 @@ export class CreatePostComponent implements OnInit {
 		}
 	}
 
+	onTopicFocus(): void {
+		const searchTerm = this.createPostForm.get('topicSearch')?.value?.toLowerCase() || '';
+
+		if (searchTerm) {
+			this.filteredTopics = this.allTopics.filter(topic =>
+				topic.name.toLowerCase().includes(searchTerm)
+			);
+		} else if (this.selectedTopic) {
+			const term = this.selectedTopic.name.toLowerCase();
+			this.filteredTopics = this.allTopics.filter(topic =>
+				topic.name.toLowerCase().includes(term)
+			);
+		} else {
+			this.filteredTopics = this.allTopics;
+		}
+
+		this.showTopicDropdown = true;
+	}
+
+	onTopicBlur(): void {
+		setTimeout(() => {
+			this.showTopicDropdown = false;
+			this.createPostForm.get('topicSearch')?.markAsTouched();
+		}, 150);
+	}
+
 	selectTopic(topic: Topic): void {
 		this.selectedTopic = topic;
 		this.createPostForm.patchValue({
 			topicSearch: topic.name
 		});
+		this.createPostForm.get('topicSearch')?.markAsUntouched();
 		this.showTopicDropdown = false;
 	}
 
@@ -90,39 +130,69 @@ export class CreatePostComponent implements OnInit {
 		this.filteredTopics = this.allTopics;
 	}
 
+	onDragOver(event: DragEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		this.isDragOver = true;
+	}
+
+	onDragLeave(event: DragEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		this.isDragOver = false;
+	}
+
+	onDrop(event: DragEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		this.isDragOver = false;
+
+		if (event.dataTransfer?.files) {
+			this.handleFiles(Array.from(event.dataTransfer.files));
+		}
+	}
+
 	onImageSelected(event: Event): void {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
-			const files = Array.from(input.files);
+			this.handleFiles(Array.from(input.files));
+			input.value = '';
+		}
+	}
 
-			// Validate maximum number of images
-			if (this.selectedImages.length + files.length > 5) {
-				this.errorMessage = 'Máximo 5 imágenes permitidas';
+	private handleFiles(files: File[]): void {
+		if (this.selectedImages.length + files.length > 10) {
+			this.setError('You can only upload up to 10 images');
+			return;
+		}
+
+		files.forEach((file) => {
+			// Validate type
+			if (!file.type.startsWith('image/')) {
+				this.setError('Only image files are allowed');
 				return;
 			}
 
-			// Validate file types
-			files.forEach((file) => {
-				if (!file.type.startsWith('image/')) {
-					this.errorMessage = 'Only image files are allowed';
-					return;
+			// Validate size
+			if (file.size > this.MAX_FILE_SIZE) {
+				this.setError(`Each image must be smaller than 10 MB`);
+				return;
+			}
+
+			this.selectedImages.push(file);
+
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				if (e.target?.result) {
+					this.previewUrls.push(e.target.result as string);
 				}
+			};
+			reader.readAsDataURL(file);
+		});
 
-				this.selectedImages.push(file);
-
-				// Create preview URL
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					if (e.target?.result) {
-						this.previewUrls.push(e.target.result as string);
-					}
-				};
-				reader.readAsDataURL(file);
-			});
-
-			this.errorMessage = null;
-		}
+		this.errorMessage = null;
 	}
+
 
 	removeImage(index: number): void {
 		this.selectedImages.splice(index, 1);
@@ -131,7 +201,7 @@ export class CreatePostComponent implements OnInit {
 
 	async createPost(): Promise<void> {
 		if (!this.createPostForm.valid || !this.selectedTopic) {
-			this.errorMessage = 'Please fill in all required fields correctly';
+			this.setError('Please fill in all required fields correctly');
 			return;
 		}
 
@@ -154,8 +224,8 @@ export class CreatePostComponent implements OnInit {
 					}
 				} catch (uploadError) {
 					console.error('Error uploading images:', uploadError);
-					this.errorMessage = 'Error uploading images';
 					this.isLoading = false;
+					this.setError('Error uploading images');
 					return;
 				}
 			}
@@ -188,14 +258,14 @@ export class CreatePostComponent implements OnInit {
 				},
 				error: (err) => {
 					console.error('Error creating post:', err);
-					this.errorMessage = 'Error creating post';
 					this.isLoading = false;
+					this.setError('Error creating post');
 				}
 			});
 		} catch (error) {
 			console.error('Error:', error);
-			this.errorMessage = 'An unexpected error occurred';
 			this.isLoading = false;
+			this.setError('An unexpected error occurred');
 		}
 	}
 
@@ -206,4 +276,16 @@ export class CreatePostComponent implements OnInit {
 	get contentLength(): number {
 		return this.createPostForm.get('content')?.value?.length || 0;
 	}
+
+	setError(message: string): void {
+		this.errorMessage = message;
+
+		// Wait a tick for angular to render
+		setTimeout(() => {
+			if (this.errorMessageRef) {
+				this.errorMessageRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		}, 0);
+	}
+
 }

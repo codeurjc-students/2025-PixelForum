@@ -2,21 +2,22 @@
 	max-width: 800px;
 	margin: 20px auto;
 	padding: 24px;
-	background: #ffffff;
+	background: #fff;
 	border-radius: 8px;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .create-post-header {
 	margin-bottom: 24px;
 	padding-bottom: 16px;
-	border-bottom: 2px solid #f1f1f3;
+	border-bottom: 2px solid #111;
+	text-align: center;
 
 	h1 {
 		font-size: 28px;
 		font-weight: 700;
 		margin: 0;
-		color: #030303;
+		color: #111;
 	}
 }
 
@@ -36,8 +37,8 @@
 
 	&.alert-success {
 		background: #efe;
-		color: #363;
-		border-left: 4px solid #363;
+		color: #8BC34A;
+		border-left: 4px solid #8BC34A;
 	}
 }
 
@@ -56,7 +57,7 @@
 	label {
 		font-size: 14px;
 		font-weight: 600;
-		color: #030303;
+		color: #111;
 	}
 }
 
@@ -74,12 +75,12 @@
 
 	&:focus {
 		outline: none;
-		border-color: #0045ac;
-		box-shadow: 0 0 0 3px rgba(0, 69, 172, 0.1);
+		border-color: #9ec5ff;
+		box-shadow: 0 0 0 3px rgba(158, 197, 255, 0.3);
 	}
 
 	&:invalid:not(:placeholder-shown) {
-		border-color: #d32f2f;
+		border-color: #e53935;
 	}
 }
 
@@ -98,7 +99,7 @@
 /* Errors */
 .error-text {
 	font-size: 12px;
-	color: #d32f2f;
+	color: #e53935;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -112,20 +113,22 @@
 .topic-search-container {
 	position: relative;
 	width: 100%;
+	max-width: 400px;
 }
 
 .topic-input-wrapper {
 	position: relative;
 	display: flex;
 	align-items: center;
+	width: 100%;
 }
 
 .topic-search-input {
-	padding-right: 36px;
+	width: 100%;
+	flex: none;
 }
 
 .clear-btn {
-	position: absolute;
 	right: 12px;
 	background: none;
 	border: none;
@@ -134,25 +137,23 @@
 	cursor: pointer;
 	padding: 4px 8px;
 	transition: color 0.2s ease;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	display: inline-block;
 
 	&:hover {
-		color: #030303;
+		color: #111;
 	}
 }
 
 .topic-dropdown {
 	position: absolute;
 	top: 100%;
+	width: 106%;
 	left: 0;
 	right: 0;
-	background: #ffffff;
+	background: #fff;
 	border: 1px solid #ccc;
-	border-top: none;
 	border-radius: 0 0 4px 4px;
-	max-height: 200px;
+	max-height: 205px;
 	overflow-y: auto;
 	z-index: 10;
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -166,7 +167,7 @@
 	background: none;
 	text-align: left;
 	font-size: 14px;
-	color: #030303;
+	color: #111;
 	cursor: pointer;
 	transition: background-color 0.2s ease;
 
@@ -176,12 +177,12 @@
 
 	&.selected {
 		background-color: #e3f2fd;
-		color: #0045ac;
+		color: #7cb342;
 		font-weight: 600;
 	}
 
 	&:not(:last-child) {
-		border-bottom: 1px solid #f1f1f3;
+		border-bottom: 1px solid #ccc;
 	}
 }
 
@@ -193,10 +194,11 @@
 }
 
 .selected-topic-badge {
-	margin-top: 8px;
+	white-space: nowrap;
+	margin-left: 8px;
 	display: inline-block;
-	background: #e3f2fd;
-	color: #0045ac;
+	background: #8BC34A;
+	color: #fff;
 	padding: 6px 12px;
 	border-radius: 20px;
 	font-size: 12px;
@@ -212,13 +214,13 @@
 	transition: all 0.2s ease;
 
 	&:hover {
-		border-color: #0045ac;
+		border-color: #8BC34A;
 		background: rgba(0, 69, 172, 0.02);
 	}
 }
 
 .upload-btn {
-	background: #0045ac;
+	background: #8BC34A;
 	color: white;
 	border: none;
 	border-radius: 20px;
@@ -229,7 +231,7 @@
 	transition: background 0.2s ease;
 
 	&:hover:not(:disabled) {
-		background: #003580;
+		background: #7cb342;
 	}
 
 	&:disabled {
@@ -243,6 +245,29 @@
 	font-size: 12px;
 	color: #818384;
 }
+
+.upload-icon {
+	width: 24px;
+	height: 24px;
+	stroke-width: 2;
+	stroke: currentColor;
+	fill: none;
+	vertical-align:  middle;
+}
+
+.drop-zone {
+	border: 2px dashed #ccc;
+	border-radius: 8px;
+	padding: 16px;
+	text-align: center;
+	transition: all 0.2s ease;
+
+	&.drag-over {
+		border-color: #7cb342;
+		background-color: rgba(59, 130, 246, 0.08);
+	}
+}
+
 
 /* Image preview */
 .image-preview-grid {
@@ -301,7 +326,7 @@
 	justify-content: flex-end;
 	margin-top: 24px;
 	padding-top: 16px;
-	border-top: 1px solid #ccc;
+	border-top: 2px solid #111;
 }
 
 .btn {
@@ -323,17 +348,17 @@
 }
 
 .btn-primary {
-	background: #0045ac;
+	background: #8BC34A;
 	color: white;
 
 	&:hover:not(:disabled) {
-		background: #003580;
+		background: #7cb342;
 	}
 }
 
 .btn-secondary {
-	background: #f1f1f3;
-	color: #030303;
+	background: #ccc;
+	color: #111;
 
 	&:hover:not(:disabled) {
 		background: #e7e7e9;
