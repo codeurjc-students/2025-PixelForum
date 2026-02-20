@@ -14,4 +14,8 @@ export class TopicService {
     getAll(): Observable<Topic[]> {
         return this.http.get<Topic[]>(this.baseUrl, { withCredentials: true });
     }
+
+    getById(id: number): Observable<Topic> {
+        return this.http.get<Topic>(`${this.baseUrl}${id}`, { withCredentials: true });
+    }
 }

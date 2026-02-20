@@ -3,37 +3,55 @@ import { of, Subject, throwError } from 'rxjs';
 import { PostListComponent } from './post-list.component';
 import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
+import { TopicService } from '../../services/topic.service';
+import { UserService } from '../../services/user.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 describe('PostListComponent - Unit Tests', () => {
 	let component: PostListComponent;
 	let fixture: ComponentFixture<PostListComponent>;
 	let postService: jasmine.SpyObj<PostService>;
+	let topicService: jasmine.SpyObj<TopicService>;
+	let userService: jasmine.SpyObj<UserService>;
+	let router: jasmine.SpyObj<Router>;
 
 	const mockPosts: Post[] = [
-        {
-            id: 1,
+		{
+			id: 1,
 			title: 'Old post',
 			content: 'Old content',
 			createdAt: '2024-01-01T10:00:00Z',
-            topic: { id: 1, name: 'GTA VI' } as any,
-        },
-        {
-            id: 2,
+			topic: { id: 1, name: 'GTA VI' } as any,
+		},
+		{
+			id: 2,
 			title: 'New post',
 			content: 'New content',
 			createdAt: '2024-02-01T10:00:00Z',
-            topic: { id: 1, name: 'GTA VI' } as any
-        }
-    ];
+			topic: { id: 1, name: 'GTA VI' } as any
+		}
+	];
 
 	beforeEach(async () => {
-        spyOn(console, 'error');
+		spyOn(console, 'error');
+
 		postService = jasmine.createSpyObj('PostService', ['getAll']);
+		topicService = jasmine.createSpyObj('TopicService', ['getById']);
+		userService = jasmine.createSpyObj('UserService', ['getById']);
+		router = jasmine.createSpyObj('Router', ['navigate']);
+
+		const activatedRouteMock = {
+			params: of({})
+		};
 
 		await TestBed.configureTestingModule({
 			imports: [PostListComponent],
 			providers: [
-				{ provide: PostService, useValue: postService }
+				{ provide: PostService, useValue: postService },
+				{ provide: TopicService, useValue: topicService },
+				{ provide: UserService, useValue: userService },
+				{ provide: Router, useValue: router },
+				{ provide: ActivatedRoute, useValue: activatedRouteMock }
 			]
 		}).compileComponents();
 
@@ -71,29 +89,29 @@ describe('PostListComponent - Unit Tests', () => {
 
 		component.loadPosts();
 
-		expect(component.error).toBe('Error loading posts.');
+		expect(component.error).toBe('Error loading posts');
 		expect(component.loading).toBeFalse();
 	});
 
-    it('should show loading message while loading', () => {
-        const subject = new Subject<Post[]>();
-        postService.getAll.and.returnValue(subject.asObservable());
+	it('should show loading message while loading', () => {
+		const subject = new Subject<Post[]>();
+		postService.getAll.and.returnValue(subject.asObservable());
 
-        fixture.detectChanges();
+		fixture.detectChanges();
 
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.textContent).toContain('Charging posts...');
-    });
+		const compiled = fixture.nativeElement as HTMLElement;
+		expect(compiled.textContent).toContain('Last PostsLoading posts...');
+	});
 
 	it('should show error message in template', () => {
-        postService.getAll.and.returnValue(
-            throwError(() => new Error('Backend error'))
-        );
+		postService.getAll.and.returnValue(
+			throwError(() => new Error('Backend error'))
+		);
 
-        fixture.detectChanges();
+		fixture.detectChanges();
 
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.textContent).toContain('Error loading posts.');
+		const compiled = fixture.nativeElement as HTMLElement;
+		expect(compiled.textContent).toContain('Last Posts⚠️Error loading posts');
 	});
 
 	it('should render posts when data exists', () => {

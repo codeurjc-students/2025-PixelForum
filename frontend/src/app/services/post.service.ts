@@ -16,7 +16,7 @@ export class PostService {
 	}
 
 	getById(id: number): Observable<Post> {
-		return this.http.get<Post>(`${this.baseUrl}/${id}`, { withCredentials: true });
+		return this.http.get<Post>(`${this.baseUrl}${id}`, { withCredentials: true });
 	}
 
 	create(post: Post): Observable<Post> {
@@ -24,11 +24,11 @@ export class PostService {
 	}
 
 	update(post: Post): Observable<Post> {
-		return this.http.put<Post>(`${this.baseUrl}/${post.id}`, post, { withCredentials: true });
+		return this.http.put<Post>(`${this.baseUrl}${post.id}`, post, { withCredentials: true });
 	}
 
 	delete(id: number): Observable<void> {
-		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
+		return this.http.delete<void>(`${this.baseUrl}${id}`, { withCredentials: true });
 	}
 
 }

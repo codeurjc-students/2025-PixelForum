@@ -37,6 +37,6 @@ describe('PostComponent', () => {
 		expect(compiled.textContent).toContain(mockPost.content);
 
 		// Topics
-		expect(compiled.textContent).toContain('#GTA VI');
+		expect(compiled.textContent).toContain('GTA VI');
 	});
 });

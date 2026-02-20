@@ -1,21 +1,46 @@
 <div class="post-list-container">
-	<!-- Charging -->
-	<div *ngIf="loading" class="loading">
-		Charging posts...
+	<!-- List Header -->
+	<div class="list-header">
+		<button *ngIf="filterType !== 'all'" class="back-btn-header" (click)="goBack()" title="Go back">
+			←
+		</button>
+		<h2>{{ filterName }}</h2>
 	</div>
 
-	<!-- Error -->
-	<div *ngIf="error" class="error">
-		{{ error }}
+	<!-- Loading State -->
+	<div *ngIf="loading" class="state-container">
+		<div class="loading-spinner">
+			<div class="spinner"></div>
+			<p>Loading posts...</p>
+		</div>
 	</div>
 
-	<!-- List of posts -->
-	<div *ngIf="!loading && !error && posts.length > 0">
-		<app-post *ngFor="let post of posts" [post]="post"></app-post>
+	<!-- Error State -->
+	<div *ngIf="error && !loading" class="state-container">
+		<div class="error-message">
+			<span class="error-icon">⚠️</span>
+			<p>{{ error }}</p>
+		</div>
 	</div>
 
-	<!-- No posts -->
-	<div *ngIf="!loading && !error && posts.length === 0" class="empty">
-		<p>No posts yet</p>
+	<!-- Posts Feed -->
+	<div *ngIf="!loading && !error && posts.length > 0" class="posts-feed">
+		<app-post *ngFor="let post of posts" [post]="post" [mode]="'list'"></app-post>
+	</div>
+
+	<!-- Empty State -->
+	<div *ngIf="!loading && !error && posts.length === 0" class="state-container">
+		<div class="empty-state">
+			<svg viewBox="0 0 24 24" class="empty-icon">
+				<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" />
+				<path d="M2 6h4" />
+				<path d="M2 10h4" />
+				<path d="M2 14h4" />
+				<path d="M2 18h4" />
+				<path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+			</svg>
+			<h3>No posts yet</h3>
+			<p>No posts found for this filter</p>
+		</div>
 	</div>
 </div>
