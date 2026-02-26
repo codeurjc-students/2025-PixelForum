@@ -1,0 +1,43 @@
+.error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 150px;
+}
+
+.error-card {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    padding: 30px;
+    background-color: #e5e5e5;
+    border-color: #ccc;
+}
+
+.error-code {
+    font-size: 72px;
+    font-weight: 700;
+    color: #e53935;
+    margin-bottom: 40px;
+}
+
+.error-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+}
+
+.error-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    vertical-align:text-bottom;
+}
