@@ -82,7 +82,7 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole("USER")
 					
 					// USERS
-					.requestMatchers(HttpMethod.GET, API_USERS).hasRole("USER")
+					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()
 					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
 					.requestMatchers(HttpMethod.PUT, API_USERS).hasRole("USER")
 					.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole("USER")

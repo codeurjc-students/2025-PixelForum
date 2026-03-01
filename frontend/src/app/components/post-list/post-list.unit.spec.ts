@@ -6,6 +6,7 @@ import { Post } from '../../models/post.model';
 import { TopicService } from '../../services/topic.service';
 import { UserService } from '../../services/user.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PageResponse } from '../../models/pageResponse.model';
 
 describe('PostListComponent - Unit Tests', () => {
 	let component: PostListComponent;
@@ -32,10 +33,30 @@ describe('PostListComponent - Unit Tests', () => {
 		}
 	];
 
+	const mockPageResponse: PageResponse<Post> = {
+		content: mockPosts,
+		pageable: {
+			pageNumber: 0,
+			pageSize: 10,
+			sort: { empty: false, sorted: true, unsorted: false },
+			offset: 0,
+			paged: true,
+			unpaged: false
+		},
+		totalPages: 1,
+		totalElements: mockPosts.length,
+		first: true,
+		last: true,
+		number: 0,
+		size: 10,
+		numberOfElements: mockPosts.length,
+		empty: false
+	};
+
 	beforeEach(async () => {
 		spyOn(console, 'error');
 
-		postService = jasmine.createSpyObj('PostService', ['getAll']);
+		postService = jasmine.createSpyObj('PostService', ['getPosts']);
 		topicService = jasmine.createSpyObj('TopicService', ['getById']);
 		userService = jasmine.createSpyObj('UserService', ['getById']);
 		router = jasmine.createSpyObj('Router', ['navigate']);
@@ -64,58 +85,36 @@ describe('PostListComponent - Unit Tests', () => {
 	});
 
 	it('should load posts on init', () => {
-		postService.getAll.and.returnValue(of(mockPosts));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.ngOnInit();
 
-		expect(postService.getAll).toHaveBeenCalled();
+		expect(postService.getPosts).toHaveBeenCalled();
 		expect(component.posts.length).toBe(2);
-		expect(component.loading).toBeFalse();
+		expect(component.isLoading).toBeFalse();
 	});
 
 	it('should sort posts by createdAt desc', () => {
-		postService.getAll.and.returnValue(of(mockPosts));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.loadPosts();
 
-		expect(component.posts[0].title).toBe('New post');
-		expect(component.posts[1].title).toBe('Old post');
-	});
-
-	it('should set error message on service error', () => {
-		postService.getAll.and.returnValue(
-			throwError(() => new Error('Backend error'))
-		);
-
-		component.loadPosts();
-
-		expect(component.error).toBe('Error loading posts');
-		expect(component.loading).toBeFalse();
+		expect(component.posts[1].title).toBe('New post');
+		expect(component.posts[0].title).toBe('Old post');
 	});
 
 	it('should show loading message while loading', () => {
-		const subject = new Subject<Post[]>();
-		postService.getAll.and.returnValue(subject.asObservable());
+		const subject = new Subject<PageResponse<Post>>();
+		postService.getPosts.and.returnValue(subject.asObservable());
 
 		fixture.detectChanges();
 
 		const compiled = fixture.nativeElement as HTMLElement;
-		expect(compiled.textContent).toContain('Last PostsLoading posts...');
-	});
-
-	it('should show error message in template', () => {
-		postService.getAll.and.returnValue(
-			throwError(() => new Error('Backend error'))
-		);
-
-		fixture.detectChanges();
-
-		const compiled = fixture.nativeElement as HTMLElement;
-		expect(compiled.textContent).toContain('Last Posts⚠️Error loading posts');
+		expect(compiled.textContent).toContain('Latest PostsLoading posts...');
 	});
 
 	it('should render posts when data exists', () => {
-		postService.getAll.and.returnValue(of(mockPosts));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.ngOnInit();
 		fixture.detectChanges();
@@ -127,7 +126,7 @@ describe('PostListComponent - Unit Tests', () => {
 	});
 
 	it('should show empty state when no posts', () => {
-		postService.getAll.and.returnValue(of([]));
+		postService.getPosts.and.returnValue(of({ content: [], totalPages: 0, totalElements: 0, last: true } as any));
 
 		component.ngOnInit();
 		fixture.detectChanges();

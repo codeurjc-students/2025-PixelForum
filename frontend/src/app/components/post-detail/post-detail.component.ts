@@ -16,7 +16,6 @@ import { PostComponent } from '../post/post.component';
 export class PostDetailComponent implements OnInit {
     post: Post | null = null;
     loading = true;
-    error: string | null = null;
 
     constructor(
         private postService: PostService,
@@ -31,7 +30,6 @@ export class PostDetailComponent implements OnInit {
             if (id) {
                 this.loadPost(id);
             } else {
-                this.error = 'Post not found';
                 this.loading = false;
             }
         });
@@ -39,16 +37,10 @@ export class PostDetailComponent implements OnInit {
 
     loadPost(id: number): void {
         this.loading = true;
-        this.error = null;
 
         this.postService.getById(id).subscribe({
             next: data => {
                 this.post = data;
-                this.loading = false;
-            },
-            error: err => {
-                console.error('Error loading post', err);
-                this.error = 'Post not found';
                 this.loading = false;
             }
         });

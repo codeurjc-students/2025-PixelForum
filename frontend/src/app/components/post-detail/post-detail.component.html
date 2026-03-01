@@ -7,15 +7,6 @@
         </div>
     </div>
 
-    <!-- Error State -->
-    <div *ngIf="error && !loading" class="state-container">
-        <div class="error-message">
-            <span class="error-icon">⚠️</span>
-            <p>{{ error }}</p>
-            <button class="back-btn-text" (click)="goBack()">← Back to posts</button>
-        </div>
-    </div>
-
     <!-- Post Detail -->
     <div *ngIf="post && !loading" class="detail-content">
         <app-post [post]="post" [mode]="'detail'"></app-post>

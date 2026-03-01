@@ -21,11 +21,11 @@ describe('PostService', () => {
   });
 
   it('getAll should fetch posts from the real API', (done: DoneFn) => {
-    service.getAll().subscribe({
+    service.getPosts().subscribe({
       next: posts => {
         expect(posts).toBeTruthy();
         expect(Array.isArray(posts)).toBeTrue();
-        expect(posts.length).toBeGreaterThan(0);
+        expect(posts.numberOfElements).toBeGreaterThan(0);
         done();
       },
       error: err => {

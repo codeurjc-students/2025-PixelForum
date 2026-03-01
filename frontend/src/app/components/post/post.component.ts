@@ -3,7 +3,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { Post } from '../../models/post.model';
 import { Topic } from '../../models/topic.model';
-import { TopicService } from '../../services/topic.service';
 
 @Component({
 	selector: 'app-post',
@@ -18,6 +17,7 @@ export class PostComponent implements OnInit {
 
 	currentImageIndex = 0;
 	imageCount = 0;
+	currentImage: string = '';
 	topicData: Topic | null = null;
 
 	constructor(
@@ -27,13 +27,8 @@ export class PostComponent implements OnInit {
 	ngOnInit(): void {
 		this.imageCount = this.post.images?.length || 0;
 		if (this.post.topic?.id) {
-			this.loadTopicData();
-		}
-	}
-
-	loadTopicData(): void {
-		if (this.post.topic?.id) {
 			this.topicData = this.post.topic;
+			this.updateCurrentImage();
 		}
 	}
 
@@ -41,6 +36,7 @@ export class PostComponent implements OnInit {
 		if (this.imageCount > 0) {
 			this.currentImageIndex = this.currentImageIndex + 1;
 			if (this.currentImageIndex > this.imageCount - 1) this.currentImageIndex = this.imageCount - 1;
+			this.updateCurrentImage();
 		}
 	}
 
@@ -48,14 +44,13 @@ export class PostComponent implements OnInit {
 		if (this.imageCount > 0) {
 			this.currentImageIndex = this.currentImageIndex - 1;
 			if (this.currentImageIndex < 1) this.currentImageIndex = 0;
+			this.updateCurrentImage();
 		}
 	}
 
-	getCurrentImage(): string {
-		if (this.post.images && this.post.images.length > 0) {
-			return this.post.images[this.currentImageIndex];
-		}
-		return '';
+	private updateCurrentImage(): void {
+		this.currentImage =
+			this.post.images?.[this.currentImageIndex] ?? '';
 	}
 
 	goToTopic(): void {
