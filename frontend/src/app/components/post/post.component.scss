@@ -287,6 +287,12 @@
 	}
 }
 
+.right-buttons {
+	display: flex;
+	gap: 0.5rem;
+	margin-left: auto;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
 	.post-card {

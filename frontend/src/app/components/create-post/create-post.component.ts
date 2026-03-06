@@ -6,6 +6,8 @@ import { Topic } from '../../models/topic.model';
 import { PostService } from '../../services/post.service';
 import { TopicService } from '../../services/topic.service';
 import { ImageService } from '../../services/image.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
 	selector: 'app-create-post',
@@ -24,22 +26,39 @@ export class CreatePostComponent implements OnInit {
 	previewUrls: string[] = [];
 	isLoading = false;
 	errorMessage: string | null = null;
-	successMessage: string | null = null;
 	showTopicDropdown = false;
 	selectedTopic: Topic | null = null;
 	isDragOver = false;
+
+	isEditMode = false;
+	postId: number | null = null;
+	existingPost: Post | null = null;
+	isLoadingPost = false;
+	existingImageUrls: string[] = [];
+
 	private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 	constructor(
 		private fb: FormBuilder,
 		private postService: PostService,
 		private topicService: TopicService,
-		private imageService: ImageService
+		private imageService: ImageService,
+		private route: ActivatedRoute,
+		private router: Router,
+		private snackBar: MatSnackBar
 	) { }
 
 	ngOnInit(): void {
 		this.initializeForm();
 		this.loadTopics();
+
+		this.route.params.subscribe(params => {
+			this.postId = params['id'];
+			if (this.postId) {
+				this.isEditMode = true;
+				this.loadPostForEdit();
+			}
+		});
 	}
 
 	private initializeForm(): void {
@@ -55,10 +74,6 @@ export class CreatePostComponent implements OnInit {
 			next: (data) => {
 				this.allTopics = data;
 				this.filteredTopics = data;
-			},
-			error: (err) => {
-				console.error('Error loading topics:', err);
-				this.setError('Error loading topics');
 			}
 		});
 	}
@@ -195,7 +210,19 @@ export class CreatePostComponent implements OnInit {
 
 
 	removeImage(index: number): void {
-		this.selectedImages.splice(index, 1);
+		const urlToRemove = this.previewUrls[index];
+
+		// If it's an existing image (URL, not data), remove from existing list
+		if (urlToRemove && !urlToRemove.startsWith('data:')) {
+			const existingIndex = this.existingImageUrls.indexOf(urlToRemove);
+			if (existingIndex > -1) {
+				this.existingImageUrls.splice(existingIndex, 1);
+			}
+		} else {
+			// If it's a new image (data URL), remove from selected images
+			this.selectedImages.splice(index, 1);
+		}
+
 		this.previewUrls.splice(index, 1);
 	}
 
@@ -207,10 +234,9 @@ export class CreatePostComponent implements OnInit {
 
 		this.isLoading = true;
 		this.errorMessage = null;
-		this.successMessage = null;
 
 		try {
-			let imageUrls: string[] = [];
+			let newImageUrls: string[] = [];
 
 			// Upload images if any are selected
 			if (this.selectedImages.length > 0) {
@@ -220,7 +246,7 @@ export class CreatePostComponent implements OnInit {
 						.toPromise();
 
 					if (uploadResponse?.urls && uploadResponse.urls.length > 0) {
-						imageUrls = uploadResponse.urls;
+						newImageUrls = uploadResponse.urls;
 					}
 				} catch (uploadError) {
 					console.error('Error uploading images:', uploadError);
@@ -230,38 +256,43 @@ export class CreatePostComponent implements OnInit {
 				}
 			}
 
+			const allImageUrls = [...this.existingImageUrls, ...newImageUrls];
+
 			// Create post
-			const newPost: Post = {
+			const postData: Post = {
 				title: this.createPostForm.get('title')?.value,
-				content: this.createPostForm.get('content')?.value,
-				topic: this.selectedTopic
+				content: this.createPostForm.get('content')?.value || null,
+				topic: this.selectedTopic,
+				images: allImageUrls.length > 0 ? allImageUrls : undefined
 			};
 
-			// Only add images if there are any
-			if (imageUrls.length > 0) {
-				newPost.images = imageUrls;
+			if (this.isEditMode && this.postId) {
+				const postToUpdate: Post = {
+					...this.existingPost,
+					...postData,
+					id: this.postId
+				};
+
+				this.postService.update(postToUpdate).subscribe({
+					next: () => {
+						this.isLoading = false;
+						this.snackBar.open('Post updated successfully', 'Close', {
+							duration: 3000
+						});
+						this.router.navigate(['/posts', this.postId]);
+					}
+				});
+			} else {
+				this.postService.create(postData).subscribe({
+					next: (createdPost) => {
+						this.isLoading = false;
+						this.snackBar.open('Post created successfully', 'Close', {
+							duration: 3000
+						});
+						this.router.navigate(['/posts', createdPost.id]);
+					}
+				});
 			}
-
-			this.postService.create(newPost).subscribe({
-				next: (createdPost) => {
-					this.successMessage = 'Post created successfully!';
-					this.createPostForm.reset();
-					this.selectedImages = [];
-					this.previewUrls = [];
-					this.selectedTopic = null;
-					this.isLoading = false;
-
-					// Clear success message after 3 seconds
-					setTimeout(() => {
-						this.successMessage = null;
-					}, 3000);
-				},
-				error: (err) => {
-					console.error('Error creating post:', err);
-					this.isLoading = false;
-					this.setError('Error creating post');
-				}
-			});
 		} catch (error) {
 			console.error('Error:', error);
 			this.isLoading = false;
@@ -288,4 +319,35 @@ export class CreatePostComponent implements OnInit {
 		}, 0);
 	}
 
+	private loadPostForEdit(): void {
+		this.isLoadingPost = true;
+		this.postService.getById(this.postId!).subscribe({
+			next: (post) => {
+				this.existingPost = post;
+				this.populateFormWithPost(post);
+				this.isLoadingPost = false;
+			}
+		});
+	}
+
+	private populateFormWithPost(post: Post): void {
+		this.createPostForm.patchValue({
+			title: post.title,
+			content: post.content || '',
+			topicSearch: post.topic?.name || ''
+		});
+
+		if (post.topic) {
+			this.selectedTopic = post.topic;
+		}
+
+		if (post.images && post.images.length > 0) {
+			this.previewUrls = [...post.images];
+			this.existingImageUrls = [...post.images];
+		}
+	}
+
+	onCancel(): void {
+		this.router.navigate(['/posts']);
+	}
 }

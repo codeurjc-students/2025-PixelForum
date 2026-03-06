@@ -148,7 +148,6 @@ export class PostListComponent implements OnInit, OnDestroy {
 						this.updatePaginationInfo(response);
 						this.isLoadingMore = false;
 					}
-					
 				}
 			});
 	}
@@ -173,6 +172,11 @@ export class PostListComponent implements OnInit, OnDestroy {
 		this.filterType = 'all';
 		this.filterId = null;
 		this.filterName = '';
+	}
+
+	removePost() {
+		this.isLoading = true;
+		this.ngOnInit();
 	}
 
 	goBack(): void {

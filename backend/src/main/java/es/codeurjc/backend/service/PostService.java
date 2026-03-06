@@ -1,7 +1,10 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +29,7 @@ public class PostService {
 		this.mapper = mapper;
 		this.postRepository = postRepository;
 	}
-	
+
 	public PostDTO getPost(long id) {
 		return toDTO(postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Post not found")));
 	}
@@ -72,6 +75,10 @@ public class PostService {
 			throw new AccessDeniedException("You can only edit your own posts");
 		}
 
+		if (!hasChanges(post, postDTO)) {
+			return toDTO(post);
+		}
+
 		post.setTitle(postDTO.title());
 		post.setContent(postDTO.content());
 		post.setImages(postDTO.images());
@@ -80,6 +87,31 @@ public class PostService {
 
 		Post updatedPost = postRepository.save(post);
 		return toDTO(updatedPost);
+	}
+
+	private boolean hasChanges(Post post, PostDTO dto) {
+		if (!Objects.equals(post.getTitle(), dto.title()))
+			return true;
+		if (!Objects.equals(post.getContent(), dto.content()))
+			return true;
+
+		List<String> currentImages = post.getImages() == null
+				? Collections.emptyList()
+				: new ArrayList<>(post.getImages());
+
+		List<String> newImages = dto.images() == null
+				? Collections.emptyList()
+				: new ArrayList<>(dto.images());
+
+		if (!currentImages.equals(newImages))
+			return true;
+
+		if (!Objects.equals(
+				post.getTopic() != null ? post.getTopic().getId() : null,
+				dto.topic() != null ? dto.topic().getId() : null))
+			return true;
+
+		return false;
 	}
 
 	@Transactional

@@ -7,6 +7,7 @@ import { TopicService } from '../../services/topic.service';
 import { UserService } from '../../services/user.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageResponse } from '../../models/pageResponse.model';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('PostListComponent - Unit Tests', () => {
 	let component: PostListComponent;
@@ -66,7 +67,7 @@ describe('PostListComponent - Unit Tests', () => {
 		};
 
 		await TestBed.configureTestingModule({
-			imports: [PostListComponent],
+			imports: [PostListComponent, HttpClientTestingModule],
 			providers: [
 				{ provide: PostService, useValue: postService },
 				{ provide: TopicService, useValue: topicService },

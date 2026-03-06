@@ -1,10 +1,11 @@
 .create-post-container {
-	max-width: 800px;
-	margin: 20px auto;
+	max-width: 70%;
+	margin: 2rem auto;
 	padding: 24px;
 	background: #fff;
 	border-radius: 8px;
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+	margin-left: 60px;
 }
 
 .create-post-header {
@@ -33,12 +34,6 @@
 		background: #fee;
 		color: #c33;
 		border-left: 4px solid #c33;
-	}
-
-	&.alert-success {
-		background: #efe;
-		color: #8BC34A;
-		border-left: 4px solid #8BC34A;
 	}
 }
 

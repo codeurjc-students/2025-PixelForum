@@ -1,0 +1,25 @@
+.dialog-container {
+    min-width: 300px;
+    max-width: 500px;
+}
+
+mat-dialog-content {
+    padding: 20px 24px;
+
+    p {
+        margin: 0 0 16px 0;
+        color: #555;
+    }
+
+    .detail-display {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        border-left: 4px solid #ff9800;
+        margin: 16px 0 0 0;
+
+        strong {
+            color: #333;
+        }
+    }
+}

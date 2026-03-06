@@ -6,6 +6,7 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { PostListComponent } from './components/post-list/post-list.component';
 import { PostDetailComponent } from './components/post-detail/post-detail.component';
 import { ErrorComponent } from './components/error/error.component';
+import { CreatePostComponent } from './components/create-post/create-post.component';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent, canActivate: [GuestGuard] },
@@ -14,7 +15,9 @@ export const routes: Routes = [
 	{ path: 'posts/topics/:topicId', component: PostListComponent },
 	{ path: 'posts/users/:userId', component: PostListComponent },
 	{ path: 'posts/:id', component: PostDetailComponent },
-	{ path: 'create-post', loadComponent: () => import('./components/create-post/create-post.component').then(m => m.CreatePostComponent), canActivate: [AuthGuard] },
+	{ path: 'create-post', component: CreatePostComponent, canActivate: [AuthGuard] },
+	{ path: 'posts/:id/edit', component: CreatePostComponent, canActivate: [AuthGuard] },
+
 	{ path: 'error', component: ErrorComponent },
 
 	{ path: '', redirectTo: 'posts', pathMatch: 'full' },

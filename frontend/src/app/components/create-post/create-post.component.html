@@ -1,123 +1,128 @@
 <div #formContainer class="create-post-container">
+
+	<!-- Loading spinner while fetching post data in edit mode -->
+	<div *ngIf="isEditMode && isLoadingPost" class="loading-spinner">
+		<p>Loading post...</p>
+	</div>
+
 	<div class="create-post-header">
-		<h1>Create Post</h1>
+		<h1>{{ isEditMode ? 'Edit Post' : 'Create Post' }}</h1>
 	</div>
 
-	<!-- Messages -->
-	<div *ngIf="errorMessage" #errorMessageRef class="alert alert-error">
-		{{ errorMessage }}
-	</div>
-	<div *ngIf="successMessage" class="alert alert-success">
-		{{ successMessage }}
-	</div>
+	<ng-container *ngIf="!isLoadingPost">
+		<!-- Messages -->
+		<div *ngIf="errorMessage" #errorMessageRef class="alert alert-error">
+			{{ errorMessage }}
+		</div>
 
-	<!-- Form -->
-	<form [formGroup]="createPostForm" (ngSubmit)="createPost()" class="post-form">
+		<!-- Form -->
+		<form [formGroup]="createPostForm" (ngSubmit)="createPost()" class="post-form">
 
-		<!-- Topic Search (Autocomplete) -->
-		<div class="form-group">
-			<label>Topic *</label>
-			<!-- Error Message -->
-			<div *ngIf="isTopicInvalid" class="error-text">
-				<span>Please select a topic</span>
-			</div>
-
-			<div class="topic-search-container">
-				<div class="topic-input-wrapper">
-					<input id="topic-search" type="text" formControlName="topicSearch"
-						placeholder="Search or select a topic..." class="form-input topic-search-input"
-						(input)="onTopicSearchChange($event)" (focus)="onTopicFocus()" (blur)="onTopicBlur()"
-						autocomplete="off" />
-
-					<!-- Selected Topic Badge -->
-					<div *ngIf="selectedTopic" class="selected-topic-badge">
-						{{ selectedTopic.name }}
-					</div>
-					<button *ngIf="selectedTopic" type="button" class="clear-btn" (click)="clearSelectedTopic()"
-						title="Clear selection">
-						✕
-					</button>
+			<!-- Topic Search (Autocomplete) -->
+			<div class="form-group">
+				<label>Topic *</label>
+				<!-- Error Message -->
+				<div *ngIf="isTopicInvalid" class="error-text">
+					<span>Please select a topic</span>
 				</div>
 
-				<!-- Topic Dropdown -->
-				<div *ngIf="showTopicDropdown" class="topic-dropdown">
-					<div *ngIf="filteredTopics.length > 0">
-						<button *ngFor="let topic of filteredTopics" type="button" class="topic-option"
-							[class.selected]="selectedTopic?.id === topic.id" (click)="selectTopic(topic)">
-							{{ topic.name }}
+				<div class="topic-search-container">
+					<div class="topic-input-wrapper">
+						<input id="topic-search" type="text" formControlName="topicSearch"
+							placeholder="Search or select a topic..." class="form-input topic-search-input"
+							(input)="onTopicSearchChange($event)" (focus)="onTopicFocus()" (blur)="onTopicBlur()"
+							autocomplete="off" />
+
+						<!-- Selected Topic Badge -->
+						<div *ngIf="selectedTopic" class="selected-topic-badge">
+							{{ selectedTopic.name }}
+						</div>
+						<button *ngIf="selectedTopic" type="button" class="clear-btn" (click)="clearSelectedTopic()"
+							title="Clear selection">
+							✕
 						</button>
 					</div>
-					<div *ngIf="filteredTopics.length === 0" class="topic-no-results">
-						No topics found
+
+					<!-- Topic Dropdown -->
+					<div *ngIf="showTopicDropdown" class="topic-dropdown">
+						<div *ngIf="filteredTopics.length > 0">
+							<button *ngFor="let topic of filteredTopics" type="button" class="topic-option"
+								[class.selected]="selectedTopic?.id === topic.id" (click)="selectTopic(topic)">
+								{{ topic.name }}
+							</button>
+						</div>
+						<div *ngIf="filteredTopics.length === 0" class="topic-no-results">
+							No topics found
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Title -->
-		<div class="form-group">
-			<label>Title *</label>
-			<div *ngIf="createPostForm.get('title')?.invalid && createPostForm.get('title')?.touched"
-				class="error-text">
-				<span *ngIf="createPostForm.get('title')?.errors?.['required']">The title is required</span>
-				<span *ngIf="createPostForm.get('title')?.errors?.['maxlength']">Maximum 300 characters</span>
-			</div>
-			<input id="title" type="text" formControlName="title" placeholder="Write a title for your post"
-				class="form-input" maxlength="300" />
-			<div class="char-count">{{ titleLength }}/300</div>
-		</div>
-
-		<!-- Content -->
-		<div class="form-group">
-			<label>Content (optional)</label>
-			<textarea id="content" formControlName="content" placeholder="Describe your post here..."
-				class="form-textarea" rows="8" maxlength="5000"></textarea>
-			<div class="char-count">{{ contentLength }}/5000</div>
-		</div>
-
-		<!-- Images -->
-		<div class="form-group">
-			<label>Images (optional)</label>
-			<div class="image-upload-section drop-zone" [class.drag-over]="isDragOver" (dragover)="onDragOver($event)"
-				(dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-				<input id="images" #fileInput type="file" multiple accept="image/*" (change)="onImageSelected($event)"
-					style="display: none" />
-				<button type="button" class="upload-btn" (click)="fileInput.click()">
-					<svg viewBox="0 0 24 24" class="upload-icon">
-						<path d="M12 13v8" />
-						<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-						<path d="m8 17 4-4 4 4" />
-					</svg>
-					Select Images
-				</button>
-				<p class="upload-hint">Maximum 10 images. Supported formats: JPG, PNG, GIF, WebP</p>
+			<!-- Title -->
+			<div class="form-group">
+				<label>Title *</label>
+				<div *ngIf="createPostForm.get('title')?.invalid && createPostForm.get('title')?.touched"
+					class="error-text">
+					<span *ngIf="createPostForm.get('title')?.errors?.['required']">The title is required</span>
+					<span *ngIf="createPostForm.get('title')?.errors?.['maxlength']">Maximum 300 characters</span>
+				</div>
+				<input id="title" type="text" formControlName="title" placeholder="Write a title for your post"
+					class="form-input" maxlength="300" />
+				<div class="char-count">{{ titleLength }}/300</div>
 			</div>
 
-			<!-- Image Previews -->
-			<div *ngIf="previewUrls.length > 0" class="image-preview-grid">
-				<div *ngFor="let preview of previewUrls; let i = index" class="image-preview-item">
-					<img [src]="preview" alt="Preview" class="preview-image" />
-					<button type="button" class="remove-image-btn" (click)="removeImage(i)" title="Eliminar imagen">
-						×
+			<!-- Content -->
+			<div class="form-group">
+				<label>Content (optional)</label>
+				<textarea id="content" formControlName="content" placeholder="Describe your post here..."
+					class="form-textarea" rows="8" maxlength="5000"></textarea>
+				<div class="char-count">{{ contentLength }}/5000</div>
+			</div>
+
+			<!-- Images -->
+			<div class="form-group">
+				<label>Images (optional)</label>
+				<div class="image-upload-section drop-zone" [class.drag-over]="isDragOver"
+					(dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+					<input id="images" #fileInput type="file" multiple accept="image/*"
+						(change)="onImageSelected($event)" style="display: none" />
+					<button type="button" class="upload-btn" (click)="fileInput.click()">
+						<svg viewBox="0 0 24 24" class="upload-icon">
+							<path d="M12 13v8" />
+							<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+							<path d="m8 17 4-4 4 4" />
+						</svg>
+						Select or Drag Images
 					</button>
+					<p class="upload-hint">Maximum 10 images. Supported formats: JPG, PNG, GIF, WebP</p>
+				</div>
+
+				<!-- Image Previews -->
+				<div *ngIf="previewUrls.length > 0" class="image-preview-grid">
+					<div *ngFor="let preview of previewUrls; let i = index" class="image-preview-item">
+						<img [src]="preview" alt="Preview" class="preview-image" />
+						<button type="button" class="remove-image-btn" (click)="removeImage(i)" title="Eliminar imagen">
+							×
+						</button>
+					</div>
+				</div>
+				<div *ngIf="selectedImages.length > 0" class="image-count">
+					{{ selectedImages.length }} image(s) selected
 				</div>
 			</div>
-			<div *ngIf="selectedImages.length > 0" class="image-count">
-				{{ selectedImages.length }} image(s) selected
-			</div>
-		</div>
 
-		<!-- Buttons -->
-		<div class="form-actions">
-			<button type="button" class="btn btn-secondary" (click)="createPostForm.reset(); clearSelectedTopic()"
-				[disabled]="isLoading">
-				Cancel
-			</button>
-			<button type="submit" class="btn btn-primary"
-				[disabled]="!createPostForm.valid || !selectedTopic || isLoading">
-				<span *ngIf="isLoading" class="spinner"></span>
-				{{ isLoading ? 'Creating...' : 'Create Post' }}
-			</button>
-		</div>
-	</form>
+			<!-- Buttons -->
+			<div class="form-actions">
+				<button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+					Cancel
+				</button>
+				<button type="submit" class="btn btn-primary"
+					[disabled]="!createPostForm.valid || !selectedTopic || isLoading">
+					<span *ngIf="isLoading" class="spinner"></span>
+					{{ isEditMode ? (isLoading ? 'Updating...' : 'Update Post') : (isLoading ? 'Creating...' : 'Create
+					Post') }}
+				</button>
+			</div>
+		</form>
+	</ng-container>
 </div>
