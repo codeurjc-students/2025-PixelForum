@@ -133,7 +133,8 @@ export class PostComponent implements OnInit {
 
 		const dialogRef = this.dialog.open(ConfirmDialogComponent, {
 			width: '400px',
-			data: dialogData
+			data: dialogData,
+			autoFocus: false
 		});
 
 		dialogRef.afterClosed().pipe(
