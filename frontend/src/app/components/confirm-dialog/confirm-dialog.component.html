@@ -12,7 +12,7 @@
         <button mat-button (click)="onCancel()" [disabled]="isLoading">
             {{ data.cancelText || 'Cancel' }}
         </button>
-        <button mat-raised-button [color]="data.color || 'warn'" (click)="onConfirm()" [disabled]="isLoading">
+        <button mat-raised-button [color]="data.color || 'warn'" (click)="onConfirm()" [disabled]="isLoading" id="confirm-button">
             <mat-spinner *ngIf="isLoading" diameter="20" class="spinner-inline"></mat-spinner>
             {{ isLoading ? 'Please wait...' : (data.confirmText || 'Confirm') }}
         </button>

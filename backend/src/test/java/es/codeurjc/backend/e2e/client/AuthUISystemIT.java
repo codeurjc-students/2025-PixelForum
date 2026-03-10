@@ -116,8 +116,8 @@ class AuthUISystemIT {
         loginButton.click();
         
         // Verify error message appears
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.className("error-message")));
-        WebElement errorMessage = driver.findElement(By.className("error-message"));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.className("server-error")));
+        WebElement errorMessage = driver.findElement(By.className("server-error"));
         assertTrue(errorMessage.isDisplayed());
         
         // Verify no cookies

@@ -116,7 +116,7 @@
 				<button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
 					Cancel
 				</button>
-				<button type="submit" class="btn btn-primary"
+				<button id="save-post-button" type="submit" class="btn btn-primary"
 					[disabled]="!createPostForm.valid || !selectedTopic || isLoading">
 					<span *ngIf="isLoading" class="spinner"></span>
 					{{ isEditMode ? (isLoading ? 'Updating...' : 'Update Post') : (isLoading ? 'Creating...' : 'Create

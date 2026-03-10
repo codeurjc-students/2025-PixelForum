@@ -1,53 +1,261 @@
 package es.codeurjc.backend.integration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
+import es.codeurjc.backend.dto.Post.PostDTO;
 import es.codeurjc.backend.dto.Post.PostMapper;
 import es.codeurjc.backend.model.Post;
-import es.codeurjc.backend.repository.PostRepository;
+import es.codeurjc.backend.model.Topic;
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.service.PostService;
+import es.codeurjc.backend.service.TopicService;
+import es.codeurjc.backend.service.UserService;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+
+import org.springframework.security.access.AccessDeniedException;
 
 @Tag("integration")
-@DisplayName("PostService Integration tests")
+@DisplayName("PostService Integration Tests")
 @ActiveProfiles("test")
 @SpringBootTest
 class PostServiceIntegrationTest {
+
     @Autowired
-    PostRepository postRepository;
+    private PostService postService;
 
-    PostService postService;
+    @Autowired
+    private UserService userService;
 
-    @BeforeEach
-    void init() {
-        PostMapper postMapper = Mappers.getMapper(PostMapper.class);
-        postService = new PostService(postMapper, postRepository);
+    @Autowired
+    private TopicService topicService;
+
+    @Autowired
+    private PostMapper postMapper;
+
+    @Test
+    @DisplayName("Should create a post successfully")
+    void createPostTest() {
+        // GIVEN
+        User user = userService.findByUsername("martin").orElseThrow();
+        Topic topic = topicService.findAll().get(0);
+
+        Post post = new Post();
+        post.setTitle("Integration Test Post");
+        post.setContent("Testing content");
+        post.setTopic(topic);
+        post.setImages(List.of("/api/v1/images/posts/test.jpeg"));
+
+        PostDTO postDTO = postMapper.toDTO(post);
+
+        // WHEN
+        PostDTO created = postService.createPost(postDTO, user);
+
+        // THEN
+        assertNotNull(created.id(), "Created post should have an ID");
+        assertEquals(postDTO.title(), created.title(), "Title should match");
+        assertEquals(postDTO.content(), created.content(), "Content should match");
+        assertEquals(user.getId(), created.author().id(), "Author should match");
     }
 
     @Test
-    void savePostIntTest(){
-        int numPostsBefore = postService.findAll().size();
+    @DisplayName("Should get a post by ID")
+    @Transactional
+    void getPostTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+
+        // WHEN
+        PostDTO dto = postService.getPost(post.getId());
+
+        // THEN
+        assertEquals(post.getTitle(), dto.title());
+        assertEquals(post.getContent(), dto.content());
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException when getting non-existing post")
+    void getPostNotFoundTest() {
+        // WHEN & THEN
+        assertThrows(EntityNotFoundException.class, () -> postService.getPost(-1L));
+    }
+
+    @Test
+    @DisplayName("Should update a post when author is the user")
+    @Transactional
+    void updatePostSuccessTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User author = post.getAuthor();
+
+        PostDTO updateDTO = new PostDTO(
+                null,
+                post.getTitle() + " Updated",
+                post.getContent() + " Updated",
+                null, null,
+                null,
+                post.getTopic(),
+                null,
+                null,
+                post.getImages());
+
+        // WHEN
+        PostDTO updated = postService.updatePost(post.getId(), updateDTO, author);
+
+        // THEN
+        assertEquals(updateDTO.title(), updated.title());
+        assertEquals(updateDTO.content(), updated.content());
+        assertEquals(updateDTO.topic(), updated.topic());
+        assertTrue(updated.updatedAt().isAfter(post.getCreatedAt()), "UpdatedAt should be later than CreatedAt");
+    }
+
+    @Test
+    @DisplayName("Should throw AccessDeniedException when updating post as non-author")
+    void updatePostAccessDeniedTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User nonAuthor = userService.findByUsername("robert").orElseThrow();
+
+        PostDTO dto = new PostDTO(
+                null,
+                "Invalid Update",
+                "Invalid content",
+                null, null,
+                null,
+                post.getTopic(),
+                null,
+                null,
+                post.getImages());
+
+        // WHEN & THEN
+        assertThrows(AccessDeniedException.class, () -> postService.updatePost(post.getId(), dto, nonAuthor));
+    }
+
+    @Test
+    @DisplayName("Should update post when user is ADMIN even if not author")
+    @Transactional
+    void updatePostAsAdminTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User admin = userService.findByUsername("admin").orElseThrow();
+
+        PostDTO dto = new PostDTO(
+                null,
+                "Admin Update",
+                "Admin content",
+                null, null,
+                null,
+                post.getTopic(),
+                null,
+                null,
+                post.getImages());
+
+        // WHEN
+        PostDTO updated = postService.updatePost(post.getId(), dto, admin);
+
+        // THEN
+        assertEquals("Admin Update", updated.title());
+        assertEquals("Admin content", updated.content());
+        assertEquals(dto.topic(), updated.topic());
+    }
+
+    @Test
+    @DisplayName("Should delete post when author deletes it")
+    void deletePostSuccessTest() {
+        // GIVEN
+        User user = userService.findByUsername("martin").orElseThrow();
+        Topic topic = topicService.findAll().get(0);
 
         Post post = new Post();
-        post.setTitle("New Post Title");
-        post.setContent("This is the content of the new post.");
+        post.setTitle("To Delete");
+        post.setContent("Content");
+        post.setTopic(topic);
 
-        Post savedpost = postService.save(post);
-        assertNotNull(savedpost);
-        assertTrue(savedpost.getId() > 0);
+        PostDTO postDTO = postMapper.toDTO(post);
+        PostDTO created = postService.createPost(postDTO, user);
 
-        int numPostsAfter = postService.findAll().size();
-        assertEquals(numPostsAfter, (numPostsBefore + 1));
-        assertEquals(true, postService.exist(savedpost.getId()));
+        // WHEN
+        postService.deletePost(created.id(), user);
+
+        // THEN
+        assertFalse(postService.exist(created.id()), "Post should be deleted");
+    }
+
+    @Test
+    @DisplayName("Should throw AccessDeniedException when non-author deletes post")
+    void deletePostAccessDeniedTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User nonAuthor = userService.findByUsername("robert").orElseThrow();
+
+        // WHEN & THEN
+        assertThrows(AccessDeniedException.class, () -> postService.deletePost(post.getId(), nonAuthor));
+    }
+
+    @Test
+    @DisplayName("Should delete post when ADMIN deletes it")
+    void deletePostAsAdminTest() {
+        // GIVEN
+        User admin = userService.findByUsername("admin").orElseThrow();
+        User author = userService.findByUsername("martin").orElseThrow();
+        Topic topic = topicService.findAll().get(0);
+
+        Post post = new Post();
+        post.setTitle("Admin Delete");
+        post.setContent("Content");
+        post.setTopic(topic);
+
+        PostDTO postDTO = postMapper.toDTO(post);
+        PostDTO created = postService.createPost(postDTO, author);
+
+        // WHEN
+        postService.deletePost(created.id(), admin);
+
+        // THEN
+        assertFalse(postService.exist(created.id()), "Post should be deleted by admin");
+    }
+
+    @Test
+    @DisplayName("Should filter posts by title and topic")
+    @Transactional
+    void searchAndFilterPostsTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // WHEN
+        var page = postService.searchAndFilterPosts("GTA VI", null, "GTA VI", pageable);
+
+        // THEN
+        assertTrue(page.stream().allMatch(p -> p.title().contains("GTA VI")));
+    }
+
+    @Test
+    @DisplayName("Exist should return true for existing post and false for non-existing")
+    void existTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+
+        // THEN
+        assertTrue(postService.exist(post.getId()));
+        assertFalse(postService.exist(-1L));
+    }
+
+    @Test
+    @DisplayName("FindAll should return all posts")
+    void findAllTest() {
+        List<Post> posts = postService.findAll();
+        assertFalse(posts.isEmpty(), "There should be posts in the database");
     }
 }

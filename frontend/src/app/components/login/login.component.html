@@ -15,6 +15,7 @@
 					[(ngModel)]="username"
 					required
 					#usernameInput="ngModel"
+					id="username"
 				/>
 				<mat-error *ngIf="usernameInput.invalid && usernameInput.touched">
 					Please enter your username
@@ -31,6 +32,7 @@
 					[(ngModel)]="password"
 					required
 					#passwordInput="ngModel"
+					id="password"
 				/>
 				<mat-error *ngIf="passwordInput.invalid && passwordInput.touched">
 					Please enter your password
@@ -44,6 +46,7 @@
 				type="submit"
 				class="full-width"
 				[disabled]="!username || !password"
+				id="login-button"
 			>
 				Log In
 			</button>

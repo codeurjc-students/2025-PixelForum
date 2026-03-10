@@ -190,7 +190,7 @@ export class CreatePostComponent implements OnInit {
 
 			// Validate size
 			if (file.size > this.MAX_FILE_SIZE) {
-				this.setError(`Each image must be smaller than 10 MB`);
+				this.setError('Each image must be smaller than 10 MB');
 				return;
 			}
 
