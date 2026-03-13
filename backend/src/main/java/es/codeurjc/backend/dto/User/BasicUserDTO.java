@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.User;
+package es.codeurjc.backend.dto.user;
 
 public record BasicUserDTO (
     Long id,

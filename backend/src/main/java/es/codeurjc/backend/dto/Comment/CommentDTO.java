@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.Comment;
+package es.codeurjc.backend.dto.comment;
 
 import java.time.LocalDateTime;
 import java.util.List;

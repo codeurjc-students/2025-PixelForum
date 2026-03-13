@@ -23,7 +23,7 @@ public class FileUploadService {
         try {
             Files.createDirectories(Paths.get("uploads"));
         } catch (IOException e) {
-            throw new RuntimeException("Could not create uploads directory", e);
+            throw new IllegalStateException("Could not create uploads directory", e);
         }
     }
 
@@ -76,7 +76,7 @@ public class FileUploadService {
         // Remove multiple consecutive dots
         sanitized = sanitized.replaceAll("\\.{2,}", ".");
         // Remove leading/trailing dots
-        sanitized = sanitized.replaceAll("^\\.+|\\.+$", "");
+        sanitized = sanitized.replaceAll("(^\\.+)|(\\.+$)", "");
         return sanitized;
     }
 

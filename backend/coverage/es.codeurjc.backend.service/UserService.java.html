@@ -10,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import es.codeurjc.backend.dto.UserDTO;
-import es.codeurjc.backend.dto.UserMapper;
+import es.codeurjc.backend.dto.user.UserDTO;
+import es.codeurjc.backend.dto.user.UserMapper;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.PostRepository;
@@ -44,7 +44,7 @@ public class UserService {
 	}
 
 	public Optional&lt;User&gt; findByUsername(String username) {
-<span class="nc" id="L47">		return userRepository.findByUsername(username);</span>
+<span class="fc" id="L47">		return userRepository.findByUsername(username);</span>
 	}
 
 	public boolean exist(long id) {
@@ -61,7 +61,7 @@ public class UserService {
 <span class="fc" id="L61">        user.setPassword(encodedPassword);</span>
 <span class="fc bfc" id="L62" title="All 2 branches covered.">        if (user.getUsername().equals(&quot;admin&quot;)) {</span>
 <span class="fc" id="L63">            user.setRoles(List.of(&quot;USER&quot;, &quot;ADMIN&quot;));</span>
-        } else {
+<span class="fc" id="L64">        } else {</span>
 <span class="fc" id="L65">            user.setRoles(List.of(&quot;USER&quot;));</span>
         }
 <span class="fc" id="L67">		return userRepository.save(user);</span>
@@ -72,7 +72,7 @@ public class UserService {
         String username;
 <span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (principal instanceof UserDetails userDetails) {</span>
 <span class="fc" id="L74">            username = userDetails.getUsername();</span>
-        } else {
+<span class="fc" id="L75">        } else {</span>
 <span class="nc" id="L76">            username = principal.toString();</span>
         }
 
@@ -84,7 +84,7 @@ public class UserService {
         String username;
 <span class="nc bnc" id="L85" title="All 2 branches missed.">        if (principal instanceof UserDetails userDetails) {</span>
 <span class="nc" id="L86">            username = userDetails.getUsername();</span>
-        } else {
+<span class="nc" id="L87">        } else {</span>
 <span class="nc" id="L88">            username = principal.toString();</span>
         }
 

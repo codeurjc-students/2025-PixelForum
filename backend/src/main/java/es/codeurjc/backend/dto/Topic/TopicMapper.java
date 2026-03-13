@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.Topic;
+package es.codeurjc.backend.dto.topic;
 
 import java.util.Collection;
 import java.util.List;

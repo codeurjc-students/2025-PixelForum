@@ -54,4 +54,5 @@ jobs:
               -Dsonar.token=$SONAR_TOKEN \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.organization=codeurjc-students \
-              -Dsonar.projectKey=codeurjc-students_2025-PixelForum
+              -Dsonar.projectKey=codeurjc-students_2025-PixelForum \
+              -Dsonar.coverage.jacoco.xmlReportPaths=coverage/jacoco.xml

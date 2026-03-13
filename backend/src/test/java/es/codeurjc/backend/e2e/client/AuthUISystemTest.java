@@ -22,13 +22,15 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 @Tag("selenium")
 @DisplayName("Authentication UI System Test")
 @ActiveProfiles("test")
-class AuthUISystemIT {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+class AuthUISystemTest {
     @LocalServerPort
     int port;
     

@@ -21,13 +21,15 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 @Tag("selenium")
 @DisplayName("Post UI System Test")
 @ActiveProfiles("test")
-class PostUISystemIT {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+class PostUISystemTest {
 
     @LocalServerPort
     int port;
@@ -253,6 +255,8 @@ class PostUISystemIT {
         // Back to posts list
         wait.until(ExpectedConditions.urlContains("/posts"));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
+        driver.get("https://localhost:" + port);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("app-root")));
 
         // Verify post is deleted
         driver.get("https://localhost:" + port + "/posts/" + postId);

@@ -50,7 +50,7 @@ public class UserLoginService {
 <span class="fc" id="L50">		response.addCookie(buildTokenCookie(TokenType.REFRESH, newRefreshToken));</span>
 
 <span class="fc" id="L52">		AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.SUCCESS,</span>
-				&quot;Auth successful. Tokens are created in cookie.&quot;);
+<span class="fc" id="L53">				&quot;Auth successful. Tokens are created in cookie.&quot;);</span>
 <span class="fc" id="L54">		return ResponseEntity.ok().headers(responseHeaders).body(loginResponse);</span>
 	}
 
@@ -71,13 +71,13 @@ public class UserLoginService {
 <span class="fc" id="L71">        	response.addCookie(buildTokenCookie(TokenType.REFRESH, newRefreshToken));</span>
 
 <span class="fc" id="L73">			AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.SUCCESS,</span>
-					&quot;Auth successful. Tokens are created in cookie.&quot;);
+<span class="fc" id="L74">					&quot;Auth successful. Tokens are created in cookie.&quot;);</span>
 <span class="fc" id="L75">			return ResponseEntity.ok().body(loginResponse);</span>
 
 <span class="fc" id="L77">		} catch (Exception e) {</span>
 <span class="fc" id="L78">			log.error(&quot;Error while processing refresh token&quot;, e);</span>
 <span class="fc" id="L79">			AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.FAILURE,</span>
-					&quot;Failure while processing refresh token&quot;);
+<span class="fc" id="L80">					&quot;Failure while processing refresh token&quot;);</span>
 <span class="fc" id="L81">			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(loginResponse);</span>
 		}
 	}

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.codeurjc.backend.dto.Post.PostDTO;
+import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.service.PostService;
 import es.codeurjc.backend.service.UserService;
@@ -29,6 +29,8 @@ import jakarta.persistence.EntityNotFoundException;
 @RestController
 @RequestMapping("/api/v1/posts")
 public class PostRestController {
+
+    private static final String USER_NOT_FOUND = "User not found";
 
     private final PostService postService;
     private final UserService userService;
@@ -57,7 +59,7 @@ public class PostRestController {
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO, Principal principal) {
         User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         PostDTO createdPostDTO = postService.createPost(postDTO, currentUser);
 
         URI location = fromCurrentRequest()
@@ -72,7 +74,7 @@ public class PostRestController {
     public ResponseEntity<PostDTO> updatePost(@PathVariable long id, @RequestBody PostDTO postDTO,
             Principal principal) {
         User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
         PostDTO updatedPostDTO = postService.updatePost(id, postDTO, currentUser);
         return ResponseEntity.ok(updatedPostDTO);
@@ -81,7 +83,7 @@ public class PostRestController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable long id, Principal principal) {
         User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
         postService.deletePost(id, currentUser);
         return ResponseEntity.noContent().build();

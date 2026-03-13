@@ -33,7 +33,7 @@ public class ImageRestController {
     public ResponseEntity<UploadResponse> uploadImages(
             @RequestParam("files") MultipartFile[] files,
             @RequestParam(value = "category", defaultValue = "default") String category) {
-        
+
         try {
             if (files == null || files.length == 0) {
                 return ResponseEntity.badRequest().build();
@@ -48,14 +48,8 @@ public class ImageRestController {
 
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
-                    try {
-                        String url = fileUploadService.uploadFile(file, category);
-                        urls.add(url);
-                    } catch (IllegalArgumentException e) {
-                        // Log and continue with next file
-                        System.err.println("Error uploading file: " + e.getMessage());
-                        continue;
-                    }
+                    String url = fileUploadService.uploadFile(file, category);
+                    urls.add(url);
                 }
             }
 
@@ -73,7 +67,7 @@ public class ImageRestController {
     public ResponseEntity<byte[]> getImage(
             @PathVariable String category,
             @PathVariable String filename) {
-        
+
         try {
             // Validate inputs
             if (!isValidCategory(category) || !isValidFilename(filename)) {
@@ -81,11 +75,11 @@ public class ImageRestController {
             }
 
             Path filepath = Paths.get("uploads", category, filename);
-            
+
             // Prevent directory traversal attacks
             Path uploadDir = Paths.get("uploads", category).toRealPath();
             Path realPath = filepath.toRealPath();
-            
+
             if (!realPath.startsWith(uploadDir)) {
                 return ResponseEntity.badRequest().build();
             }
@@ -109,7 +103,7 @@ public class ImageRestController {
     public ResponseEntity<Void> deleteImage(
             @PathVariable String category,
             @PathVariable String filename) {
-        
+
         try {
             // Validate inputs
             if (!isValidCategory(category) || !isValidFilename(filename)) {
@@ -124,19 +118,19 @@ public class ImageRestController {
     }
 
     private boolean isValidCategory(String category) {
-        return category != null && 
-               !category.isEmpty() && 
-               category.matches("^[a-zA-Z0-9_-]+$") && 
-               !category.contains("..") &&
-               !category.equals(".");
+        return category != null &&
+                !category.isEmpty() &&
+                category.matches("^[a-zA-Z0-9_-]+$") &&
+                !category.contains("..") &&
+                !category.equals(".");
     }
 
     private boolean isValidFilename(String filename) {
-        return filename != null && 
-               !filename.isEmpty() && 
-               filename.matches("^[a-zA-Z0-9_.-]+\\.(jpg|jpeg|png|gif|webp)$") &&
-               !filename.contains("..") &&
-               !filename.equals(".");
+        return filename != null &&
+                !filename.isEmpty() &&
+                filename.matches("^[a-zA-Z0-9_.-]+\\.(jpg|jpeg|png|gif|webp)$") &&
+                !filename.contains("..") &&
+                !filename.equals(".");
     }
 
     private String getContentType(String filename) {

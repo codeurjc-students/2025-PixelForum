@@ -15,8 +15,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 
-import es.codeurjc.backend.dto.Post.PostDTO;
-import es.codeurjc.backend.dto.Post.PostMapper;
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;

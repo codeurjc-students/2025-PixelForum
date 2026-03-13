@@ -42,8 +42,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 <span class="fc" id="L42">			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
 <span class="fc" id="L43">			SecurityContextHolder.getContext().setAuthentication(authentication);</span>
 <span class="fc" id="L44">		} catch (Exception ex) {</span>
-<span class="fc" id="L45">			log.error(&quot;Exception processing JWT Token: &quot;, ex);</span>
-<span class="fc" id="L46">		}</span>
+<span class="fc" id="L45">			log.debug(&quot;Exception processing JWT Token: &quot;, ex);</span>
+		}
 
 <span class="fc" id="L48">		filterChain.doFilter(request, response);</span>
 <span class="fc" id="L49">	}</span>

@@ -54,7 +54,7 @@ import jakarta.servlet.http.HttpServletRequest;
 	public Claims validateToken(HttpServletRequest req, boolean fromCookie){
 <span class="pc bpc" id="L55" title="1 of 2 branches missed.">		var token = fromCookie?</span>
 <span class="fc" id="L56">				tokenStringFromCookies(req):</span>
-<span class="pc" id="L57">				tokenStringFromHeaders(req);</span>
+<span class="nc" id="L57">				tokenStringFromHeaders(req);</span>
 <span class="fc" id="L58">		return validateToken(token);</span>
 	}
 

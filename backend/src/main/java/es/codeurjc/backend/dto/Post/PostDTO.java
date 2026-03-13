@@ -1,9 +1,9 @@
-package es.codeurjc.backend.dto.Post;
+package es.codeurjc.backend.dto.post;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import es.codeurjc.backend.dto.User.BasicUserDTO;
+import es.codeurjc.backend.dto.user.BasicUserDTO;
 import es.codeurjc.backend.model.Topic;
 
 public record PostDTO (

@@ -11,8 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import es.codeurjc.backend.dto.Post.PostDTO;
-import es.codeurjc.backend.dto.Post.PostMapper;
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.PostRepository;
@@ -21,6 +21,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class PostService {
+
+	private static final String POST_NOT_FOUND = "Post not found";
 
 	private final PostMapper mapper;
 	private final PostRepository postRepository;
@@ -31,7 +33,7 @@ public class PostService {
 	}
 
 	public PostDTO getPost(long id) {
-		return toDTO(postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Post not found")));
+		return toDTO(postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND)));
 	}
 
 	public Page<PostDTO> searchAndFilterPosts(String title, String authorUsername, String topic, Pageable pageable) {
@@ -69,7 +71,7 @@ public class PostService {
 	@Transactional
 	public PostDTO updatePost(Long id, PostDTO postDTO, User user) {
 		Post post = postRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Post not found"));
+				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
 
 		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
 			throw new AccessDeniedException("You can only edit your own posts");
@@ -106,18 +108,15 @@ public class PostService {
 		if (!currentImages.equals(newImages))
 			return true;
 
-		if (!Objects.equals(
+		return (!Objects.equals(
 				post.getTopic() != null ? post.getTopic().getId() : null,
-				dto.topic() != null ? dto.topic().getId() : null))
-			return true;
-
-		return false;
+				dto.topic() != null ? dto.topic().getId() : null));
 	}
 
 	@Transactional
 	public void deletePost(Long id, User user) {
 		Post post = postRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Post not found"));
+				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
 
 		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
 			throw new AccessDeniedException("You can only delete your own posts");

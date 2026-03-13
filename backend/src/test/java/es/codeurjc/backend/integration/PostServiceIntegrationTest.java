@@ -13,8 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
-import es.codeurjc.backend.dto.Post.PostDTO;
-import es.codeurjc.backend.dto.Post.PostMapper;
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
@@ -139,8 +139,9 @@ class PostServiceIntegrationTest {
                 null,
                 post.getImages());
 
+        long postId = post.getId();
         // WHEN & THEN
-        assertThrows(AccessDeniedException.class, () -> postService.updatePost(post.getId(), dto, nonAuthor));
+        assertThrows(AccessDeniedException.class, () -> postService.updatePost(postId, dto, nonAuthor));
     }
 
     @Test
@@ -201,7 +202,8 @@ class PostServiceIntegrationTest {
         User nonAuthor = userService.findByUsername("robert").orElseThrow();
 
         // WHEN & THEN
-        assertThrows(AccessDeniedException.class, () -> postService.deletePost(post.getId(), nonAuthor));
+        long postId = post.getId();
+        assertThrows(AccessDeniedException.class, () -> postService.deletePost(postId, nonAuthor));
     }
 
     @Test
