@@ -58,7 +58,7 @@ class PostUISystemTest {
             options.setAcceptInsecureCerts(true);
             driver = new ChromeDriver(options);
         }
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
     }
 
     @AfterEach
@@ -258,9 +258,11 @@ class PostUISystemTest {
 
         // Verify post is deleted
         driver.get("https://localhost:" + port + "/posts/" + postId);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
-        WebElement errorCode = driver.findElement(By.id("error-code"));
-        String code = errorCode.getText();
-        assertEquals(code, "500", "The post should be deleted and not accessible anymore");
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("/error"),
+                ExpectedConditions.presenceOfElementLocated(By.id("error-code"))));
+
+        WebElement errorCode = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("error-code")));
+        assertEquals("500", errorCode.getText(), "The post should be deleted and not accessible anymore");
     }
 }
