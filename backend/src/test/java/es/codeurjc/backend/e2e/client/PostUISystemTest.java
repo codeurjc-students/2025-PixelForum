@@ -58,7 +58,7 @@ class PostUISystemTest {
             options.setAcceptInsecureCerts(true);
             driver = new ChromeDriver(options);
         }
-        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     @AfterEach
@@ -254,8 +254,7 @@ class PostUISystemTest {
         confirmButton.click();
 
         // Back to post list
-        driver.get("https://localhost:" + port + "/posts");
-        driver.navigate().refresh();
+        wait.until(ExpectedConditions.urlMatches(".*/posts$"));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
         wait.until(ExpectedConditions.invisibilityOfElementLocated(
                 By.xpath("//app-post[.//*[@id='post-title' and text()='" + postTitleToDelete + "']]")));
