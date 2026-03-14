@@ -227,42 +227,44 @@ class PostUISystemTest {
     }
 
     @Test
-    @DisplayName("Delete a post")
+    @DisplayName("Delete a post safely")
     void deletePostTest() {
         login("admin", "admin0");
 
-        // Navigate to last post
-        driver.get("https://localhost:" + port + "/posts");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
+        // Create a post to delete
+        driver.get("https://localhost:" + port + "/create-post");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
 
-        List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
-        WebElement firstPost = posts.get(0);
-        firstPost.click();
+        String postTitleToDelete = "Selenium Delete Test Post";
 
+        driver.findElement(By.id("title")).sendKeys(postTitleToDelete);
+        driver.findElement(By.id("content")).sendKeys("Content for deletion test");
+        driver.findElement(By.id("topic-search")).sendKeys("GTA");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
+        driver.findElement(By.cssSelector(".topic-option")).click();
+        driver.findElement(By.id("save-post-button")).click();
+
+        // Wait for navigation to detail page
         wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
-        // Save id
-        String url = driver.getCurrentUrl();
-        String postId = url.substring(url.lastIndexOf("/") + 1);
 
-        // Click delete button
+        // Click delete
         WebElement deleteButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("delete-btn")));
         deleteButton.click();
-
-        // Confirm dialog
         WebElement confirmButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("confirm-button")));
         confirmButton.click();
 
-        // Back to posts list
-        wait.until(ExpectedConditions.urlContains("/posts"));
+        // Back to post list
+        driver.get("https://localhost:" + port + "/posts");
+        driver.navigate().refresh();
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath("//app-post[.//*[@id='post-title' and text()='" + postTitleToDelete + "']]")));
 
-        // Verify post is deleted
-        driver.get("https://localhost:" + port + "/posts/" + postId);
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains("/error"),
-                ExpectedConditions.presenceOfElementLocated(By.id("error-code"))));
+        // Verify that the title no longer exists
+        List<WebElement> postsAfterDelete = driver.findElements(By.cssSelector("app-post"));
+        boolean foundDeletedTitle = postsAfterDelete.stream()
+                .anyMatch(p -> p.findElement(By.id("post-title")).getText().equals(postTitleToDelete));
 
-        WebElement errorCode = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("error-code")));
-        assertEquals("500", errorCode.getText(), "The post should be deleted and not accessible anymore");
+        assertFalse(foundDeletedTitle, "The deleted post should no longer be in the list");
     }
 }
