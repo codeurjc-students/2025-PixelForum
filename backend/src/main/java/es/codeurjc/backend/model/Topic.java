@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Topic {
@@ -20,7 +20,7 @@ public class Topic {
     private String name;
     private String description;
 
-    @ManyToMany(mappedBy = "topics")
+    @OneToMany(mappedBy = "topic")
 	private List<Post> posts;
 
     

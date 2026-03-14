@@ -33,9 +33,9 @@ describe('LoginComponent - Unit Tests', () => {
 
     it('should call authService.login with username and password', () => {
         authService.login.and.returnValue(of({
-            status: 'SUCCESS',
-            message: 'Auth successful',
-            error: null
+            id: 1,
+            username: 'testuser',
+            roles: ['USER']
         }));
         authService.checkAuth.and.returnValue(of(null));
 
@@ -49,9 +49,9 @@ describe('LoginComponent - Unit Tests', () => {
 
     it('should navigate to home on successful login', () => {
         authService.login.and.returnValue(of({
-            status: 'SUCCESS',
-            message: 'Auth successful',
-            error: null
+            id: 1,
+            username: 'testuser',
+            roles: ['USER']
         }));
         authService.checkAuth.and.returnValue(of(null));
 

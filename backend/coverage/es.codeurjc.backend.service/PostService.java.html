@@ -1,78 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">PostService.java</span></div><h1>PostService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import es.codeurjc.backend.dto.PostDTO;
-import es.codeurjc.backend.dto.PostMapper;
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.PostRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
 public class PostService {
 
+	private static final String POST_NOT_FOUND = &quot;Post not found&quot;;
+
 	private final PostMapper mapper;
 	private final PostRepository postRepository;
 
-<span class="fc" id="L21">	public PostService(PostMapper mapper, PostRepository postRepository) {</span>
-<span class="fc" id="L22">		this.mapper = mapper;</span>
-<span class="fc" id="L23">		this.postRepository = postRepository;</span>
-<span class="fc" id="L24">	}</span>
+<span class="fc" id="L30">	public PostService(PostMapper mapper, PostRepository postRepository) {</span>
+<span class="fc" id="L31">		this.mapper = mapper;</span>
+<span class="fc" id="L32">		this.postRepository = postRepository;</span>
+<span class="fc" id="L33">	}</span>
 
-	public Optional&lt;Post&gt; findById(long id) {
-<span class="fc" id="L27">		return postRepository.findById(id);</span>
+	public PostDTO getPost(long id) {
+<span class="fc" id="L36">		return toDTO(postRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND)));</span>
+	}
+
+	public Page&lt;PostDTO&gt; searchAndFilterPosts(String title, String authorUsername, String topic, Pageable pageable) {
+<span class="fc" id="L40">		Page&lt;Post&gt; postsPage = postRepository.findByFilters(title, authorUsername, topic, pageable);</span>
+<span class="fc" id="L41">		return postsPage.map(mapper::toDTO);</span>
 	}
 
 	public boolean exist(long id) {
-<span class="fc" id="L31">		return postRepository.existsById(id);</span>
+<span class="fc" id="L45">		return postRepository.existsById(id);</span>
 	}
 
 	public List&lt;Post&gt; findAll() {
-<span class="fc" id="L35">		return postRepository.findAll();</span>
+<span class="fc" id="L49">		return postRepository.findAll();</span>
 	}
 
-	public Post save(Post post){
-<span class="fc" id="L39">		return postRepository.save(post);</span>
+	public Post save(Post post) {
+<span class="fc" id="L53">		return postRepository.save(post);</span>
 	}
 
-    @Transactional 
-    public void deleteById(Long id) {
-<span class="nc" id="L44">        Optional&lt;Post&gt; postOptional = postRepository.findById(id);</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (postOptional.isPresent()) {</span>
-<span class="nc" id="L46">            Post post = postOptional.get();</span>
-<span class="nc" id="L47">			postRepository.delete(post);</span>
-        }
-<span class="nc" id="L49">    }</span>
-
-	private PostDTO toDTO (Post post) {
-<span class="fc" id="L52">        return mapper.toDTO(post);</span>
-    }
-
-    private Post toDomain (PostDTO postDTO) {
-<span class="nc" id="L56">        return mapper.toDomain(postDTO);</span>
-    }
-
-    private List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; posts){
-<span class="nc" id="L60">        return mapper.toDTOs(posts);</span>
-    }
-
-	public Collection&lt;PostDTO&gt; getposts() {
-<span class="nc" id="L64">		return toDTOs(postRepository.findAll());</span>
+	private PostDTO toDTO(Post post) {
+<span class="fc" id="L57">		return mapper.toDTO(post);</span>
 	}
 
-	public PostDTO getPost(long id) {
-<span class="fc" id="L68">		return toDTO(postRepository.findById(id).orElseThrow());</span>
+	public PostDTO createPost(PostDTO postDTO, User user) {
+<span class="fc" id="L61">		Post post = mapper.toDomain(postDTO);</span>
+<span class="fc" id="L62">		post.setCreatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L63">		post.setUpdatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L64">		post.setLikes(0);</span>
+<span class="fc" id="L65">		post.setAuthor(user);</span>
+
+<span class="fc" id="L67">		Post savedPost = postRepository.save(post);</span>
+<span class="fc" id="L68">		return toDTO(savedPost);</span>
 	}
 
-	public PostDTO createPost(PostDTO postDTO) {
-<span class="nc" id="L72">		Post post = toDomain(postDTO);</span>
-<span class="nc" id="L73"> 		this.save(post);</span>
-<span class="nc" id="L74"> 		return toDTO(post);</span>
+	@Transactional
+	public PostDTO updatePost(Long id, PostDTO postDTO, User user) {
+<span class="fc" id="L73">		Post post = postRepository.findById(id)</span>
+<span class="pc" id="L74">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
+
+<span class="fc bfc" id="L76" title="All 4 branches covered.">		if (post.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L77">			throw new AccessDeniedException(&quot;You can only edit your own posts&quot;);</span>
+		}
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">		if (!hasChanges(post, postDTO)) {</span>
+<span class="fc" id="L81">			return toDTO(post);</span>
+		}
+
+<span class="fc" id="L84">		post.setTitle(postDTO.title());</span>
+<span class="fc" id="L85">		post.setContent(postDTO.content());</span>
+<span class="fc" id="L86">		post.setImages(postDTO.images());</span>
+<span class="fc" id="L87">		post.setTopic(postDTO.topic());</span>
+<span class="fc" id="L88">		post.setUpdatedAt(LocalDateTime.now());</span>
+
+<span class="fc" id="L90">		Post updatedPost = postRepository.save(post);</span>
+<span class="fc" id="L91">		return toDTO(updatedPost);</span>
 	}
 
+	private boolean hasChanges(Post post, PostDTO dto) {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">		if (!Objects.equals(post.getTitle(), dto.title()))</span>
+<span class="fc" id="L96">			return true;</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">		if (!Objects.equals(post.getContent(), dto.content()))</span>
+<span class="nc" id="L98">			return true;</span>
+
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">		List&lt;String&gt; currentImages = post.getImages() == null</span>
+<span class="nc" id="L101">				? Collections.emptyList()</span>
+<span class="fc" id="L102">				: new ArrayList&lt;&gt;(post.getImages());</span>
+
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">		List&lt;String&gt; newImages = dto.images() == null</span>
+<span class="nc" id="L105">				? Collections.emptyList()</span>
+<span class="fc" id="L106">				: new ArrayList&lt;&gt;(dto.images());</span>
+
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">		if (!currentImages.equals(newImages))</span>
+<span class="nc" id="L109">			return true;</span>
+
+<span class="fc" id="L111">		return (!Objects.equals(</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">				post.getTopic() != null ? post.getTopic().getId() : null,</span>
+<span class="fc bfc" id="L113" title="All 4 branches covered.">				dto.topic() != null ? dto.topic().getId() : null));</span>
+	}
+
+	@Transactional
+	public void deletePost(Long id, User user) {
+<span class="fc" id="L118">		Post post = postRepository.findById(id)</span>
+<span class="fc" id="L119">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
+
+<span class="fc bfc" id="L121" title="All 4 branches covered.">		if (post.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L122">			throw new AccessDeniedException(&quot;You can only delete your own posts&quot;);</span>
+		}
+
+<span class="fc" id="L125">		postRepository.delete(post);</span>
+<span class="fc" id="L126">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

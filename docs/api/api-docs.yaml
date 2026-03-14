@@ -6,6 +6,63 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
+  /api/v1/posts/{id}:
+    get:
+      tags:
+      - post-rest-controller
+      operationId: getPostById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostDTO"
+    put:
+      tags:
+      - post-rest-controller
+      operationId: updatePost
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostDTO"
+    delete:
+      tags:
+      - post-rest-controller
+      operationId: deletePost
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
   /api/v1/users/:
     get:
       tags:
@@ -37,6 +94,102 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
+  /api/v1/posts:
+    get:
+      tags:
+      - post-rest-controller
+      operationId: getAllPosts
+      parameters:
+      - name: title
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: authorUsername
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: topic
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagePostDTO"
+    post:
+      tags:
+      - post-rest-controller
+      operationId: createPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PostDTO"
+  /api/v1/images/{category}/{filename}/delete:
+    post:
+      tags:
+      - image-rest-controller
+      operationId: deleteImage
+      parameters:
+      - name: category
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: filename
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/images/upload:
+    post:
+      tags:
+      - image-rest-controller
+      operationId: uploadImages
+      parameters:
+      - name: files
+        in: query
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+            format: binary
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          default: default
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
   /api/v1/auth/refresh:
     post:
       tags:
@@ -134,11 +287,11 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
-  /api/v1/posts/{id}:
+  /api/v1/topics/{id}:
     get:
       tags:
-      - post-rest-controller
-      operationId: getPostById
+      - topic-rest-controller
+      operationId: getTopicById
       parameters:
       - name: id
         in: path
@@ -152,12 +305,12 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/Post"
-  /api/v1/posts/:
+                $ref: "#/components/schemas/Topic"
+  /api/v1/topics/:
     get:
       tags:
-      - post-rest-controller
-      operationId: getAllPosts
+      - topic-rest-controller
+      operationId: getAllTopics
       responses:
         "200":
           description: OK
@@ -166,7 +319,31 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Post"
+                  $ref: "#/components/schemas/Topic"
+  /api/v1/images/{category}/{filename}:
+    get:
+      tags:
+      - image-rest-controller
+      operationId: getImage
+      parameters:
+      - name: category
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: filename
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: byte
   /api/v1/auth/me:
     get:
       tags:
@@ -181,6 +358,58 @@ paths:
                 $ref: "#/components/schemas/UserDTO"
 components:
   schemas:
+    BasicUserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+    PostDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        author:
+          $ref: "#/components/schemas/BasicUserDTO"
+        topic:
+          $ref: "#/components/schemas/Topic"
+        likes:
+          type: integer
+          format: int32
+        usersThatLiked:
+          type: array
+          items:
+            type: integer
+            format: int64
+        images:
+          type: array
+          items:
+            type: string
+    Topic:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
     UserDTO:
       type: object
       properties:
@@ -207,6 +436,18 @@ components:
           type: array
           items:
             type: string
+        avatar:
+          type: object
+          properties:
+            binaryStream:
+              type: object
+    UploadResponse:
+      type: object
+      properties:
+        urls:
+          type: array
+          items:
+            type: string
     AuthResponse:
       type: object
       properties:
@@ -226,81 +467,77 @@ components:
           type: string
         password:
           type: string
-    Post:
+    Pageable:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-        title:
-          type: string
-        content:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        images:
-          type: array
-          items:
-            type: object
-            properties:
-              binaryStream:
-                type: object
-        author:
-          $ref: "#/components/schemas/User"
-        topics:
-          type: array
-          items:
-            $ref: "#/components/schemas/Topic"
-        likes:
+        page:
           type: integer
           format: int32
-        usersThatLiked:
-          type: array
-          items:
-            type: integer
-            format: int64
-    Topic:
-      type: object
-      properties:
-        id:
+          minimum: 0
+        size:
           type: integer
-          format: int64
-        name:
-          type: string
-        description:
-          type: string
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-        avatar:
-          type: object
-          properties:
-            binaryStream:
-              type: object
-        likedPosts:
-          type: array
-          items:
-            type: integer
-            format: int64
-        likedComments:
-          type: array
-          items:
-            type: integer
-            format: int64
-        roles:
+          format: int32
+          minimum: 1
+        sort:
           type: array
           items:
             type: string
+    PagePostDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean

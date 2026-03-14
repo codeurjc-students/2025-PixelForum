@@ -24,7 +24,7 @@ describe('AuthService - Integration Tests', () => {
         service.login('admin', 'admin0').subscribe({
             next: response => {
                 expect(response).toBeTruthy();
-                expect(response.status).toBe('SUCCESS');
+                expect(response?.username).toBe('admin');
                 done();
             },
             error: err => {

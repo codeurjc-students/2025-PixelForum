@@ -10,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import es.codeurjc.backend.dto.UserDTO;
-import es.codeurjc.backend.dto.UserMapper;
+import es.codeurjc.backend.dto.user.UserDTO;
+import es.codeurjc.backend.dto.user.UserMapper;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.PostRepository;

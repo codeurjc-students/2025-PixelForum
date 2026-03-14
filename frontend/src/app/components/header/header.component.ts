@@ -18,8 +18,6 @@ export class HeaderComponent {
 	}
 	
 	onLogout() {
-		this.authService.logout().subscribe();
-
 		this.authService.logout().subscribe({
 			next: () => {
 				this.authService.checkAuth().subscribe(() => {
@@ -27,5 +25,9 @@ export class HeaderComponent {
 				});
 			}
 		});
+	}
+
+	onCreatePost() {
+		this.router.navigate(['/create-post']);
 	}
 }

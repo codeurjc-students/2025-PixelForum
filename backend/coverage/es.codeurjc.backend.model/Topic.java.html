@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Topic {
@@ -20,7 +20,7 @@ public class Topic {
     private String name;
     private String description;
 
-    @ManyToMany(mappedBy = &quot;topics&quot;)
+    @OneToMany(mappedBy = &quot;topic&quot;)
 	private List&lt;Post&gt; posts;
 
     
@@ -37,24 +37,24 @@ public class Topic {
     }
 
     public void setId(long id) {
-<span class="nc" id="L40">        this.id = id;</span>
-<span class="nc" id="L41">    }</span>
+<span class="fc" id="L40">        this.id = id;</span>
+<span class="fc" id="L41">    }</span>
 
     public String getName() {
 <span class="fc" id="L44">        return name;</span>
     }
 
     public void setName(String name) {
-<span class="nc" id="L48">        this.name = name;</span>
-<span class="nc" id="L49">    }</span>
+<span class="fc" id="L48">        this.name = name;</span>
+<span class="fc" id="L49">    }</span>
 
     public String getDescription() {
 <span class="fc" id="L52">        return description;</span>
     }
 
     public void setDescription(String description) {
-<span class="nc" id="L56">        this.description = description;</span>
-<span class="nc" id="L57">    }</span>
+<span class="fc" id="L56">        this.description = description;</span>
+<span class="fc" id="L57">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

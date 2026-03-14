@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, catchError, of, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, of, switchMap, tap } from 'rxjs';
 import { User } from '../models/user.model';
 
 interface AuthResponse {
@@ -15,8 +15,12 @@ export class AuthService {
 
 	private baseUrl = environment.apiUrl + 'auth/';
 
-    private loggedInSubject = new BehaviorSubject<boolean>(false);
-	loggedIn$ = this.loggedInSubject.asObservable();
+	private userSubject = new BehaviorSubject<User | null>(null);
+	user$ = this.userSubject.asObservable();
+
+	loggedIn$ = this.user$.pipe(
+		map(user => !!user)
+	);
     
 	constructor(private http: HttpClient) {}
     
@@ -26,11 +30,13 @@ export class AuthService {
 			{ username, password },
 			{ withCredentials: true }
 		).pipe(
-			tap(response => {
+			switchMap(response => {
 				if (response.status === 'SUCCESS') {
-					this.loggedInSubject.next(true);
+					return this.me();
 				}
-			})
+				return of(null);
+			}),
+			tap(user => this.userSubject.next(user))
 		);
 	}
 
@@ -40,7 +46,11 @@ export class AuthService {
 			{},
 			{ withCredentials: true }
 		).pipe(
-			tap(() => this.loggedInSubject.next(false))
+			tap(() => this.userSubject.next(null)),
+			catchError(() => {
+				this.userSubject.next(null);
+				return of(null);
+			})
 		);
 	}
 
@@ -53,9 +63,9 @@ export class AuthService {
 
 	checkAuth() {
 		return this.me().pipe(
-			tap(() => this.loggedInSubject.next(true)),
+			tap(user => this.userSubject.next(user)),
 			catchError(() => {
-				this.loggedInSubject.next(false);
+				this.userSubject.next(null);
 				return of(null);
 			})
 		);

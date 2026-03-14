@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto;
+package es.codeurjc.backend.dto.user;
 
 import java.util.Collection;
 import java.util.List;

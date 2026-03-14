@@ -3,41 +3,71 @@ import { of, Subject, throwError } from 'rxjs';
 import { PostListComponent } from './post-list.component';
 import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
+import { TopicService } from '../../services/topic.service';
+import { UserService } from '../../services/user.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PageResponse } from '../../models/pageResponse.model';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('PostListComponent - Unit Tests', () => {
+
 	let component: PostListComponent;
 	let fixture: ComponentFixture<PostListComponent>;
 	let postService: jasmine.SpyObj<PostService>;
+	let topicService: jasmine.SpyObj<TopicService>;
+	let userService: jasmine.SpyObj<UserService>;
+	let router: jasmine.SpyObj<Router>;
 
 	const mockPosts: Post[] = [
-        {
-            id: 1,
+		{
+			id: 1,
 			title: 'Old post',
 			content: 'Old content',
 			createdAt: '2024-01-01T10:00:00Z',
-            topics: [
-                { id: 1, name: 'GTA VI' } as any
-            ],
-        },
-        {
-            id: 2,
+			topic: { id: 1, name: 'GTA VI' } as any,
+		},
+		{
+			id: 2,
 			title: 'New post',
 			content: 'New content',
 			createdAt: '2024-02-01T10:00:00Z',
-            topics: [
-                { id: 1, name: 'GTA VI' } as any
-            ],
-        }
-    ];
+			topic: { id: 1, name: 'GTA VI' } as any
+		}
+	];
+
+	const mockPageResponse: PageResponse<Post> = {
+		content: mockPosts,
+		pageable: {} as any,
+		totalPages: 1,
+		totalElements: 2,
+		first: true,
+		last: true,
+		number: 0,
+		size: 10,
+		numberOfElements: 2,
+		empty: false
+	};
 
 	beforeEach(async () => {
-        spyOn(console, 'error');
-		postService = jasmine.createSpyObj('PostService', ['getAll']);
+		spyOn(console, 'error');
+
+		postService = jasmine.createSpyObj('PostService', ['getPosts']);
+		topicService = jasmine.createSpyObj('TopicService', ['getById']);
+		userService = jasmine.createSpyObj('UserService', ['getById']);
+		router = jasmine.createSpyObj('Router', ['navigate']);
+
+		const activatedRouteMock = {
+			params: of({})
+		};
 
 		await TestBed.configureTestingModule({
-			imports: [PostListComponent],
+			imports: [PostListComponent, HttpClientTestingModule],
 			providers: [
-				{ provide: PostService, useValue: postService }
+				{ provide: PostService, useValue: postService },
+				{ provide: TopicService, useValue: topicService },
+				{ provide: UserService, useValue: userService },
+				{ provide: Router, useValue: router },
+				{ provide: ActivatedRoute, useValue: activatedRouteMock }
 			]
 		}).compileComponents();
 
@@ -45,63 +75,49 @@ describe('PostListComponent - Unit Tests', () => {
 		component = fixture.componentInstance;
 	});
 
+	// ---------- INIT ----------
+
 	it('should create component', () => {
 		expect(component).toBeTruthy();
 	});
 
 	it('should load posts on init', () => {
-		postService.getAll.and.returnValue(of(mockPosts));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.ngOnInit();
 
-		expect(postService.getAll).toHaveBeenCalled();
+		expect(postService.getPosts).toHaveBeenCalled();
 		expect(component.posts.length).toBe(2);
-		expect(component.loading).toBeFalse();
+		expect(component.isLoading).toBeFalse();
 	});
+
+	// ---------- SORTING ----------
 
 	it('should sort posts by createdAt desc', () => {
-		postService.getAll.and.returnValue(of(mockPosts));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.loadPosts();
 
-		expect(component.posts[0].title).toBe('New post');
-		expect(component.posts[1].title).toBe('Old post');
+		expect(component.posts[1].title).toBe('New post');
+		expect(component.posts[0].title).toBe('Old post');
 	});
 
-	it('should set error message on service error', () => {
-		postService.getAll.and.returnValue(
-			throwError(() => new Error('Backend error'))
-		);
+	// ---------- LOADING STATE ----------
 
-		component.loadPosts();
+	it('should show loading message while loading', () => {
+		const subject = new Subject<PageResponse<Post>>();
+		postService.getPosts.and.returnValue(subject.asObservable());
 
-		expect(component.error).toBe('Error loading posts.');
-		expect(component.loading).toBeFalse();
+		fixture.detectChanges();
+
+		const compiled = fixture.nativeElement as HTMLElement;
+		expect(compiled.textContent).toContain('Latest PostsLoading posts...');
 	});
 
-    it('should show loading message while loading', () => {
-        const subject = new Subject<Post[]>();
-        postService.getAll.and.returnValue(subject.asObservable());
-
-        fixture.detectChanges();
-
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.textContent).toContain('Charging posts...');
-    });
-
-	it('should show error message in template', () => {
-        postService.getAll.and.returnValue(
-            throwError(() => new Error('Backend error'))
-        );
-
-        fixture.detectChanges();
-
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.textContent).toContain('Error loading posts.');
-	});
+	// ---------- RENDERING POSTS ----------
 
 	it('should render posts when data exists', () => {
-		postService.getAll.and.returnValue(of(mockPosts));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.ngOnInit();
 		fixture.detectChanges();
@@ -113,7 +129,7 @@ describe('PostListComponent - Unit Tests', () => {
 	});
 
 	it('should show empty state when no posts', () => {
-		postService.getAll.and.returnValue(of([]));
+		postService.getPosts.and.returnValue(of({ content: [], totalPages: 0, totalElements: 0, last: true } as any));
 
 		component.ngOnInit();
 		fixture.detectChanges();
@@ -121,4 +137,112 @@ describe('PostListComponent - Unit Tests', () => {
 		const compiled = fixture.nativeElement as HTMLElement;
 		expect(compiled.textContent).toContain('No posts yet');
 	});
+
+	// ---------- FILTER LOADING ----------
+
+	it('should load topic name and posts', () => {
+		const mockTopic = { id: 1, name: 'Angular' } as any;
+		component.filterId = 1;
+		topicService.getById.and.returnValue(of(mockTopic));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
+
+		component.loadTopicName();
+
+		expect(component.filterName).toBe('Angular');
+		expect(component.filterTopic).toBe('Angular');
+		expect(postService.getPosts).toHaveBeenCalled();
+	});
+
+	it('should navigate to error if topicId is invalid', () => {
+		component.filterId = null;
+
+		component.loadTopicName();
+
+		expect(router.navigate).toHaveBeenCalledWith(['/error']);
+	});
+
+	it('should load user name and posts', () => {
+		const mockUser = { id: 1, username: 'TestUser' } as any;
+		component.filterId = 1;
+		userService.getById.and.returnValue(of(mockUser));
+		postService.getPosts.and.returnValue(of(mockPageResponse));
+
+		component.loadUserName();
+
+		expect(component.filterName).toBe('TestUser');
+		expect(component.filterUsername).toBe('TestUser');
+		expect(postService.getPosts).toHaveBeenCalled();
+	});
+
+	it('should navigate to error if userId is invalid', () => {
+		component.filterId = null;
+
+		component.loadUserName();
+
+		expect(router.navigate).toHaveBeenCalledWith(['/error']);
+	});
+
+	// ---------- LOAD MORE & PAGINATION ----------
+
+	it('should load more posts if has more pages', () => {
+		component.hasMorePages = true;
+		component.currentPage = 0;
+		component.isLoadingMore = false;
+		postService.getPosts.and.returnValue(of(mockPageResponse));
+
+		component.loadMorePosts();
+
+		expect(component.isLoadingMore).toBeFalse();
+		expect(component.currentPage).toBe(1);
+		expect(postService.getPosts).toHaveBeenCalled();
+	});
+
+	it('should not load more posts if no more pages', () => {
+		component.hasMorePages = false;
+		component.isLoadingMore = false;
+
+		component.loadMorePosts();
+
+		expect(component.isLoadingMore).toBeFalse();
+		expect(component.currentPage).toBe(0);
+	});
+
+	// ---------- FETCH POSTS ----------
+
+	it('should append posts on fetchPosts with isInitialLoad false', () => {
+		component.posts = [{ id: 0, title: 'Existing', content: '', createdAt: '2024-01-01', topic: { id: 1, name: 'X' } } as any];
+		component.currentPage = 0;
+		postService.getPosts.and.returnValue(of(mockPageResponse));
+
+		component['fetchPosts'](false);
+
+		expect(component.posts.length).toBe(3);
+		expect(component.isLoadingMore).toBeFalse();
+	});
+
+	// ---------- REMOVE POST ----------
+
+	it('should reload posts on removePost', () => {
+		spyOn(component, 'ngOnInit');
+
+		component.removePost();
+
+		expect(component.isLoading).toBeTrue();
+		expect(component.ngOnInit).toHaveBeenCalled();
+	});
+
+	// ---------- GO BACK ----------
+
+	it('should go back using location if history length > 1', () => {
+		spyOn(window.history, 'back');
+
+		component.goBack();
+
+		if (window.history.length > 1) {
+			expect(window.history.back).toHaveBeenCalled();
+		} else {
+			expect(router.navigate).toHaveBeenCalledWith(['/posts']);
+		}
+	});
+
 });

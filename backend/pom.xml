@@ -159,6 +159,7 @@
 				<configuration>
 			<!--  Change if error with used port -->
 					<jmxPort>9009</jmxPort>
+					<wait>60000</wait>
 				</configuration>
 				<executions>
 					<execution>

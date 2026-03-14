@@ -1,0 +1,19 @@
+<div class="post-detail-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="state-container">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading post...</p>
+        </div>
+    </div>
+
+    <!-- Post Detail -->
+    <div *ngIf="post && !loading" class="detail-content">
+        <app-post [post]="post" [mode]="'detail'"></app-post>
+        <!-- Comments Section -->
+        <div class="comments-section" id="comments">
+            <h3>Comments</h3>
+            <p class="placeholder">Comments feature coming soon...</p>
+        </div>
+    </div>
+</div>

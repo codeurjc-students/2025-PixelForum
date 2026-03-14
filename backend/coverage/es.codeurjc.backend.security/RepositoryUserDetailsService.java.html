@@ -30,7 +30,7 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 <span class="fc" id="L30">		List&lt;GrantedAuthority&gt; roles = new ArrayList&lt;&gt;();</span>
 <span class="fc bfc" id="L31" title="All 2 branches covered.">		for (String role : user.getRoles()) {</span>
 <span class="fc" id="L32">			roles.add(new SimpleGrantedAuthority(&quot;ROLE_&quot; + role));</span>
-<span class="fc" id="L33">		}</span>
+		}
 
 <span class="fc" id="L35">		return new org.springframework.security.core.userdetails.User(user.getUsername(), </span>
 <span class="fc" id="L36">				user.getPassword(), roles);</span>
