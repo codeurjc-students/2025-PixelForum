@@ -255,12 +255,12 @@ class PostUISystemTest {
         // Back to posts list
         wait.until(ExpectedConditions.urlContains("/posts"));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
-        driver.get("https://localhost:" + port);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("app-root")));
 
         // Verify post is deleted
         driver.get("https://localhost:" + port + "/posts/" + postId);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
-        assertTrue(driver.getCurrentUrl().contains("/error"));
+        WebElement errorCode = driver.findElement(By.id("error-code"));
+        String code = errorCode.getText();
+        assertEquals(code, "500", "The post should be deleted and not accessible anymore");
     }
 }
