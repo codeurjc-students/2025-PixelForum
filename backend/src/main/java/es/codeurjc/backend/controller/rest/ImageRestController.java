@@ -1,149 +1,69 @@
 package es.codeurjc.backend.controller.rest;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.service.ImageService;
+import es.codeurjc.backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.codeurjc.backend.service.FileUploadService;
+import java.security.Principal;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/images")
 public class ImageRestController {
 
-    private final FileUploadService fileUploadService;
+    private final ImageService imageService;
+    private final UserService userService;
 
-    public ImageRestController(FileUploadService fileUploadService) {
-        this.fileUploadService = fileUploadService;
+    public ImageRestController(ImageService imageService, UserService userService) {
+        this.imageService = imageService;
+        this.userService = userService;
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<UploadResponse> uploadImages(
-            @RequestParam("files") MultipartFile[] files,
-            @RequestParam(value = "category", defaultValue = "default") String category) {
+    @GetMapping("/{id}")
+    public ResponseEntity<byte[]> getImage(@PathVariable long id) {
+        Image image = imageService.getImageById(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(image.getContentType()))
+                .body(image.getImageData());
+    }
 
-        try {
-            if (files == null || files.length == 0) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            // Validate category (prevent directory traversal)
-            if (!isValidCategory(category)) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            List<String> urls = new ArrayList<>();
-
-            for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    String url = fileUploadService.uploadFile(file, category);
-                    urls.add(url);
-                }
-            }
-
-            if (urls.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            return ResponseEntity.ok(new UploadResponse(urls));
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+    @PostMapping
+    public ResponseEntity<List<Long>> uploadImages(@RequestParam("files") MultipartFile[] files,
+            Principal principal) {
+        if (files == null || files.length == 0) {
+            return ResponseEntity.badRequest().build();
         }
-    }
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-    @GetMapping("/{category}/{filename}")
-    public ResponseEntity<byte[]> getImage(
-            @PathVariable String category,
-            @PathVariable String filename) {
+        List<Long> ids = new ArrayList<>();
 
-        try {
-            // Validate inputs
-            if (!isValidCategory(category) || !isValidFilename(filename)) {
-                return ResponseEntity.badRequest().build();
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                Long id = imageService.uploadImage(file, currentUser);
+                ids.add(id);
             }
-
-            Path filepath = Paths.get("uploads", category, filename);
-
-            // Prevent directory traversal attacks
-            Path uploadDir = Paths.get("uploads", category).toRealPath();
-            Path realPath = filepath.toRealPath();
-
-            if (!realPath.startsWith(uploadDir)) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            if (!Files.exists(filepath)) {
-                return ResponseEntity.notFound().build();
-            }
-
-            byte[] imageBytes = Files.readAllBytes(filepath);
-            String contentType = getContentType(filename);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(imageBytes);
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
         }
-    }
 
-    @PostMapping("/{category}/{filename}/delete")
-    public ResponseEntity<Void> deleteImage(
-            @PathVariable String category,
-            @PathVariable String filename) {
-
-        try {
-            // Validate inputs
-            if (!isValidCategory(category) || !isValidFilename(filename)) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            fileUploadService.deleteFile(filename, category);
-            return ResponseEntity.noContent().build();
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+        if (ids.isEmpty()) {
+            return ResponseEntity.badRequest().build();
         }
+
+        return ResponseEntity.ok(ids);
     }
 
-    private boolean isValidCategory(String category) {
-        return category != null &&
-                !category.isEmpty() &&
-                category.matches("^[a-zA-Z0-9_-]+$") &&
-                !category.contains("..") &&
-                !category.equals(".");
-    }
-
-    private boolean isValidFilename(String filename) {
-        return filename != null &&
-                !filename.isEmpty() &&
-                filename.matches("^[a-zA-Z0-9_.-]+\\.(jpg|jpeg|png|gif|webp)$") &&
-                !filename.contains("..") &&
-                !filename.equals(".");
-    }
-
-    private String getContentType(String filename) {
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        return switch (extension) {
-            case "jpg", "jpeg" -> "image/jpeg";
-            case "png" -> "image/png";
-            case "gif" -> "image/gif";
-            case "webp" -> "image/webp";
-            default -> "application/octet-stream";
-        };
-    }
-
-    public record UploadResponse(List<String> urls) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteImage(@PathVariable long id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        imageService.deleteImage(id, currentUser);
+        return ResponseEntity.noContent().build();
     }
 }

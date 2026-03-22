@@ -56,7 +56,6 @@ class PostServiceIntegrationTest {
         post.setTitle("Integration Test Post");
         post.setContent("Testing content");
         post.setTopic(topic);
-        post.setImages(List.of("/api/v1/images/posts/test.jpeg"));
 
         PostDTO postDTO = postMapper.toDTO(post);
 
@@ -109,7 +108,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
-                post.getImages());
+                null);
 
         // WHEN
         PostDTO updated = postService.updatePost(post.getId(), updateDTO, author);
@@ -137,7 +136,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
-                post.getImages());
+                null);
 
         long postId = post.getId();
         // WHEN & THEN
@@ -161,7 +160,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
-                post.getImages());
+                null);
 
         // WHEN
         PostDTO updated = postService.updatePost(post.getId(), dto, admin);

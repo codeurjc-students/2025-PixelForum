@@ -20,6 +20,7 @@ import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +33,7 @@ class PostServiceUnitTest {
 
 	private PostService postService;
 	private PostRepository postRepository;
+	private ImageRepository imageRepository;
 	private PostMapper mapper;
 
 	private Post post;
@@ -42,9 +44,10 @@ class PostServiceUnitTest {
 	void init() {
 
 		postRepository = mock(PostRepository.class);
+		imageRepository = mock(ImageRepository.class);
 		mapper = mock(PostMapper.class);
 
-		postService = new PostService(mapper, postRepository);
+		postService = new PostService(mapper, postRepository, imageRepository);
 
 		user = new User();
 		user.setId(1L);
@@ -54,14 +57,14 @@ class PostServiceUnitTest {
 		post.setId(1L);
 		post.setTitle("Title");
 		post.setContent("Content");
-		post.setImages(List.of("img1"));
+		//post.setImages(List.of("img1"));
 		post.setAuthor(user);
 
 		postDTO = mock(PostDTO.class);
 
 		when(postDTO.title()).thenReturn("Title");
 		when(postDTO.content()).thenReturn("Content");
-		when(postDTO.images()).thenReturn(List.of("img1"));
+		//when(postDTO.images()).thenReturn(List.of("img1"));
 		when(postDTO.topic()).thenReturn(null);
 	}
 

@@ -1,6 +1,5 @@
 package es.codeurjc.backend.model;
 
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -19,29 +19,30 @@ import jakarta.persistence.Table;
 public class User {
 
     @Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
 
-    @Column (unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column (unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Lob
-    private Blob avatar;
+    @OneToOne
+    @JoinColumn(name = "profile_image_id")
+    private Image avatar;
 
     private List<Long> likedPosts;
     private List<Long> likedComments;
 
     @ElementCollection(fetch = FetchType.EAGER)
-	private List<String> roles;
-    
-    public User(){
-        
+    private List<String> roles;
+
+    public User() {
+
     }
 
     public User(String username, String email, String password, String... roles) {
@@ -58,7 +59,7 @@ public class User {
         return id;
     }
 
-    public String getUsername(){
+    public String getUsername() {
         return this.username;
     }
 
@@ -70,24 +71,23 @@ public class User {
         return this.password;
     }
 
-    public Blob getAvatar() {
-		return avatar;
-	}
+    public Image getAvatar() {
+        return avatar;
+    }
 
     public List<Long> getLikedPosts() {
-		return likedPosts;
-	}
+        return likedPosts;
+    }
 
     public List<Long> getLikedComments() {
-		return likedComments;
-	}
+        return likedComments;
+    }
 
     public List<String> getRoles() {
-		return roles;
-	}
+        return roles;
+    }
 
-    //Setters
-
+    // Setters
     public void setId(long id) {
         this.id = id;
     }
@@ -104,9 +104,9 @@ public class User {
         this.password = password;
     }
 
-    public void setAvatar(Blob avatar) {
-		this.avatar = avatar;
-	}
+    public void setAvatar(Image avatar) {
+        this.avatar = avatar;
+    }
 
     public void setLikedPosts(List<Long> likedPosts) {
         this.likedPosts = likedPosts;
@@ -116,8 +116,8 @@ public class User {
         this.likedComments = likedComments;
     }
 
-	public void setRoles(List<String> roles) {
-		this.roles = roles;
-	}
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
 
 }

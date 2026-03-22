@@ -16,5 +16,5 @@ public record PostDTO (
     Topic topic,
     Integer likes,
     List<Long> usersThatLiked,
-    List<String> images) {
+    List<Long> images) {
 }
