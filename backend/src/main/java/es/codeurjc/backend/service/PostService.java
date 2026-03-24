@@ -120,16 +120,19 @@ public class PostService {
 
 	public void checkImagesOwnership(List<Image> images, User user, Post post) {
 		for (Image img : images) {
-			if (img.getOwner().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
-				throw new AccessDeniedException("You can only add your own images to the post");
-			}
-
 			if (post == null) {
+				if (img.getOwner().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
+					throw new AccessDeniedException("You can only add your own images to the post");
+				}
 				if (img.getPost() != null) {
 					throw new IllegalArgumentException(
 							"Image with id " + img.getId() + " is already associated with another post");
 				}
 			} else {
+				if (img.getOwner().getId() != user.getId() && user.getId() != post.getAuthor().getId()
+						&& !user.getRoles().contains("ADMIN")) {
+					throw new AccessDeniedException("You can only add your own images to the post");
+				}
 				if (img.getPost() != null && img.getPost().getId() != post.getId()) {
 					throw new IllegalArgumentException(
 							"Image with id " + img.getId() + " is already associated with another post");

@@ -8,6 +8,7 @@ import { TopicService } from '../../services/topic.service';
 import { ImageService } from '../../services/image.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 
 @Component({
 	selector: 'app-create-post',
@@ -22,8 +23,8 @@ export class CreatePostComponent implements OnInit {
 	createPostForm!: FormGroup;
 	allTopics: Topic[] = [];
 	filteredTopics: Topic[] = [];
-	selectedImages: File[] = [];
-	previewUrls: string[] = [];
+	selectedImages: File[] = []; // Files selected for upload
+	previewImages: string[] = []; // Existing image URLs and new image previews
 	isLoading = false;
 	errorMessage: string | null = null;
 	showTopicDropdown = false;
@@ -34,7 +35,7 @@ export class CreatePostComponent implements OnInit {
 	postId: number | null = null;
 	existingPost: Post | null = null;
 	isLoadingPost = false;
-	existingImageUrls: string[] = [];
+	existingImageIds: string[] = []; // IDs of existing images for edit mode
 
 	private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -176,7 +177,7 @@ export class CreatePostComponent implements OnInit {
 	}
 
 	private handleFiles(files: File[]): void {
-		if (this.selectedImages.length + files.length > 10) {
+		if (this.previewImages.length + files.length > 10) {
 			this.setError('You can only upload up to 10 images');
 			return;
 		}
@@ -199,7 +200,7 @@ export class CreatePostComponent implements OnInit {
 			const reader = new FileReader();
 			reader.onload = (e) => {
 				if (e.target?.result) {
-					this.previewUrls.push(e.target.result as string);
+					this.previewImages.push(e.target.result as string);
 				}
 			};
 			reader.readAsDataURL(file);
@@ -210,20 +211,13 @@ export class CreatePostComponent implements OnInit {
 
 
 	removeImage(index: number): void {
-		const urlToRemove = this.previewUrls[index];
-
-		// If it's an existing image (URL, not data), remove from existing list
-		if (urlToRemove && !urlToRemove.startsWith('data:')) {
-			const existingIndex = this.existingImageUrls.indexOf(urlToRemove);
-			if (existingIndex > -1) {
-				this.existingImageUrls.splice(existingIndex, 1);
-			}
-		} else {
-			// If it's a new image (data URL), remove from selected images
-			this.selectedImages.splice(index, 1);
+		// If it's an existing image remove from existing list
+		if (!this.previewImages[index].startsWith('data:')) {
+			this.existingImageIds.splice(index, 1);
+		} else { // If it's a new image remove from selected images
+			this.selectedImages.splice(index - this.existingImageIds.length, 1);
 		}
-
-		this.previewUrls.splice(index, 1);
+		this.previewImages.splice(index, 1);
 	}
 
 	async createPost(): Promise<void> {
@@ -236,17 +230,16 @@ export class CreatePostComponent implements OnInit {
 		this.errorMessage = null;
 
 		try {
-			let newImageUrls: string[] = [];
+			let newImageIds: string[] = [];
 
 			// Upload images if any are selected
 			if (this.selectedImages.length > 0) {
 				try {
-					const uploadResponse = await this.imageService
-						.uploadImages(this.selectedImages, 'posts')
-						.toPromise();
+					const uploadResponse = await firstValueFrom(this.imageService
+						.uploadImages(this.selectedImages));
 
-					if (uploadResponse?.urls && uploadResponse.urls.length > 0) {
-						newImageUrls = uploadResponse.urls;
+					if (uploadResponse && uploadResponse.length > 0) {
+						newImageIds = uploadResponse;
 					}
 				} catch (uploadError) {
 					console.error('Error uploading images:', uploadError);
@@ -256,14 +249,14 @@ export class CreatePostComponent implements OnInit {
 				}
 			}
 
-			const allImageUrls = [...this.existingImageUrls, ...newImageUrls];
+			const allImageIds = [...this.existingImageIds, ...newImageIds];
 
 			// Create post
 			const postData: Post = {
 				title: this.createPostForm.get('title')?.value,
 				content: this.createPostForm.get('content')?.value || null,
 				topic: this.selectedTopic,
-				images: allImageUrls.length > 0 ? allImageUrls : undefined
+				images: allImageIds.length > 0 ? allImageIds : undefined
 			};
 
 			if (this.isEditMode && this.postId) {
@@ -342,8 +335,8 @@ export class CreatePostComponent implements OnInit {
 		}
 
 		if (post.images && post.images.length > 0) {
-			this.previewUrls = [...post.images];
-			this.existingImageUrls = [...post.images];
+			this.previewImages = post.images.map(id => `/api/v1/images/${id}`);
+			this.existingImageIds = [...post.images];
 		}
 	}
 

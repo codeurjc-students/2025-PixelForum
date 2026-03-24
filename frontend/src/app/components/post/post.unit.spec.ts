@@ -67,7 +67,7 @@ describe('PostComponent', () => {
 		component.ngOnInit();
 
 		expect(component.imageCount).toBe(2);
-		expect(component.currentImage).toBe('img1');
+		expect(component.currentImage).toBe('api/v1/images/img1');
 	});
 
 	// ---------- IMAGE NAVIGATION ----------
@@ -77,7 +77,7 @@ describe('PostComponent', () => {
 
 		component.nextImage();
 		expect(component.currentImageIndex).toBe(1);
-		expect(component.currentImage).toBe('img2');
+		expect(component.currentImage).toBe('api/v1/images/img2');
 
 		component.nextImage();
 		expect(component.currentImageIndex).toBe(1);
@@ -89,7 +89,7 @@ describe('PostComponent', () => {
 
 		component.prevImage();
 		expect(component.currentImageIndex).toBe(0);
-		expect(component.currentImage).toBe('img1');
+		expect(component.currentImage).toBe('api/v1/images/img1');
 
 		component.prevImage();
 		expect(component.currentImageIndex).toBe(0);

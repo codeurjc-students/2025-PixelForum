@@ -172,15 +172,15 @@ describe('CreatePostComponent', () => {
     });
 
     it('should remove image from preview list', () => {
-        component.previewUrls = ['img1', 'img2'];
+        component.previewImages = ['img1', 'img2'];
 
         component.removeImage(0);
 
-        expect(component.previewUrls.length).toBe(1);
+        expect(component.previewImages.length).toBe(1);
     });
 
     it('should not allow more than 10 images', () => {
-        component.selectedImages = new Array(10).fill(
+        component.previewImages = new Array(10).fill(
             new File(['a'], 'a.png', { type: 'image/png' })
         );
 

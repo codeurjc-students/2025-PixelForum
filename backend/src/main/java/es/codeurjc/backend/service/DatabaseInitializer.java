@@ -62,7 +62,7 @@ public class DatabaseInitializer {
 				"A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.",
 				LocalDateTime.of(2026, 2, 20, 18, 43), new ArrayList<>(), user1, topics.get(0));
 		postService.save(post1);
-		addImages(post1, List.of("/images/gta_poster.jpeg", "/images/gta_map.webp"), user4);
+		addImages(post1, List.of("/images/gta_poster.jpeg", "/images/gta_map.webp"), user1);
 
 		Post post2 = new Post("GTA VI official 2nd trailer",
 				"Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.",
