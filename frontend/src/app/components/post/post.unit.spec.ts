@@ -35,7 +35,7 @@ describe('PostComponent', () => {
 
 	beforeEach(async () => {
 		postServiceSpy = jasmine.createSpyObj('PostService', ['delete']);
-		authServiceSpy = jasmine.createSpyObj('AuthService', ['user$'], { user$: of(mockUser) });
+		authServiceSpy = jasmine.createSpyObj('AuthService', [], { user$: of(mockUser) });
 		routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 		dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 		snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -68,6 +68,7 @@ describe('PostComponent', () => {
 
 		expect(component.imageCount).toBe(2);
 		expect(component.currentImage).toBe('api/v1/images/img1');
+		expect(component.topicData).toEqual(mockTopic);
 	});
 
 	// ---------- IMAGE NAVIGATION ----------
@@ -134,10 +135,7 @@ describe('PostComponent', () => {
 	// ---------- DELETE ----------
 
 	it('should open delete dialog and delete post', () => {
-		const afterClosedSpy = jasmine.createSpyObj('afterClosed', ['pipe', 'subscribe']);
-		afterClosedSpy.pipe.and.returnValue({ subscribe: (fn: any) => fn(true) });
-		const dialogRefSpy = { afterClosed: () => afterClosedSpy } as any;
-		dialogSpy.open.and.returnValue(dialogRefSpy);
+		dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
 
 		postServiceSpy.delete.and.returnValue(of(void 0));
 
@@ -146,6 +144,15 @@ describe('PostComponent', () => {
 		expect(dialogSpy.open).toHaveBeenCalled();
 		expect(postServiceSpy.delete).toHaveBeenCalledWith(1);
 		expect(snackBarSpy.open).toHaveBeenCalledWith('Post deleted successfully', 'Close', { duration: 3000 });
+	});
+
+	it('should navigate when deleting in detail mode', () => {
+		component.mode = 'detail';
+		postServiceSpy.delete.and.returnValue(of(void 0));
+
+		component['deletePost']();
+
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts']);
 	});
 
 	it('should emit postDeleted when deleting in list mode', () => {

@@ -39,12 +39,10 @@ export class LoginComponent {
 
 		this.authService.login(this.username, this.password).subscribe({
 			next: () => {
-				this.authService.checkAuth().subscribe(() => {
-					this.snackBar.open('Login succesfull', 'Close', {
-						duration: 3000
-					});
-					this.router.navigate(['/']);
+				this.snackBar.open('Login succesfull', 'Close', {
+					duration: 3000
 				});
+				this.router.navigate(['/']);
 			},
 			error: err => {
 				if (err.status === 401) {

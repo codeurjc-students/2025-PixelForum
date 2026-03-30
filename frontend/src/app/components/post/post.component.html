@@ -31,7 +31,7 @@
 	<!-- Images -->
 	<div *ngIf="imageCount > 0" class="post-images-section">
 		<div class="image-container">
-			<img [src]="currentImage" alt="Post image" class="main-image" />
+			<img [src]="currentImage" alt="Post image" class="main-image" id="post-image"/>
 
 			<!-- Navigation Arrows -->
 			<button *ngIf="imageCount > 1" class="carousel-btn carousel-btn-prev"
