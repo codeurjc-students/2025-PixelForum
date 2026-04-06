@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.user_temp;
+package es.codeurjc.backend.dto.user;
 
 import java.util.List;
 
