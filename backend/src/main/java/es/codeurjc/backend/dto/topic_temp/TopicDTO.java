@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.topic;
+package es.codeurjc.backend.dto.topic_temp;
 
 public record TopicDTO (
     Long id,

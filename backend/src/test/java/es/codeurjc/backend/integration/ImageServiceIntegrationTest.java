@@ -174,7 +174,8 @@ class ImageServiceIntegrationTest {
 		imageService.deleteImage(image.getId(), user);
 
 		// THEN
-		assertThrows(EntityNotFoundException.class, () -> imageService.getImageById(image.getId()));
+		Long deletedId = image.getId();
+		assertThrows(EntityNotFoundException.class, () -> imageService.getImageById(deletedId));
 	}
 
 	@Test
@@ -191,7 +192,8 @@ class ImageServiceIntegrationTest {
 		imageService.deleteImage(image.getId(), admin);
 
 		// THEN
-		assertThrows(EntityNotFoundException.class, () -> imageService.getImageById(image.getId()));
+		Long deletedId = image.getId();
+		assertThrows(EntityNotFoundException.class, () -> imageService.getImageById(deletedId));
 	}
 
 	@Test
@@ -204,8 +206,9 @@ class ImageServiceIntegrationTest {
 		Image image = imageService.saveImage("data".getBytes(), "file.png", "image/png", owner);
 
 		// WHEN & THEN
+		Long imageId = image.getId();
 		assertThrows(AccessDeniedException.class, () -> {
-			imageService.deleteImage(image.getId(), other);
+			imageService.deleteImage(imageId, other);
 		});
 	}
 

@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.post;
+package es.codeurjc.backend.dto.post_temp;
 
 import java.util.Collection;
 import java.util.List;

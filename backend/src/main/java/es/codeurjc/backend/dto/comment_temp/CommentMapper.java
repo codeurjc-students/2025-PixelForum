@@ -1,4 +1,4 @@
-package es.codeurjc.backend.dto.comment;
+package es.codeurjc.backend.dto.comment_temp;
 
 import java.util.Collection;
 import java.util.List;
