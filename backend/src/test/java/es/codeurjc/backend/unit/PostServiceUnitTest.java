@@ -1,8 +1,10 @@
 package es.codeurjc.backend.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +19,11 @@ import org.springframework.security.access.AccessDeniedException;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +36,7 @@ class PostServiceUnitTest {
 
 	private PostService postService;
 	private PostRepository postRepository;
+	private ImageRepository imageRepository;
 	private PostMapper mapper;
 
 	private Post post;
@@ -42,9 +47,10 @@ class PostServiceUnitTest {
 	void init() {
 
 		postRepository = mock(PostRepository.class);
+		imageRepository = mock(ImageRepository.class);
 		mapper = mock(PostMapper.class);
 
-		postService = new PostService(mapper, postRepository);
+		postService = new PostService(mapper, postRepository, imageRepository);
 
 		user = new User();
 		user.setId(1L);
@@ -54,14 +60,14 @@ class PostServiceUnitTest {
 		post.setId(1L);
 		post.setTitle("Title");
 		post.setContent("Content");
-		post.setImages(List.of("img1"));
+		post.setImages(new ArrayList<>());
 		post.setAuthor(user);
 
 		postDTO = mock(PostDTO.class);
 
 		when(postDTO.title()).thenReturn("Title");
 		when(postDTO.content()).thenReturn("Content");
-		when(postDTO.images()).thenReturn(List.of("img1"));
+		when(postDTO.images()).thenReturn(List.of());
 		when(postDTO.topic()).thenReturn(null);
 	}
 
@@ -184,6 +190,64 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("createPost should assign images correctly")
+	void createPostWithImagesTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+
+		when(postDTO.images()).thenReturn(List.of(1L));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(postRepository.save(any(Post.class))).thenReturn(post);
+		when(mapper.toDTO(post)).thenReturn(postDTO);
+
+		// WHEN
+		PostDTO result = postService.createPost(postDTO, user);
+
+		// THEN
+		assertEquals(postDTO, result);
+		assertEquals(1, post.getImages().size());
+		verify(imageRepository).findAllById(List.of(1L));
+	}
+
+	@Test
+	@DisplayName("createPost should throw when images not found")
+	void createPostImagesNotFoundTest() {
+		// GIVEN
+		when(postDTO.images()).thenReturn(List.of(1L, 2L));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(imageRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of());
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			postService.createPost(postDTO, user);
+		});
+	}
+
+	@Test
+	@DisplayName("createPost should fail if image not owned by user")
+	void createPostWrongOwnerTest() {
+		// GIVEN
+		User other = new User();
+		other.setId(99L);
+
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(other);
+
+		when(postDTO.images()).thenReturn(List.of(1L));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+
+		// WHEN & THEN
+		assertThrows(AccessDeniedException.class, () -> {
+			postService.createPost(postDTO, user);
+		});
+	}
+
+	@Test
 	@DisplayName("updatePost should update post when author edits")
 	void updatePostSuccessTest() {
 		// GIVEN
@@ -250,6 +314,69 @@ class PostServiceUnitTest {
 		// WHEN & THEN
 		assertThrows(AccessDeniedException.class, () -> {
 			postService.updatePost(1L, postDTO, otherUser);
+		});
+	}
+
+	@Test
+	@DisplayName("updatePost should add new images")
+	void updatePostAddImagesTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(2L);
+		img.setOwner(user);
+
+		post.setImages(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(List.of(2L));
+		when(imageRepository.findAllById(List.of(2L))).thenReturn(List.of(img));
+		when(postRepository.save(post)).thenReturn(post);
+		when(mapper.toDTO(post)).thenReturn(postDTO);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals(1, post.getImages().size());
+	}
+
+	@Test
+	@DisplayName("updatePost should remove images")
+	void updatePostRemoveImagesTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+
+		post.setImages(new ArrayList<>(List.of(img)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(List.of());
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(postRepository.save(post)).thenReturn(post);
+		when(mapper.toDTO(post)).thenReturn(postDTO);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertTrue(post.getImages().isEmpty());
+		verify(imageRepository).deleteAllById(List.of(1L));
+	}
+
+	@Test
+	@DisplayName("updatePost should throw when adding non-existing image")
+	void updatePostImageNotFoundTest() {
+		// GIVEN
+		post.setImages(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(List.of(5L));
+		when(imageRepository.findAllById(List.of(5L))).thenReturn(List.of());
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			postService.updatePost(1L, postDTO, user);
 		});
 	}
 

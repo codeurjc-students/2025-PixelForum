@@ -93,6 +93,15 @@ describe('CreatePostComponent', () => {
         expect(component.filteredTopics.length).toBe(1);
     });
 
+    it('should detect invalid topic', () => {
+        component.createPostForm.patchValue({ topicSearch: 'Angular' });
+        component.createPostForm.get('topicSearch')?.markAsTouched();
+        component.selectedTopic = null;
+        component.showTopicDropdown = false;
+
+        expect(component.isTopicInvalid).toBeTrue();
+    });
+
     it('should show dropdown on focus', () => {
         component.allTopics = [mockTopic];
 
@@ -172,17 +181,17 @@ describe('CreatePostComponent', () => {
     });
 
     it('should remove image from preview list', () => {
-        component.previewUrls = ['img1', 'img2'];
+        component.previewImages = ['data:image/png'];
+        component.selectedImages = [new File(['test'], 'test.png', { type: 'image/png' })];
 
         component.removeImage(0);
 
-        expect(component.previewUrls.length).toBe(1);
+        expect(component.previewImages.length).toBe(0);
+        expect(component.selectedImages.length).toBe(0);
     });
 
     it('should not allow more than 10 images', () => {
-        component.selectedImages = new Array(10).fill(
-            new File(['a'], 'a.png', { type: 'image/png' })
-        );
+        component.previewImages = new Array(10).fill('data:image/png');
 
         const newFile = new File(['test'], 'img.png', { type: 'image/png' });
 
@@ -243,7 +252,7 @@ describe('CreatePostComponent', () => {
     // ---------- IMAGE UPLOAD ----------
 
     it('should upload images before creating post', async () => {
-        imageServiceSpy.uploadImages.and.returnValue(of({ urls: ['img1'] }) as any);
+        imageServiceSpy.uploadImages.and.returnValue(of(['img1']));
         postServiceSpy.create.and.returnValue(of(mockPost));
 
         component.selectedTopic = mockTopic;
@@ -260,6 +269,7 @@ describe('CreatePostComponent', () => {
         await component.createPost();
 
         expect(imageServiceSpy.uploadImages).toHaveBeenCalled();
+        expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({images: ['img1']}));
     });
 
     it('should handle upload error', async () => {

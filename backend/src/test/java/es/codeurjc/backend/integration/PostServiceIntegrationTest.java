@@ -15,9 +15,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.service.PostService;
 import es.codeurjc.backend.service.TopicService;
 import es.codeurjc.backend.service.UserService;
@@ -43,7 +45,19 @@ class PostServiceIntegrationTest {
     private TopicService topicService;
 
     @Autowired
+    private ImageRepository imageRepository;
+
+    @Autowired
     private PostMapper postMapper;
+
+    private Image createImage(User user) {
+        Image img = new Image();
+        img.setOwner(user);
+        img.setPost(null);
+        img.setFilename("test.png");
+        img.setContentType("image/png");
+        return imageRepository.save(img);
+    }
 
     @Test
     @DisplayName("Should create a post successfully")
@@ -56,7 +70,6 @@ class PostServiceIntegrationTest {
         post.setTitle("Integration Test Post");
         post.setContent("Testing content");
         post.setTopic(topic);
-        post.setImages(List.of("/api/v1/images/posts/test.jpeg"));
 
         PostDTO postDTO = postMapper.toDTO(post);
 
@@ -68,6 +81,90 @@ class PostServiceIntegrationTest {
         assertEquals(postDTO.title(), created.title(), "Title should match");
         assertEquals(postDTO.content(), created.content(), "Content should match");
         assertEquals(user.getId(), created.author().id(), "Author should match");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should create post with images")
+    void createPostWithImagesTest() {
+        // GIVEN
+        User user = userService.findByUsername("martin").orElseThrow();
+        Topic topic = topicService.findAll().get(0);
+
+        Image img = createImage(user);
+
+        PostDTO dto = new PostDTO(
+                null,
+                "Post with images",
+                "Content",
+                null,
+                null,
+                null,
+                topic,
+                null,
+                null,
+                List.of(img.getId()));
+
+        // WHEN
+        PostDTO created = postService.createPost(dto, user);
+
+        // THEN
+        assertNotNull(created.id());
+        assertEquals(1, created.images().size());
+    }
+
+    @Test
+    @DisplayName("Should fail when image does not exist")
+    void createPostImageNotFoundTest() {
+        // GIVEN
+        User user = userService.findByUsername("martin").orElseThrow();
+        Topic topic = topicService.findAll().get(0);
+
+        PostDTO dto = new PostDTO(
+                null,
+                "Invalid",
+                "Content",
+                null,
+                null,
+                null,
+                topic,
+                null,
+                null,
+                List.of(99999L));
+
+        // WHEN & THEN
+        assertThrows(IllegalArgumentException.class, () -> {
+            postService.createPost(dto, user);
+        });
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should fail when image belongs to another user")
+    void createPostWrongOwnerTest() {
+        // GIVEN
+        User user = userService.findByUsername("martin").orElseThrow();
+        User other = userService.findByUsername("robert").orElseThrow();
+        Topic topic = topicService.findAll().get(0);
+
+        Image img = createImage(other);
+
+        PostDTO dto = new PostDTO(
+                null,
+                "Invalid ownership",
+                "Content",
+                null,
+                null,
+                null,
+                topic,
+                null,
+                null,
+                List.of(img.getId()));
+
+        // WHEN & THEN
+        assertThrows(AccessDeniedException.class, () -> {
+            postService.createPost(dto, user);
+        });
     }
 
     @Test
@@ -109,7 +206,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
-                post.getImages());
+                null);
 
         // WHEN
         PostDTO updated = postService.updatePost(post.getId(), updateDTO, author);
@@ -137,7 +234,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
-                post.getImages());
+                null);
 
         long postId = post.getId();
         // WHEN & THEN
@@ -161,7 +258,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
-                post.getImages());
+                null);
 
         // WHEN
         PostDTO updated = postService.updatePost(post.getId(), dto, admin);
@@ -170,6 +267,80 @@ class PostServiceIntegrationTest {
         assertEquals("Admin Update", updated.title());
         assertEquals("Admin content", updated.content());
         assertEquals(dto.topic(), updated.topic());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should add images when updating post")
+    void updatePostAddImagesTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User user = post.getAuthor();
+
+        Image img = createImage(user);
+
+        PostDTO dto = new PostDTO(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                null,
+                null,
+                null,
+                post.getTopic(),
+                null,
+                null,
+                List.of(img.getId()));
+
+        // WHEN
+        PostDTO updated = postService.updatePost(post.getId(), dto, user);
+
+        // THEN
+        assertEquals(1, updated.images().size());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should remove images when updating post")
+    void updatePostRemoveImagesTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User user = post.getAuthor();
+
+        Image img = createImage(user);
+
+        // Add image first
+        PostDTO withImage = new PostDTO(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                null,
+                null,
+                null,
+                post.getTopic(),
+                null,
+                null,
+                List.of(img.getId()));
+
+        postService.updatePost(post.getId(), withImage, user);
+
+        // Remove image
+        PostDTO withoutImages = new PostDTO(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                null,
+                null,
+                null,
+                post.getTopic(),
+                null,
+                null,
+                List.of());
+
+        // WHEN
+        PostDTO updated = postService.updatePost(post.getId(), withoutImages, user);
+
+        // THEN
+        assertTrue(updated.images().isEmpty());
     }
 
     @Test

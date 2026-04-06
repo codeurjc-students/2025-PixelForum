@@ -65,7 +65,7 @@ export class PostComponent implements OnInit {
 
 	private updateCurrentImage(): void {
 		this.currentImage =
-			this.post.images?.[this.currentImageIndex] ?? '';
+			'api/v1/images/' + (this.post.images?.[this.currentImageIndex] ?? '');
 	}
 
 	goToTopic(): void {

@@ -1,17 +1,17 @@
 package es.codeurjc.backend.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Post {
@@ -25,10 +25,8 @@ public class Post {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @ElementCollection
-    @CollectionTable(name = "post_images")
-    @Column(name = "image_url", columnDefinition = "TEXT")
-    private List<String> images;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -50,7 +48,7 @@ public class Post {
         this.topic = topic;
     }
 
-    public Post(String title, String content, LocalDateTime createdAt, List<String> images, User author, Topic topic) {
+    public Post(String title, String content, LocalDateTime createdAt, List<Image> images, User author, Topic topic) {
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;
@@ -99,11 +97,11 @@ public class Post {
         this.updatedAt = updatedAt;
     }
 
-    public List<String> getImages() {
+    public List<Image> getImages() {
         return images;
     }
 
-    public void setImages(List<String> images) {
+    public void setImages(List<Image> images) {
         this.images = images;
     }
 

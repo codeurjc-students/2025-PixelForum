@@ -98,16 +98,16 @@
 				</div>
 
 				<!-- Image Previews -->
-				<div *ngIf="previewUrls.length > 0" class="image-preview-grid">
-					<div *ngFor="let preview of previewUrls; let i = index" class="image-preview-item">
+				<div *ngIf="previewImages.length > 0" class="image-preview-grid">
+					<div *ngFor="let preview of previewImages; let i = index" class="image-preview-item">
 						<img [src]="preview" alt="Preview" class="preview-image" />
 						<button type="button" class="remove-image-btn" (click)="removeImage(i)" title="Eliminar imagen">
 							×
 						</button>
 					</div>
 				</div>
-				<div *ngIf="selectedImages.length > 0" class="image-count">
-					{{ selectedImages.length }} image(s) selected
+				<div *ngIf="previewImages.length > 0" class="image-count">
+					{{ previewImages.length }} image(s) selected
 				</div>
 			</div>
 

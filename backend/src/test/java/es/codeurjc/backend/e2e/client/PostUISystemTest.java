@@ -84,6 +84,25 @@ class PostUISystemTest {
         wait.until(ExpectedConditions.urlContains("/posts"));
     }
 
+    private String createPost(String title) {
+        driver.get("https://localhost:" + port + "/create-post");
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
+
+        driver.findElement(By.id("title")).sendKeys(title);
+        driver.findElement(By.id("content")).sendKeys("Test content");
+
+        driver.findElement(By.id("topic-search")).sendKeys("GTA");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
+        driver.findElement(By.cssSelector(".topic-option")).click();
+
+        driver.findElement(By.id("save-post-button")).click();
+
+        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+
+        return driver.getCurrentUrl();
+    }
+
     @Test
     @DisplayName("List posts page displays posts")
     void listPostsTest() {
@@ -119,9 +138,15 @@ class PostUISystemTest {
         // Fill form
         driver.findElement(By.id("title")).sendKeys("Selenium Test Post");
         driver.findElement(By.id("content")).sendKeys("This post was created by Selenium E2E test.");
+
+        // Topic
         driver.findElement(By.id("topic-search")).sendKeys("GTA V");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
         driver.findElement(By.cssSelector(".topic-option")).click();
+
+        // Image upload
+        WebElement fileInput = driver.findElement(By.id("images"));
+        fileInput.sendKeys(System.getProperty("user.dir") + "/src/test/resources/test.png");
 
         driver.findElement(By.id("save-post-button")).click();
 
@@ -131,6 +156,10 @@ class PostUISystemTest {
         // Verify title in detail page
         WebElement postTitle = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("post-title")));
         assertEquals("Selenium Test Post", postTitle.getText(), "The post should be created");
+
+        // Verify image is displayed
+        List<WebElement> images = driver.findElements(By.id("post-image"));
+        assertTrue(images.size() > 0, "Post should contain an image");
     }
 
     @Test
@@ -148,15 +177,9 @@ class PostUISystemTest {
     void editPostTest() {
         login("admin", "admin0");
 
-        // Navigate to last post
-        driver.get("https://localhost:" + port + "/posts");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
-
-        List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
-        WebElement firstPost = posts.get(0);
-        firstPost.click();
-
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+        // Create a post to edit
+        createPost("Post to edit");
+        List<WebElement> imagesBefore = driver.findElements(By.id("post-image"));
 
         // Click edit button
         WebElement editButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("edit-btn")));
@@ -164,49 +187,42 @@ class PostUISystemTest {
 
         wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+/edit$"));
 
+        // Edit title and add image
         WebElement titleInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
         titleInput.clear();
         titleInput.sendKeys("Edited Selenium Post");
+        WebElement fileInput = driver.findElement(By.id("images"));
+        fileInput.sendKeys(System.getProperty("user.dir") + "/src/test/resources/test.png");
 
         driver.findElement(By.id("save-post-button")).click();
 
+        // Verify edited content
         wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
         WebElement postTitle = driver.findElement(By.id("post-title"));
         assertEquals("Edited Selenium Post", postTitle.getText(), "The title should change to the edited one");
+        List<WebElement> imagesAfter = driver.findElements(By.id("post-image"));
+        assertEquals(imagesBefore.size() + 1, imagesAfter.size());
     }
 
     @Test
     @DisplayName("Edit an existing post without authorization should fail")
     void editPostUnauthorizedTest() {
+        // Create post as admin
+        login("admin", "admin0");
+        String postUrl = createPost("Admin Post For Unauthorized Test");
+
+        // Extract postId
+        String postId = postUrl.substring(postUrl.lastIndexOf("/") + 1);
+
+        // Logout
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
+        driver.manage().deleteAllCookies();
+        driver.navigate().refresh();
+
+        // Login as another user
         login("martin", "user");
-        driver.get("https://localhost:" + port + "/posts");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("app-post")));
 
-        // Get post
-        List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
-        WebElement targetPost = null;
-        String originalContent = null;
-        String postId = null;
-
-        for (WebElement post : posts) {
-            String author = post.findElement(By.id("post-author-username")).getText();
-            if (!author.equals("martin")) {
-                targetPost = post;
-                originalContent = post.findElement(By.id("post-title")).getText();
-                break;
-            }
-        }
-
-        if (targetPost == null)
-            fail("No post from another user found");
-
-        targetPost.click();
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
-
-        String url = driver.getCurrentUrl();
-        postId = url.substring(url.lastIndexOf("/") + 1);
-
-        // Open edit page
+        // Go directly to edit page
         driver.get("https://localhost:" + port + "/posts/" + postId + "/edit");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("save-post-button")));
 
@@ -223,7 +239,7 @@ class PostUISystemTest {
         // Verify post content is unchanged
         driver.get("https://localhost:" + port + "/posts/" + postId);
         WebElement postTitle = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("post-title")));
-        assertEquals(originalContent, postTitle.getText(), "The post title should not have changed");
+        assertEquals("Admin Post For Unauthorized Test", postTitle.getText(), "The post title should not have changed");
     }
 
     @Test
@@ -232,20 +248,8 @@ class PostUISystemTest {
         login("admin", "admin0");
 
         // Create a post to delete
-        driver.get("https://localhost:" + port + "/create-post");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
-
         String postTitleToDelete = "Selenium Delete Test Post";
-
-        driver.findElement(By.id("title")).sendKeys(postTitleToDelete);
-        driver.findElement(By.id("content")).sendKeys("Content for deletion test");
-        driver.findElement(By.id("topic-search")).sendKeys("GTA");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
-        driver.findElement(By.cssSelector(".topic-option")).click();
-        driver.findElement(By.id("save-post-button")).click();
-
-        // Wait for navigation to detail page
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+        String postUrl = createPost(postTitleToDelete);
 
         // Click delete
         WebElement deleteButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("delete-btn")));
@@ -256,14 +260,9 @@ class PostUISystemTest {
         // Back to post list
         wait.until(ExpectedConditions.urlMatches(".*/posts$"));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath("//app-post[.//*[@id='post-title' and text()='" + postTitleToDelete + "']]")));
 
-        // Verify that the title no longer exists
-        List<WebElement> postsAfterDelete = driver.findElements(By.cssSelector("app-post"));
-        boolean foundDeletedTitle = postsAfterDelete.stream()
-                .anyMatch(p -> p.findElement(By.id("post-title")).getText().equals(postTitleToDelete));
-
-        assertFalse(foundDeletedTitle, "The deleted post should no longer be in the list");
+        driver.get(postUrl);
+        WebElement error = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
+        assertEquals("500", error.getText(), "The post should be deleted and not accessible");
     }
 }
