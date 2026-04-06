@@ -58,7 +58,7 @@ public class ImageService {
             Image savedImage = imageRepository.save(image);
             return savedImage.getId();
         } catch (IOException e) {
-            throw new RuntimeException("Error processing the file", e);
+            throw new IllegalStateException("Error processing the file", e);
         }
     }
 

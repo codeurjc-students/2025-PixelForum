@@ -2,8 +2,6 @@ package es.codeurjc.backend.integration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -84,7 +82,7 @@ class ImageServiceIntegrationTest {
 	@Test
 	@DisplayName("Should upload image successfully")
 	@Transactional
-	void uploadImageSuccessTest() throws IOException {
+	void uploadImageSuccessTest() {
 		// GIVEN
 		User user = userService.findByUsername("martin").orElseThrow();
 
@@ -92,8 +90,7 @@ class ImageServiceIntegrationTest {
 				"file",
 				"test.png",
 				"image/png",
-				"data".getBytes()
-		);
+				"data".getBytes());
 
 		// WHEN
 		Long imageId = imageService.uploadImage(file, user);
@@ -116,8 +113,7 @@ class ImageServiceIntegrationTest {
 				"file",
 				"test.png",
 				"image/png",
-				new byte[0]
-		);
+				new byte[0]);
 
 		// WHEN & THEN
 		assertThrows(IllegalArgumentException.class, () -> {
@@ -135,8 +131,7 @@ class ImageServiceIntegrationTest {
 				"file",
 				"test.pdf",
 				"application/pdf",
-				"data".getBytes()
-		);
+				"data".getBytes());
 
 		// WHEN & THEN
 		assertThrows(IllegalArgumentException.class, () -> {
@@ -156,8 +151,7 @@ class ImageServiceIntegrationTest {
 				"file",
 				"big.png",
 				"image/png",
-				bigData
-		);
+				bigData);
 
 		// WHEN & THEN
 		assertThrows(IllegalArgumentException.class, () -> {
@@ -180,9 +174,7 @@ class ImageServiceIntegrationTest {
 		imageService.deleteImage(image.getId(), user);
 
 		// THEN
-		assertThrows(EntityNotFoundException.class, () -> {
-			imageService.getImageById(image.getId());
-		});
+		assertThrows(EntityNotFoundException.class, () -> imageService.getImageById(image.getId()));
 	}
 
 	@Test
@@ -199,9 +191,7 @@ class ImageServiceIntegrationTest {
 		imageService.deleteImage(image.getId(), admin);
 
 		// THEN
-		assertThrows(EntityNotFoundException.class, () -> {
-			imageService.getImageById(image.getId());
-		});
+		assertThrows(EntityNotFoundException.class, () -> imageService.getImageById(image.getId()));
 	}
 
 	@Test
@@ -226,8 +216,6 @@ class ImageServiceIntegrationTest {
 		User user = userService.findByUsername("martin").orElseThrow();
 
 		// WHEN & THEN
-		assertThrows(EntityNotFoundException.class, () -> {
-			imageService.deleteImage(-1L, user);
-		});
+		assertThrows(EntityNotFoundException.class, () -> imageService.deleteImage(-1L, user));
 	}
 }

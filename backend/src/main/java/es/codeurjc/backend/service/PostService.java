@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 public class PostService {
 
 	private static final String POST_NOT_FOUND = "Post not found";
+	private static final String ADMIN = "ADMIN";
 
 	private final PostMapper mapper;
 	private final PostRepository postRepository;
@@ -84,7 +85,7 @@ public class PostService {
 		Post post = postRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
 
-		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
+		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only edit your own posts");
 		}
 
@@ -121,23 +122,31 @@ public class PostService {
 	public void checkImagesOwnership(List<Image> images, User user, Post post) {
 		for (Image img : images) {
 			if (post == null) {
-				if (img.getOwner().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
-					throw new AccessDeniedException("You can only add your own images to the post");
-				}
-				if (img.getPost() != null) {
-					throw new IllegalArgumentException(
-							"Image with id " + img.getId() + " is already associated with another post");
-				}
+				validateOwnership(img, user);
 			} else {
-				if (img.getOwner().getId() != user.getId() && user.getId() != post.getAuthor().getId()
-						&& !user.getRoles().contains("ADMIN")) {
-					throw new AccessDeniedException("You can only add your own images to the post");
-				}
-				if (img.getPost() != null && img.getPost().getId() != post.getId()) {
-					throw new IllegalArgumentException(
-							"Image with id " + img.getId() + " is already associated with another post");
-				}
+				validateOwnership(img, post, user);
 			}
+		}
+	}
+
+	private void validateOwnership(Image img, User user) {
+		if (img.getOwner().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only add your own images to the post");
+		}
+		if (img.getPost() != null) {
+			throw new IllegalArgumentException(
+					"Image with id " + img.getId() + " is already associated with another post");
+		}
+	}
+
+	private void validateOwnership(Image img, Post post, User user) {
+		if (img.getOwner().getId() != user.getId() && user.getId() != post.getAuthor().getId()
+				&& !user.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only add your own images to the post");
+		}
+		if (img.getPost() != null && img.getPost().getId() != post.getId()) {
+			throw new IllegalArgumentException(
+					"Image with id " + img.getId() + " is already associated with another post");
 		}
 	}
 
@@ -176,7 +185,7 @@ public class PostService {
 	public void deletePost(Long id, User user) {
 		Post post = postRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
-		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
+		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only delete your own posts");
 		}
 		postRepository.delete(post);
