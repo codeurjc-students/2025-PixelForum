@@ -175,7 +175,7 @@ class PostServiceIntegrationTest {
         Post post = postService.findAll().get(0);
 
         // WHEN
-        PostDTO dto = postService.getPost(post.getId());
+        PostDTO dto = postService.getPost(post.getId(), null);
 
         // THEN
         assertEquals(post.getTitle(), dto.title());
@@ -186,7 +186,7 @@ class PostServiceIntegrationTest {
     @DisplayName("Should throw EntityNotFoundException when getting non-existing post")
     void getPostNotFoundTest() {
         // WHEN & THEN
-        assertThrows(EntityNotFoundException.class, () -> postService.getPost(-1L));
+        assertThrows(EntityNotFoundException.class, () -> postService.getPost(-1L, null));
     }
 
     @Test
@@ -408,7 +408,7 @@ class PostServiceIntegrationTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // WHEN
-        var page = postService.searchAndFilterPosts("GTA VI", null, "GTA VI", pageable);
+        var page = postService.searchAndFilterPosts("GTA VI", null, "GTA VI", pageable, null);
 
         // THEN
         assertTrue(page.stream().allMatch(p -> p.title().contains("GTA VI")));

@@ -27,14 +27,15 @@ public class UserService {
 	private final CommentRepository commentRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository, CommentRepository commentRepository, PasswordEncoder passwordEncoder) {
+	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository,
+			CommentRepository commentRepository, PasswordEncoder passwordEncoder) {
 		this.mapper = mapper;
 		this.userRepository = userRepository;
 		this.postRepository = postRepository;
 		this.commentRepository = commentRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
-	
+
 	public Optional<User> findById(long id) {
 		return userRepository.findById(id);
 	}
@@ -55,67 +56,72 @@ public class UserService {
 		return userRepository.findAll();
 	}
 
-	public User save(User user){
+	public User save(User user) {
 		String password = user.getPassword();
-        String encodedPassword = passwordEncoder.encode(password);
-        user.setPassword(encodedPassword);
-        if (user.getUsername().equals("admin")) {
-            user.setRoles(List.of("USER", "ADMIN"));
-        } else {
-            user.setRoles(List.of("USER"));
-        }
+		String encodedPassword = passwordEncoder.encode(password);
+		user.setPassword(encodedPassword);
+		if (user.getUsername().equals("admin")) {
+			user.setRoles(List.of("USER", "ADMIN"));
+		} else {
+			user.setRoles(List.of("USER"));
+		}
 		return userRepository.save(user);
-	}	
+	}
+
+	public User update(User user) {
+		return userRepository.save(user);
+	}
 
 	public UserDTO getLoggedUserDTO() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        } else {
-            username = principal.toString();
-        }
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username;
+		if (principal instanceof UserDetails userDetails) {
+			username = userDetails.getUsername();
+		} else {
+			username = principal.toString();
+		}
 
-        return toDTO(userRepository.findByUsername(username).orElseThrow());
+		return toDTO(userRepository.findByUsername(username).orElseThrow());
 	}
 
 	public User getLoggedUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-        } else {
-            username = principal.toString();
-        }
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username;
+		if (principal instanceof UserDetails userDetails) {
+			username = userDetails.getUsername();
+		} else {
+			username = principal.toString();
+		}
 
-        return userRepository.findByUsername(username).orElseThrow(() -> new NoSuchElementException("User not logged or registered"));
+		return userRepository.findByUsername(username)
+				.orElseThrow(() -> new NoSuchElementException("User not logged or registered"));
 	}
 
-    @Transactional 
-    public void deleteById(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
+	@Transactional
+	public void deleteById(Long id) {
+		Optional<User> userOptional = userRepository.findById(id);
+		if (userOptional.isPresent()) {
+			User user = userOptional.get();
 
-            if (user.getId()!= 1){
+			if (user.getId() != 1) {
 				postRepository.deleteByAuthor(user);
 				commentRepository.deleteByAuthor(user);
 				userRepository.delete(user);
 			}
-        }
-    }
+		}
+	}
 
-	private UserDTO toDTO (User user) {
-        return mapper.toDTO(user);
-    }
+	private UserDTO toDTO(User user) {
+		return mapper.toDTO(user);
+	}
 
-    private User toDomain (UserDTO userDTO) {
-        return mapper.toDomain(userDTO);
-    }
+	private User toDomain(UserDTO userDTO) {
+		return mapper.toDomain(userDTO);
+	}
 
-    private List<UserDTO> toDTOs(Collection<User> users){
-        return mapper.toDTOs(users);
-    }
+	private List<UserDTO> toDTOs(Collection<User> users) {
+		return mapper.toDTOs(users);
+	}
 
 	public Collection<UserDTO> getUsers() {
 		return toDTOs(userRepository.findAll());
@@ -127,8 +133,8 @@ public class UserService {
 
 	public UserDTO createUser(UserDTO userDTO) {
 		User user = toDomain(userDTO);
- 		this.save(user);
- 		return toDTO(user);
+		this.save(user);
+		return toDTO(user);
 	}
 
 }

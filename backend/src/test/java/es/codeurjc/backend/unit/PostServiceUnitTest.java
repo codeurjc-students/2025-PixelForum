@@ -76,15 +76,15 @@ class PostServiceUnitTest {
 	void getPostSuccessTest() {
 		// GIVEN
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-		when(mapper.toDTO(post)).thenReturn(postDTO);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
 
 		// WHEN
-		PostDTO result = postService.getPost(1L);
+		PostDTO result = postService.getPost(1L, user);
 
 		// THEN
 		assertEquals(postDTO, result);
 		verify(postRepository).findById(1L);
-		verify(mapper).toDTO(post);
+		verify(mapper).toDTOWithLike(post, user);
 	}
 
 	@Test
@@ -95,7 +95,7 @@ class PostServiceUnitTest {
 
 		// WHEN & THEN
 		assertThrows(EntityNotFoundException.class, () -> {
-			postService.getPost(1L);
+			postService.getPost(1L, user);
 		});
 	}
 
@@ -108,10 +108,8 @@ class PostServiceUnitTest {
 		when(postRepository.findByFilters(null, null, null, Pageable.unpaged()))
 				.thenReturn(page);
 
-		when(mapper.toDTO(post)).thenReturn(postDTO);
-
 		// WHEN
-		Page<PostDTO> result = postService.searchAndFilterPosts(null, null, null, Pageable.unpaged());
+		Page<PostDTO> result = postService.searchAndFilterPosts(null, null, null, Pageable.unpaged(), user);
 
 		// THEN
 		assertEquals(1, result.getContent().size());
@@ -178,7 +176,7 @@ class PostServiceUnitTest {
 		// GIVEN
 		when(mapper.toDomain(postDTO)).thenReturn(post);
 		when(postRepository.save(any(Post.class))).thenReturn(post);
-		when(mapper.toDTO(post)).thenReturn(postDTO);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
 
 		// WHEN
 		PostDTO result = postService.createPost(postDTO, user);
@@ -186,7 +184,7 @@ class PostServiceUnitTest {
 		// THEN
 		assertEquals(postDTO, result);
 		verify(postRepository).save(any(Post.class));
-		verify(mapper).toDTO(post);
+		verify(mapper).toDTOWithLike(post, user);
 	}
 
 	@Test
@@ -201,7 +199,7 @@ class PostServiceUnitTest {
 		when(mapper.toDomain(postDTO)).thenReturn(post);
 		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
 		when(postRepository.save(any(Post.class))).thenReturn(post);
-		when(mapper.toDTO(post)).thenReturn(postDTO);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
 
 		// WHEN
 		PostDTO result = postService.createPost(postDTO, user);
@@ -253,7 +251,7 @@ class PostServiceUnitTest {
 		// GIVEN
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
-		when(mapper.toDTO(post)).thenReturn(postDTO);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
 
 		when(postDTO.title()).thenReturn("New title");
 		when(postDTO.content()).thenReturn("New content");
@@ -271,7 +269,7 @@ class PostServiceUnitTest {
 	void updatePostNoChangesTest() {
 		// GIVEN
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-		when(mapper.toDTO(post)).thenReturn(postDTO);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
 
 		// WHEN
 		PostDTO result = postService.updatePost(1L, postDTO, user);
@@ -290,7 +288,6 @@ class PostServiceUnitTest {
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
-		when(mapper.toDTO(post)).thenReturn(postDTO);
 
 		when(postDTO.topic()).thenReturn(topic);
 
@@ -331,7 +328,6 @@ class PostServiceUnitTest {
 		when(postDTO.images()).thenReturn(List.of(2L));
 		when(imageRepository.findAllById(List.of(2L))).thenReturn(List.of(img));
 		when(postRepository.save(post)).thenReturn(post);
-		when(mapper.toDTO(post)).thenReturn(postDTO);
 
 		// WHEN
 		postService.updatePost(1L, postDTO, user);
@@ -354,7 +350,6 @@ class PostServiceUnitTest {
 		when(postDTO.images()).thenReturn(List.of());
 		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
 		when(postRepository.save(post)).thenReturn(post);
-		when(mapper.toDTO(post)).thenReturn(postDTO);
 
 		// WHEN
 		postService.updatePost(1L, postDTO, user);

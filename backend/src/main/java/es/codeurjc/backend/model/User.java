@@ -11,11 +11,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
@@ -35,7 +37,10 @@ public class User {
     @JoinColumn(name = "profile_image_id")
     private Image avatar;
 
-    private List<Long> likedPosts;
+    @ManyToMany
+    @JoinTable(name = "user_liked_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
+    private List<Post> likedPosts = new ArrayList<>();
+
     private List<Long> likedComments;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -75,7 +80,7 @@ public class User {
         return avatar;
     }
 
-    public List<Long> getLikedPosts() {
+    public List<Post> getLikedPosts() {
         return likedPosts;
     }
 
@@ -108,7 +113,7 @@ public class User {
         this.avatar = avatar;
     }
 
-    public void setLikedPosts(List<Long> likedPosts) {
+    public void setLikedPosts(List<Post> likedPosts) {
         this.likedPosts = likedPosts;
     }
 

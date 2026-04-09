@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import es.codeurjc.backend.model.User;
-
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -15,6 +15,7 @@ public interface UserMapper {
 
     List<UserDTO> toDTOs(Collection<User> users);
 
+    @Mapping(target = "likedPosts", ignore = true)
     User toDomain(UserDTO userDTO);
 
 }

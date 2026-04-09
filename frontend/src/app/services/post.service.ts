@@ -62,4 +62,7 @@ export class PostService {
 		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
 	}
 
+	toggleLike(id: number): Observable<Post> {
+		return this.http.post<Post>(`${this.baseUrl}/${id}/like`, {}, { withCredentials: true });
+	}
 }

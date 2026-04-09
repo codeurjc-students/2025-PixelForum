@@ -11,5 +11,5 @@ export interface Post {
 	author?: User;
 	topic: Topic;
 	likes?: number;
-	usersThatLiked?: number[];
+	hasUserLiked?: boolean;
 }

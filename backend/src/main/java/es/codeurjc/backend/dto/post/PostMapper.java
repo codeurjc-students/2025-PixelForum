@@ -6,12 +6,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.model.Image;
 
 @Mapper(componentModel = "spring")
 public interface PostMapper {
 
     @Mapping(target = "images", source = "images", qualifiedByName = "imagesToIds")
+    @Mapping(target = "hasUserLiked", ignore = true)
     PostDTO toDTO(Post post);
 
     List<PostDTO> toDTOs(Collection<Post> posts);
@@ -22,6 +24,7 @@ public interface PostMapper {
     @Mapping(target = "author.likedComments", ignore = true)
     @Mapping(target = "author.roles", ignore = true)
     @Mapping(target = "images", source = "images", qualifiedByName = "idsToImages")
+    @Mapping(target = "usersThatLiked", ignore = true)
     Post toDomain(PostDTO postDTO);
 
     @Named("imagesToIds")
@@ -46,5 +49,21 @@ public interface PostMapper {
                     return image;
                 })
                 .toList();
+    }
+
+    default PostDTO toDTOWithLike(Post post, User currentUser) {
+        PostDTO dto = toDTO(post);
+        Boolean hasLiked = false;
+        if (currentUser != null) {
+            hasLiked = post.getUsersThatLiked() != null &&
+                    post.getUsersThatLiked().contains(currentUser);
+        }
+        return new PostDTO(
+                dto.id(), dto.title(), dto.content(),
+                dto.createdAt(), dto.updatedAt(),
+                dto.author(), dto.topic(),
+                dto.likes(),
+                hasLiked,
+                dto.images());
     }
 }
