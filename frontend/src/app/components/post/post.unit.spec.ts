@@ -34,8 +34,9 @@ describe('PostComponent', () => {
 	};
 
 	beforeEach(async () => {
-		postServiceSpy = jasmine.createSpyObj('PostService', ['delete']);
+		postServiceSpy = jasmine.createSpyObj('PostService', ['delete', 'toggleLike']);
 		authServiceSpy = jasmine.createSpyObj('AuthService', [], { user$: of(mockUser) });
+		authServiceSpy.loggedIn$ = of(true);
 		routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 		dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 		snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -163,6 +164,40 @@ describe('PostComponent', () => {
 		component['deletePost']();
 
 		expect(component.postDeleted.emit).toHaveBeenCalled();
+	});
+
+	it('should toggle like when user is logged in', () => {
+		const updatedPost: Post = { ...mockPost, likes: 1, hasUserLiked: true };
+
+		postServiceSpy.toggleLike.and.returnValue(of(updatedPost));
+
+		component.toggleLike();
+
+		expect(postServiceSpy.toggleLike).toHaveBeenCalledWith(1);
+		expect(component.post).toEqual(updatedPost);
+		expect(component.hasUserLiked).toBeTrue();
+	});
+
+	it('should remove like when already liked', () => {
+		component.hasUserLiked = true;
+
+		const updatedPost: Post = { ...mockPost, likes: 0, hasUserLiked: false };
+
+		postServiceSpy.toggleLike.and.returnValue(of(updatedPost));
+
+		component.toggleLike();
+
+		expect(postServiceSpy.toggleLike).toHaveBeenCalledWith(1);
+		expect(component.post.likes).toBe(0);
+		expect(component.hasUserLiked).toBeFalse();
+	});
+
+	it('should not call toggleLike when user is not logged in', () => {
+		authServiceSpy.loggedIn$ = of(false);
+
+		component.toggleLike();
+
+		expect(postServiceSpy.toggleLike).not.toHaveBeenCalled();
 	});
 
 });

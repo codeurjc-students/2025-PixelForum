@@ -207,4 +207,101 @@ describe('PostService - Integration', () => {
 		});
 	});
 
+	it('toggleLike should add like to a post', (done: DoneFn) => {
+		const newPost: Post = {
+			title: 'Like Test ' + Date.now(),
+			content: 'Testing like',
+			topic: { id: 1 } as any,
+			images: []
+		};
+
+		// Create a new post to like
+		service.create(newPost).subscribe({
+			next: post => {
+				expect(post.id).toBeTruthy();
+
+				// WHEN
+				service.toggleLike(post.id!).subscribe({
+					next: updated => {
+						expect(updated.likes).toBe(1);
+						done();
+					},
+					error: err => {
+						fail('Error toggling like: ' + err.message);
+						done();
+					}
+				});
+			},
+			error: err => {
+				fail('Error creating post: ' + err.message);
+				done();
+			}
+		});
+	});
+
+	it('toggleLike should remove like when already liked', (done: DoneFn) => {
+		const newPost: Post = {
+			title: 'Unlike Test ' + Date.now(),
+			content: 'Testing unlike',
+			topic: { id: 1 } as any,
+			images: []
+		};
+
+		service.create(newPost).subscribe({
+			next: post => {
+				// First like
+				service.toggleLike(post.id!).subscribe({
+					next: () => {
+						// Then unlike
+						service.toggleLike(post.id!).subscribe({
+							next: updated => {
+								expect(updated.likes).toBe(0);
+								done();
+							},
+							error: err => {
+								fail('Error removing like: ' + err.message);
+								done();
+							}
+						});
+
+					}
+				});
+			}
+		});
+	});
+
+	it('toggleLike without authentication should fail', (done: DoneFn) => {
+		const newPost: Post = {
+			title: 'No Auth Like ' + Date.now(),
+			content: 'Test',
+			topic: { id: 1 } as any,
+			images: []
+		};
+
+		// Create a new post to like
+		service.create(newPost).subscribe({
+			next: post => {
+
+				// LOGOUT
+				authService.logout().subscribe({
+					next: () => {
+						// THEN TRY TO LIKE
+						service.toggleLike(post.id!).subscribe({
+							next: () => {
+								fail('Like should not be allowed without auth');
+								done();
+							},
+							error: err => {
+								expect(err.status).toBe(401);
+								done();
+							}
+						});
+
+					}
+				});
+
+			}
+		});
+	});
+
 });

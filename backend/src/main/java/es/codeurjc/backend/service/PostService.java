@@ -1,6 +1,7 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,13 +36,14 @@ public class PostService {
 		this.imageRepository = imageRepository;
 	}
 
-	public PostDTO getPost(Long id) {
-		return toDTO(postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND)));
+	public PostDTO getPost(Long id, User user) {
+		return toDTO(postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND)), user);
 	}
 
-	public Page<PostDTO> searchAndFilterPosts(String title, String authorUsername, String topic, Pageable pageable) {
+	public Page<PostDTO> searchAndFilterPosts(String title, String authorUsername, String topic, Pageable pageable,
+			User user) {
 		Page<Post> postsPage = postRepository.findByFilters(title, authorUsername, topic, pageable);
-		return postsPage.map(mapper::toDTO);
+		return postsPage.map(post -> toDTO(post, user));
 	}
 
 	public boolean exist(Long id) {
@@ -56,8 +58,8 @@ public class PostService {
 		return postRepository.save(post);
 	}
 
-	private PostDTO toDTO(Post post) {
-		return mapper.toDTO(post);
+	private PostDTO toDTO(Post post, User user) {
+		return mapper.toDTOWithLike(post, user);
 	}
 
 	public PostDTO createPost(PostDTO postDTO, User user) {
@@ -77,7 +79,7 @@ public class PostService {
 			images.forEach(img -> img.setPost(post));
 		}
 		Post savedPost = postRepository.save(post);
-		return toDTO(savedPost);
+		return toDTO(savedPost, user);
 	}
 
 	@Transactional
@@ -90,7 +92,7 @@ public class PostService {
 		}
 
 		if (!hasChanges(post, postDTO)) {
-			return toDTO(post);
+			return toDTO(post, user);
 		}
 
 		manageImages(post, postDTO, user);
@@ -100,7 +102,7 @@ public class PostService {
 		post.setUpdatedAt(LocalDateTime.now());
 
 		Post updatedPost = postRepository.save(post);
-		return toDTO(updatedPost);
+		return toDTO(updatedPost, user);
 	}
 
 	private boolean hasChanges(Post post, PostDTO dto) {
@@ -188,6 +190,27 @@ public class PostService {
 		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only delete your own posts");
 		}
+		for (User userLikes : new ArrayList<>(post.getUsersThatLiked())) {
+			userLikes.getLikedPosts().remove(post);
+		}
 		postRepository.delete(post);
+	}
+
+	@Transactional
+	public PostDTO toggleLike(Long postId, User user) {
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
+
+		List<Post> likedPosts = user.getLikedPosts();
+		boolean hasLiked = likedPosts.contains(post);
+		if (hasLiked) {
+			user.getLikedPosts().remove(post);
+			post.getUsersThatLiked().remove(user);
+		} else {
+			user.getLikedPosts().add(post);
+			post.getUsersThatLiked().add(user);
+		}
+		post.setLikes(post.getUsersThatLiked().size());
+		return toDTO(post, user);
 	}
 }

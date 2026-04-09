@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">ImageService.java</span></div><h1>ImageService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
+
+import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.ImageRepository;
+import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.*;
+
+@Service
+public class ImageService {
+
+    private final ImageRepository imageRepository;
+    private static final long MAX_FILE_SIZE = 5242880; // 5 MB
+<span class="fc" id="L20">    private static final Set&lt;String&gt; ALLOWED_TYPES = Set.of(&quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;, &quot;image/webp&quot;);</span>
+
+<span class="fc" id="L22">    public ImageService(ImageRepository imageRepository) {</span>
+<span class="fc" id="L23">        this.imageRepository = imageRepository;</span>
+<span class="fc" id="L24">    }</span>
+
+    public Image getImageById(Long id) {
+<span class="fc" id="L27">        return imageRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Image not found&quot;));</span>
+    }
+
+    public Image saveImage(byte[] data, String filename, String contentType, User user) {
+<span class="fc" id="L31">        Image image = new Image(data, filename, contentType, user);</span>
+<span class="fc" id="L32">        return imageRepository.save(image);</span>
+    }
+
+    public Long uploadImage(MultipartFile file, User user) {
+        // Validate file
+<span class="fc bfc" id="L37" title="All 4 branches covered.">        if (file == null || file.isEmpty()) {</span>
+<span class="fc" id="L38">            throw new IllegalArgumentException(&quot;The file is empty&quot;);</span>
+        }
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (!ALLOWED_TYPES.contains(file.getContentType())) {</span>
+<span class="fc" id="L42">            throw new IllegalArgumentException(&quot;File type not allowed&quot;);</span>
+        }
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (file.getSize() &gt; MAX_FILE_SIZE) {</span>
+<span class="fc" id="L46">            throw new IllegalArgumentException(&quot;File exceeds the maximum size of 5MB&quot;);</span>
+        }
+
+        try {
+            // Create Image
+<span class="fc" id="L51">            Image image = new Image(</span>
+<span class="fc" id="L52">                    file.getBytes(),</span>
+<span class="fc" id="L53">                    file.getOriginalFilename(),</span>
+<span class="fc" id="L54">                    file.getContentType(),</span>
+                    user);
+
+            // Save to DB and return Id
+<span class="fc" id="L58">            Image savedImage = imageRepository.save(image);</span>
+<span class="fc" id="L59">            return savedImage.getId();</span>
+<span class="fc" id="L60">        } catch (IOException e) {</span>
+<span class="fc" id="L61">            throw new IllegalStateException(&quot;Error processing the file&quot;, e);</span>
+        }
+    }
+
+    public void deleteImage(Long id, User user) {
+<span class="fc" id="L66">        Image image = imageRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Image not found&quot;));</span>
+<span class="fc bfc" id="L67" title="All 4 branches covered.">        if (image.getOwner().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L68">            throw new AccessDeniedException(&quot;You can only delete your own images&quot;);</span>
+        }
+<span class="fc" id="L70">        imageRepository.deleteById(id);</span>
+<span class="fc" id="L71">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

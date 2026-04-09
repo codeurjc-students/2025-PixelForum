@@ -9,7 +9,6 @@ public record UserDTO (
     String username,
 	String email,
     String password,
-    List<Long> likedPosts,
     List<Long> likedComments,
     List<String> roles,
     Image avatar) {

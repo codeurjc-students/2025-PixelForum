@@ -45,15 +45,25 @@ public class PostRestController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String authorUsername,
             @RequestParam(required = false) String topic,
-            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            Principal principal) {
 
-        Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable);
+        User user = null;
+        if (principal != null) {
+            user = userService.findByUsername(principal.getName()).orElse(null);
+        }
+        Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable,
+                user);
         return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> getPostById(@PathVariable long id) {
-        return ResponseEntity.ok(postService.getPost(id));
+    public ResponseEntity<PostDTO> getPostById(@PathVariable long id, Principal principal) {
+        User user = null;
+        if (principal != null) {
+            user = userService.findByUsername(principal.getName()).orElse(null);
+        }
+        return ResponseEntity.ok(postService.getPost(id, user));
     }
 
     @PostMapping
@@ -87,5 +97,13 @@ public class PostRestController {
 
         postService.deletePost(id, currentUser);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<PostDTO> toggleLike(@PathVariable long id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        PostDTO likedPostDTO = postService.toggleLike(id, currentUser);
+        return ResponseEntity.ok(likedPostDTO);
     }
 }

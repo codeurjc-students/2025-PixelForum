@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -37,7 +38,9 @@ public class Post {
     private Topic topic;
 
     private int likes;
-    private List<Long> usersThatLiked;
+
+    @ManyToMany(mappedBy = "likedPosts")
+    private List<User> usersThatLiked = new ArrayList<>();
 
     public Post() {
     }
@@ -129,11 +132,11 @@ public class Post {
         this.likes = likes;
     }
 
-    public List<Long> getUsersThatLiked() {
+    public List<User> getUsersThatLiked() {
         return usersThatLiked;
     }
 
-    public void setUsersThatLiked(List<Long> usersThatLiked) {
+    public void setUsersThatLiked(List<User> usersThatLiked) {
         this.usersThatLiked = usersThatLiked;
     }
 

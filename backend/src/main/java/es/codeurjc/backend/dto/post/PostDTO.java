@@ -15,6 +15,6 @@ public record PostDTO (
     BasicUserDTO author,
     Topic topic,
     Integer likes,
-    List<Long> usersThatLiked,
+    Boolean hasUserLiked,
     List<Long> images) {
 }

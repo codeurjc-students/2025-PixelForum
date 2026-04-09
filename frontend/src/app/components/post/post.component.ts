@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Post } from '../../models/post.model';
 import { Topic } from '../../models/topic.model';
 import { AuthService } from '../../services/auth.service';
-import { map, Observable, takeUntil } from 'rxjs';
+import { map, Observable, take } from 'rxjs';
 import { PostService } from '../../services/post.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
@@ -26,6 +26,7 @@ export class PostComponent implements OnInit {
 	imageCount = 0;
 	currentImage: string = '';
 	topicData: Topic | null = null;
+	hasUserLiked = false;
 	isOwner$!: Observable<boolean>;
 
 	constructor(
@@ -40,6 +41,7 @@ export class PostComponent implements OnInit {
 		this.isOwner$ = this.authService.user$.pipe(
 			map(user => user ? user.id === this.post.author?.id || user.roles.includes('ADMIN') : false)
 		);
+		this.hasUserLiked = !!this.post.hasUserLiked;
 		this.imageCount = this.post.images?.length || 0;
 		if (this.post.topic?.id) {
 			this.topicData = this.post.topic;
@@ -97,8 +99,18 @@ export class PostComponent implements OnInit {
 	}
 
 	toggleLike(): void {
-		// TO DO: Like function
-		console.log('Like post:', this.post.id);
+		this.authService.loggedIn$.pipe(take(1)).subscribe(loggedIn => {
+			if (loggedIn) {
+				if (this.post.id) {
+					this.postService.toggleLike(this.post.id).subscribe({
+						next: (updatedPost: Post) => {
+							this.post = updatedPost;
+							this.hasUserLiked = !!updatedPost.hasUserLiked;
+						}
+					});
+				}
+			}
+		});
 	}
 
 	goToComments(): void {

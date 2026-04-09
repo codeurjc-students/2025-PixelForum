@@ -92,6 +92,11 @@ public class DatabaseInitializer {
 			postService.save(post);
 		}
 
+		addLikes(user1, List.of(post1, post3, post4));
+		addLikes(user2, List.of(post1, post2, post3, post4));
+		addLikes(user3, List.of(post1, post2, post4));
+		addLikes(user4, List.of(post1, post2, post3, post4));
+		addLikes(admin, List.of(post1));
 	}
 
 	private void addImages(Post post, List<String> imageRoutes, User user) throws IOException {
@@ -104,6 +109,16 @@ public class DatabaseInitializer {
 			post.getImages().add(image);
 		}
 		postService.save(post);
+	}
+
+	private void addLikes(User user, List<Post> posts) {
+		for (Post post : posts) {
+			user.getLikedPosts().add(post);
+			post.getUsersThatLiked().add(user);
+			post.setLikes(post.getUsersThatLiked().size());
+			postService.save(post);
+		}
+		userService.update(user);
 	}
 
 }

@@ -872,6 +872,30 @@ ul.nav-tabs {
     }
   }
 };
+    defs["Image"] = {
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "imageData" : {
+      "type" : "string",
+      "format" : "byte"
+    },
+    "filename" : {
+      "type" : "string"
+    },
+    "contentType" : {
+      "type" : "string"
+    },
+    "post" : {
+      "$ref" : "#/components/schemas/Post"
+    },
+    "owner" : {
+      "$ref" : "#/components/schemas/User"
+    }
+  }
+};
     defs["LoginRequest"] = {
   "properties" : {
     "username" : {
@@ -956,6 +980,9 @@ ul.nav-tabs {
     "sort" : {
       "$ref" : "#/components/schemas/SortObject"
     },
+    "unpaged" : {
+      "type" : "boolean"
+    },
     "paged" : {
       "type" : "boolean"
     },
@@ -966,9 +993,50 @@ ul.nav-tabs {
     "pageSize" : {
       "type" : "integer",
       "format" : "int32"
+    }
+  }
+};
+    defs["Post"] = {
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
     },
-    "unpaged" : {
-      "type" : "boolean"
+    "title" : {
+      "type" : "string"
+    },
+    "content" : {
+      "type" : "string"
+    },
+    "createdAt" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "updatedAt" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "images" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Image"
+      }
+    },
+    "author" : {
+      "$ref" : "#/components/schemas/User"
+    },
+    "topic" : {
+      "$ref" : "#/components/schemas/Topic"
+    },
+    "likes" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "usersThatLiked" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/User"
+      }
     }
   }
 };
@@ -1002,17 +1070,14 @@ ul.nav-tabs {
       "type" : "integer",
       "format" : "int32"
     },
-    "usersThatLiked" : {
-      "type" : "array",
-      "items" : {
-        "type" : "integer",
-        "format" : "int64"
-      }
+    "hasUserLiked" : {
+      "type" : "boolean"
     },
     "images" : {
       "type" : "array",
       "items" : {
-        "type" : "string"
+        "type" : "integer",
+        "format" : "int64"
       }
     }
   }
@@ -1022,10 +1087,10 @@ ul.nav-tabs {
     "empty" : {
       "type" : "boolean"
     },
-    "sorted" : {
+    "unsorted" : {
       "type" : "boolean"
     },
-    "unsorted" : {
+    "sorted" : {
       "type" : "boolean"
     }
   }
@@ -1044,9 +1109,38 @@ ul.nav-tabs {
     }
   }
 };
-    defs["UploadResponse"] = {
+    defs["User"] = {
   "properties" : {
-    "urls" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "username" : {
+      "type" : "string"
+    },
+    "email" : {
+      "type" : "string"
+    },
+    "password" : {
+      "type" : "string"
+    },
+    "avatar" : {
+      "$ref" : "#/components/schemas/Image"
+    },
+    "likedPosts" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Post"
+      }
+    },
+    "likedComments" : {
+      "type" : "array",
+      "items" : {
+        "type" : "integer",
+        "format" : "int64"
+      }
+    },
+    "roles" : {
       "type" : "array",
       "items" : {
         "type" : "string"
@@ -1069,13 +1163,6 @@ ul.nav-tabs {
     "password" : {
       "type" : "string"
     },
-    "likedPosts" : {
-      "type" : "array",
-      "items" : {
-        "type" : "integer",
-        "format" : "int64"
-      }
-    },
     "likedComments" : {
       "type" : "array",
       "items" : {
@@ -1090,14 +1177,7 @@ ul.nav-tabs {
       }
     },
     "avatar" : {
-      "$ref" : "#/components/schemas/UserDTO_avatar"
-    }
-  }
-};
-    defs["UserDTO_avatar"] = {
-  "properties" : {
-    "binaryStream" : {
-      "type" : "object"
+      "$ref" : "#/components/schemas/Image"
     }
   }
 };
@@ -1155,6 +1235,9 @@ ul.nav-tabs {
                     </li>
                     <li data-group="PostRestController" data-name="getPostById" class="">
                       <a href="#api-PostRestController-getPostById">getPostById</a>
+                    </li>
+                    <li data-group="PostRestController" data-name="toggleLike" class="">
+                      <a href="#api-PostRestController-toggleLike">toggleLike</a>
                     </li>
                     <li data-group="PostRestController" data-name="updatePost" class="">
                       <a href="#api-PostRestController-updatePost">updatePost</a>
@@ -1217,7 +1300,7 @@ ul.nav-tabs {
                         <p class="marked"></p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/images/{category}/{filename}/delete</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/api/v1/images/{id}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -1239,8 +1322,8 @@ ul.nav-tabs {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-ImageRestController-deleteImage-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
- "http://localhost:8080/api/v1/images/{category}/{filename}/delete"
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE \
+ "http://localhost:8080/api/v1/images/{id}"
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-ImageRestController-deleteImage-0-java">
@@ -1257,11 +1340,10 @@ public class ImageRestControllerApiExample {
 
         // Create an instance of the API class
         ImageRestControllerApi apiInstance = new ImageRestControllerApi();
-        String category = category_example; // String | 
-        String filename = filename_example; // String | 
+        Long id = 789; // Long | 
 
         try {
-            apiInstance.deleteImage(category, filename);
+            apiInstance.deleteImage(id);
         } catch (ApiException e) {
             System.err.println("Exception when calling ImageRestControllerApi#deleteImage");
             e.printStackTrace();
@@ -1276,11 +1358,10 @@ public class ImageRestControllerApiExample {
 
 final api_instance = DefaultApi();
 
-final String category = new String(); // String | 
-final String filename = new String(); // String | 
+final Long id = new Long(); // Long | 
 
 try {
-    final result = await api_instance.deleteImage(category, filename);
+    final result = await api_instance.deleteImage(id);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->deleteImage: $e\n');
@@ -1295,11 +1376,10 @@ try {
 public class ImageRestControllerApiExample {
     public static void main(String[] args) {
         ImageRestControllerApi apiInstance = new ImageRestControllerApi();
-        String category = category_example; // String | 
-        String filename = filename_example; // String | 
+        Long id = 789; // Long | 
 
         try {
-            apiInstance.deleteImage(category, filename);
+            apiInstance.deleteImage(id);
         } catch (ApiException e) {
             System.err.println("Exception when calling ImageRestControllerApi#deleteImage");
             e.printStackTrace();
@@ -1316,11 +1396,9 @@ public class ImageRestControllerApiExample {
 
 // Create an instance of the API class
 ImageRestControllerApi *apiInstance = [[ImageRestControllerApi alloc] init];
-String *category = category_example; //  (default to null)
-String *filename = filename_example; //  (default to null)
+Long *id = 789; //  (default to null)
 
-[apiInstance deleteImageWith:category
-    filename:filename
+[apiInstance deleteImageWith:id
               completionHandler: ^(NSError* error) {
     if (error) {
         NSLog(@"Error: %@", error);
@@ -1334,8 +1412,7 @@ String *filename = filename_example; //  (default to null)
 
 // Create an instance of the API class
 var api = new OpenApiDefinition.ImageRestControllerApi()
-var category = category_example; // {String} 
-var filename = filename_example; // {String} 
+var id = 789; // {Long} 
 
 var callback = function(error, data, response) {
   if (error) {
@@ -1344,7 +1421,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully.');
   }
 };
-api.deleteImage(category, filename, callback);
+api.deleteImage(id, callback);
 </code></pre>
                             </div>
 
@@ -1367,11 +1444,10 @@ namespace Example
 
             // Create an instance of the API class
             var apiInstance = new ImageRestControllerApi();
-            var category = category_example;  // String |  (default to null)
-            var filename = filename_example;  // String |  (default to null)
+            var id = 789;  // Long |  (default to null)
 
             try {
-                apiInstance.deleteImage(category, filename);
+                apiInstance.deleteImage(id);
             } catch (Exception e) {
                 Debug.Print("Exception when calling ImageRestControllerApi.deleteImage: " + e.Message );
             }
@@ -1387,11 +1463,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\ImageRestControllerApi();
-$category = category_example; // String | 
-$filename = filename_example; // String | 
+$id = 789; // Long | 
 
 try {
-    $api_instance->deleteImage($category, $filename);
+    $api_instance->deleteImage($id);
 } catch (Exception $e) {
     echo 'Exception when calling ImageRestControllerApi->deleteImage: ', $e->getMessage(), PHP_EOL;
 }
@@ -1405,11 +1480,10 @@ use WWW::OPenAPIClient::ImageRestControllerApi;
 
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::ImageRestControllerApi->new();
-my $category = category_example; # String | 
-my $filename = filename_example; # String | 
+my $id = 789; # Long | 
 
 eval {
-    $api_instance->deleteImage(category => $category, filename => $filename);
+    $api_instance->deleteImage(id => $id);
 };
 if ($@) {
     warn "Exception when calling ImageRestControllerApi->deleteImage: $@\n";
@@ -1425,11 +1499,10 @@ from pprint import pprint
 
 # Create an instance of the API class
 api_instance = openapi_client.ImageRestControllerApi()
-category = category_example # String |  (default to null)
-filename = filename_example # String |  (default to null)
+id = 789 # Long |  (default to null)
 
 try:
-    api_instance.delete_image(category, filename)
+    api_instance.delete_image(id)
 except ApiException as e:
     print("Exception when calling ImageRestControllerApi->deleteImage: %s\n" % e)</code></pre>
                             </div>
@@ -1438,11 +1511,10 @@ except ApiException as e:
                               <pre class="prettyprint"><code class="language-rust">extern crate ImageRestControllerApi;
 
 pub fn main() {
-    let category = category_example; // String
-    let filename = filename_example; // String
+    let id = 789; // Long
 
     let mut context = ImageRestControllerApi::Context::default();
-    let result = client.deleteImage(category, filename, &context).wait();
+    let result = client.deleteImage(id, &context).wait();
 
     println!("{:?}", result);
 }
@@ -1463,36 +1535,19 @@ pub fn main() {
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">category*</td>
+                                  <tr><td style="width:150px;">id*</td>
 <td>
 
 
-    <div id="d2e199_deleteImage_category">
+    <div id="d2e199_deleteImage_id">
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    String
+                    Long
                 </span>
-
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                                  <tr><td style="width:150px;">filename*</td>
-<td>
-
-
-    <div id="d2e199_deleteImage_filename">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    String
-                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
 
             </div>
                 <div class="inner required">
@@ -1589,7 +1644,7 @@ pub fn main() {
                         <p class="marked"></p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/images/{category}/{filename}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/images/{id}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -1613,7 +1668,7 @@ pub fn main() {
                           <div class="tab-pane active" id="examples-ImageRestController-getImage-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: */*" \
- "http://localhost:8080/api/v1/images/{category}/{filename}"
+ "http://localhost:8080/api/v1/images/{id}"
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-ImageRestController-getImage-0-java">
@@ -1630,11 +1685,10 @@ public class ImageRestControllerApiExample {
 
         // Create an instance of the API class
         ImageRestControllerApi apiInstance = new ImageRestControllerApi();
-        String category = category_example; // String | 
-        String filename = filename_example; // String | 
+        Long id = 789; // Long | 
 
         try {
-            byte[] result = apiInstance.getImage(category, filename);
+            byte[] result = apiInstance.getImage(id);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling ImageRestControllerApi#getImage");
@@ -1650,11 +1704,10 @@ public class ImageRestControllerApiExample {
 
 final api_instance = DefaultApi();
 
-final String category = new String(); // String | 
-final String filename = new String(); // String | 
+final Long id = new Long(); // Long | 
 
 try {
-    final result = await api_instance.getImage(category, filename);
+    final result = await api_instance.getImage(id);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->getImage: $e\n');
@@ -1669,11 +1722,10 @@ try {
 public class ImageRestControllerApiExample {
     public static void main(String[] args) {
         ImageRestControllerApi apiInstance = new ImageRestControllerApi();
-        String category = category_example; // String | 
-        String filename = filename_example; // String | 
+        Long id = 789; // Long | 
 
         try {
-            byte[] result = apiInstance.getImage(category, filename);
+            byte[] result = apiInstance.getImage(id);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling ImageRestControllerApi#getImage");
@@ -1691,11 +1743,9 @@ public class ImageRestControllerApiExample {
 
 // Create an instance of the API class
 ImageRestControllerApi *apiInstance = [[ImageRestControllerApi alloc] init];
-String *category = category_example; //  (default to null)
-String *filename = filename_example; //  (default to null)
+Long *id = 789; //  (default to null)
 
-[apiInstance getImageWith:category
-    filename:filename
+[apiInstance getImageWith:id
               completionHandler: ^(byte[] output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
@@ -1712,8 +1762,7 @@ String *filename = filename_example; //  (default to null)
 
 // Create an instance of the API class
 var api = new OpenApiDefinition.ImageRestControllerApi()
-var category = category_example; // {String} 
-var filename = filename_example; // {String} 
+var id = 789; // {Long} 
 
 var callback = function(error, data, response) {
   if (error) {
@@ -1722,7 +1771,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.getImage(category, filename, callback);
+api.getImage(id, callback);
 </code></pre>
                             </div>
 
@@ -1745,11 +1794,10 @@ namespace Example
 
             // Create an instance of the API class
             var apiInstance = new ImageRestControllerApi();
-            var category = category_example;  // String |  (default to null)
-            var filename = filename_example;  // String |  (default to null)
+            var id = 789;  // Long |  (default to null)
 
             try {
-                byte[] result = apiInstance.getImage(category, filename);
+                byte[] result = apiInstance.getImage(id);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling ImageRestControllerApi.getImage: " + e.Message );
@@ -1766,11 +1814,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\ImageRestControllerApi();
-$category = category_example; // String | 
-$filename = filename_example; // String | 
+$id = 789; // Long | 
 
 try {
-    $result = $api_instance->getImage($category, $filename);
+    $result = $api_instance->getImage($id);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ImageRestControllerApi->getImage: ', $e->getMessage(), PHP_EOL;
@@ -1785,11 +1832,10 @@ use WWW::OPenAPIClient::ImageRestControllerApi;
 
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::ImageRestControllerApi->new();
-my $category = category_example; # String | 
-my $filename = filename_example; # String | 
+my $id = 789; # Long | 
 
 eval {
-    my $result = $api_instance->getImage(category => $category, filename => $filename);
+    my $result = $api_instance->getImage(id => $id);
     print Dumper($result);
 };
 if ($@) {
@@ -1806,11 +1852,10 @@ from pprint import pprint
 
 # Create an instance of the API class
 api_instance = openapi_client.ImageRestControllerApi()
-category = category_example # String |  (default to null)
-filename = filename_example # String |  (default to null)
+id = 789 # Long |  (default to null)
 
 try:
-    api_response = api_instance.get_image(category, filename)
+    api_response = api_instance.get_image(id)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ImageRestControllerApi->getImage: %s\n" % e)</code></pre>
@@ -1820,11 +1865,10 @@ except ApiException as e:
                               <pre class="prettyprint"><code class="language-rust">extern crate ImageRestControllerApi;
 
 pub fn main() {
-    let category = category_example; // String
-    let filename = filename_example; // String
+    let id = 789; // Long
 
     let mut context = ImageRestControllerApi::Context::default();
-    let result = client.getImage(category, filename, &context).wait();
+    let result = client.getImage(id, &context).wait();
 
     println!("{:?}", result);
 }
@@ -1845,36 +1889,19 @@ pub fn main() {
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">category*</td>
+                                  <tr><td style="width:150px;">id*</td>
 <td>
 
 
-    <div id="d2e199_getImage_category">
+    <div id="d2e199_getImage_id">
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    String
+                    Long
                 </span>
-
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                                  <tr><td style="width:150px;">filename*</td>
-<td>
-
-
-    <div id="d2e199_getImage_filename">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    String
-                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
 
             </div>
                 <div class="inner required">
@@ -1984,7 +2011,7 @@ pub fn main() {
                         <p class="marked"></p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/images/upload</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/images</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -2008,7 +2035,7 @@ pub fn main() {
                           <div class="tab-pane active" id="examples-ImageRestController-uploadImages-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X POST \
  -H "Accept: */*" \
- "http://localhost:8080/api/v1/images/upload?files=&category=category_example"
+ "http://localhost:8080/api/v1/images?files="
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-ImageRestController-uploadImages-0-java">
@@ -2026,10 +2053,9 @@ public class ImageRestControllerApiExample {
         // Create an instance of the API class
         ImageRestControllerApi apiInstance = new ImageRestControllerApi();
         array[File] files = ; // array[File] | 
-        String category = category_example; // String | 
 
         try {
-            UploadResponse result = apiInstance.uploadImages(files, category);
+            array[Long] result = apiInstance.uploadImages(files);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling ImageRestControllerApi#uploadImages");
@@ -2046,10 +2072,9 @@ public class ImageRestControllerApiExample {
 final api_instance = DefaultApi();
 
 final array[File] files = new array[File](); // array[File] | 
-final String category = new String(); // String | 
 
 try {
-    final result = await api_instance.uploadImages(files, category);
+    final result = await api_instance.uploadImages(files);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->uploadImages: $e\n');
@@ -2065,10 +2090,9 @@ public class ImageRestControllerApiExample {
     public static void main(String[] args) {
         ImageRestControllerApi apiInstance = new ImageRestControllerApi();
         array[File] files = ; // array[File] | 
-        String category = category_example; // String | 
 
         try {
-            UploadResponse result = apiInstance.uploadImages(files, category);
+            array[Long] result = apiInstance.uploadImages(files);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling ImageRestControllerApi#uploadImages");
@@ -2087,11 +2111,9 @@ public class ImageRestControllerApiExample {
 // Create an instance of the API class
 ImageRestControllerApi *apiInstance = [[ImageRestControllerApi alloc] init];
 array[File] *files = ; //  (default to null)
-String *category = category_example; //  (optional) (default to default)
 
 [apiInstance uploadImagesWith:files
-    category:category
-              completionHandler: ^(UploadResponse output, NSError* error) {
+              completionHandler: ^(array[Long] output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
     }
@@ -2108,9 +2130,6 @@ String *category = category_example; //  (optional) (default to default)
 // Create an instance of the API class
 var api = new OpenApiDefinition.ImageRestControllerApi()
 var files = ; // {array[File]} 
-var opts = {
-  'category': category_example // {String} 
-};
 
 var callback = function(error, data, response) {
   if (error) {
@@ -2119,7 +2138,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.uploadImages(files, opts, callback);
+api.uploadImages(files, callback);
 </code></pre>
                             </div>
 
@@ -2143,10 +2162,9 @@ namespace Example
             // Create an instance of the API class
             var apiInstance = new ImageRestControllerApi();
             var files = new array[File](); // array[File] |  (default to null)
-            var category = category_example;  // String |  (optional)  (default to default)
 
             try {
-                UploadResponse result = apiInstance.uploadImages(files, category);
+                array[Long] result = apiInstance.uploadImages(files);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling ImageRestControllerApi.uploadImages: " + e.Message );
@@ -2164,10 +2182,9 @@ require_once(__DIR__ . '/vendor/autoload.php');
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\ImageRestControllerApi();
 $files = ; // array[File] | 
-$category = category_example; // String | 
 
 try {
-    $result = $api_instance->uploadImages($files, $category);
+    $result = $api_instance->uploadImages($files);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ImageRestControllerApi->uploadImages: ', $e->getMessage(), PHP_EOL;
@@ -2183,10 +2200,9 @@ use WWW::OPenAPIClient::ImageRestControllerApi;
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::ImageRestControllerApi->new();
 my $files = []; # array[File] | 
-my $category = category_example; # String | 
 
 eval {
-    my $result = $api_instance->uploadImages(files => $files, category => $category);
+    my $result = $api_instance->uploadImages(files => $files);
     print Dumper($result);
 };
 if ($@) {
@@ -2204,10 +2220,9 @@ from pprint import pprint
 # Create an instance of the API class
 api_instance = openapi_client.ImageRestControllerApi()
 files =  # array[File] |  (default to null)
-category = category_example # String |  (optional) (default to default)
 
 try:
-    api_response = api_instance.upload_images(files, category=category)
+    api_response = api_instance.upload_images(files)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling ImageRestControllerApi->uploadImages: %s\n" % e)</code></pre>
@@ -2218,10 +2233,9 @@ except ApiException as e:
 
 pub fn main() {
     let files = ; // array[File]
-    let category = category_example; // String
 
     let mut context = ImageRestControllerApi::Context::default();
-    let result = client.uploadImages(files, category, &context).wait();
+    let result = client.uploadImages(files, &context).wait();
 
     println!("{:?}", result);
 }
@@ -2269,23 +2283,6 @@ pub fn main() {
 </td>
 </tr>
 
-                                <tr><td style="width:150px;">category</td>
-<td>
-
-
-    <div id="d2e199_uploadImages_category">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    String
-                </span>
-
-            </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                             </table>
 
                           <h2>Responses</h2>
@@ -2324,7 +2321,11 @@ pub fn main() {
   "content" : {
     "*/*" : {
       "schema" : {
-        "$ref" : "#/components/schemas/UploadResponse"
+        "type" : "array",
+        "items" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
       }
     }
   }
@@ -3791,12 +3792,13 @@ pub fn main() {
  "http://localhost:8080/api/v1/posts" \
  -d '{
   &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
-  &quot;images&quot; : [ &quot;images&quot;, &quot;images&quot; ],
+  &quot;images&quot; : [ 5, 5 ],
   &quot;author&quot; : {
     &quot;id&quot; : 6,
     &quot;email&quot; : &quot;email&quot;,
     &quot;username&quot; : &quot;username&quot;
   },
+  &quot;hasUserLiked&quot; : true,
   &quot;topic&quot; : {
     &quot;name&quot; : &quot;name&quot;,
     &quot;description&quot; : &quot;description&quot;,
@@ -3804,7 +3806,6 @@ pub fn main() {
   },
   &quot;id&quot; : 0,
   &quot;title&quot; : &quot;title&quot;,
-  &quot;usersThatLiked&quot; : [ 5, 5 ],
   &quot;content&quot; : &quot;content&quot;,
   &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
   &quot;likes&quot; : 5
@@ -5315,6 +5316,372 @@ pub fn main() {
                         </article>
                       </div>
                       <hr>
+                    <div id="api-PostRestController-toggleLike">
+                      <article id="api-PostRestController-toggleLike-0" data-group="User" data-name="toggleLike" data-version="0">
+                        <div class="pull-left">
+                          <h1>toggleLike</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/posts/{id}/like</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-PostRestController-toggleLike-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-java">Java</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-PostRestController-toggleLike-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-PostRestController-toggleLike-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-python">Python</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-PostRestController-toggleLike-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/posts/{id}/like"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-PostRestController-toggleLike-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.PostRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class PostRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        PostRestControllerApi apiInstance = new PostRestControllerApi();
+        Long id = 789; // Long | 
+
+        try {
+            PostDTO result = apiInstance.toggleLike(id);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling PostRestControllerApi#toggleLike");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-PostRestController-toggleLike-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long id = new Long(); // Long | 
+
+try {
+    final result = await api_instance.toggleLike(id);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->toggleLike: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-PostRestController-toggleLike-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.PostRestControllerApi;
+
+public class PostRestControllerApiExample {
+    public static void main(String[] args) {
+        PostRestControllerApi apiInstance = new PostRestControllerApi();
+        Long id = 789; // Long | 
+
+        try {
+            PostDTO result = apiInstance.toggleLike(id);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling PostRestControllerApi#toggleLike");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-PostRestController-toggleLike-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+PostRestControllerApi *apiInstance = [[PostRestControllerApi alloc] init];
+Long *id = 789; //  (default to null)
+
+[apiInstance toggleLikeWith:id
+              completionHandler: ^(PostDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.PostRestControllerApi()
+var id = 789; // {Long} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.toggleLike(id, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-PostRestController-toggleLike-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class toggleLikeExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new PostRestControllerApi();
+            var id = 789;  // Long |  (default to null)
+
+            try {
+                PostDTO result = apiInstance.toggleLike(id);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling PostRestControllerApi.toggleLike: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\PostRestControllerApi();
+$id = 789; // Long | 
+
+try {
+    $result = $api_instance->toggleLike($id);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling PostRestControllerApi->toggleLike: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::PostRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::PostRestControllerApi->new();
+my $id = 789; # Long | 
+
+eval {
+    my $result = $api_instance->toggleLike(id => $id);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling PostRestControllerApi->toggleLike: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.PostRestControllerApi()
+id = 789 # Long |  (default to null)
+
+try:
+    api_response = api_instance.toggle_like(id)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling PostRestControllerApi->toggleLike: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate PostRestControllerApi;
+
+pub fn main() {
+    let id = 789; // Long
+
+    let mut context = PostRestControllerApi::Context::default();
+    let result = client.toggleLike(id, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+<td>
+
+
+    <div id="d2e199_toggleLike_id">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-PostRestController-toggleLike-title-200"></h3>
+                            <p id="examples-PostRestController-toggleLike-description-200" class="marked"></p>
+                            <script>
+                              var responsePostRestController200_description = `OK`;
+                              var responsePostRestController200_description_break = responsePostRestController200_description.indexOf('\n');
+                              if (responsePostRestController200_description_break == -1) {
+                                $("#examples-PostRestController-toggleLike-title-200").text("Status: 200 - " + responsePostRestController200_description);
+                              } else {
+                                $("#examples-PostRestController-toggleLike-title-200").text("Status: 200 - " + responsePostRestController200_description.substring(0, responsePostRestController200_description_break));
+                                $("#examples-PostRestController-toggleLike-description-200").html(responsePostRestController200_description.substring(responsePostRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-PostRestController-toggleLike-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-PostRestController-toggleLike-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-PostRestController-toggleLike-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-PostRestController-toggleLike-200-schema">
+                                <div id="responses-PostRestController-toggleLike-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/PostDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-PostRestController-toggleLike-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-PostRestController-toggleLike-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-PostRestController-toggleLike-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-PostRestController-updatePost">
                       <article id="api-PostRestController-updatePost-0" data-group="User" data-name="updatePost" data-version="0">
                         <div class="pull-left">
@@ -5355,12 +5722,13 @@ pub fn main() {
  "http://localhost:8080/api/v1/posts/{id}" \
  -d '{
   &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
-  &quot;images&quot; : [ &quot;images&quot;, &quot;images&quot; ],
+  &quot;images&quot; : [ 5, 5 ],
   &quot;author&quot; : {
     &quot;id&quot; : 6,
     &quot;email&quot; : &quot;email&quot;,
     &quot;username&quot; : &quot;username&quot;
   },
+  &quot;hasUserLiked&quot; : true,
   &quot;topic&quot; : {
     &quot;name&quot; : &quot;name&quot;,
     &quot;description&quot; : &quot;description&quot;,
@@ -5368,7 +5736,6 @@ pub fn main() {
   },
   &quot;id&quot; : 0,
   &quot;title&quot; : &quot;title&quot;,
-  &quot;usersThatLiked&quot; : [ 5, 5 ],
   &quot;content&quot; : &quot;content&quot;,
   &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
   &quot;likes&quot; : 5
@@ -6500,13 +6867,64 @@ pub fn main() {
  -H "Content-Type: application/json" \
  "http://localhost:8080/api/v1/users/" \
  -d '{
-  &quot;likedComments&quot; : [ 1, 1 ],
+  &quot;likedComments&quot; : [ 6, 6 ],
   &quot;password&quot; : &quot;password&quot;,
-  &quot;likedPosts&quot; : [ 6, 6 ],
   &quot;roles&quot; : [ &quot;roles&quot;, &quot;roles&quot; ],
   &quot;id&quot; : 0,
   &quot;avatar&quot; : {
-    &quot;binaryStream&quot; : &quot;{}&quot;
+    &quot;owner&quot; : {
+      &quot;likedComments&quot; : [ 2, 2 ],
+      &quot;password&quot; : &quot;password&quot;,
+      &quot;likedPosts&quot; : [ null, null ],
+      &quot;roles&quot; : [ &quot;roles&quot;, &quot;roles&quot; ],
+      &quot;id&quot; : 5,
+      &quot;email&quot; : &quot;email&quot;,
+      &quot;username&quot; : &quot;username&quot;
+    },
+    &quot;filename&quot; : &quot;filename&quot;,
+    &quot;post&quot; : {
+      &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+      &quot;images&quot; : [ null, null ],
+      &quot;author&quot; : {
+        &quot;likedComments&quot; : [ 2, 2 ],
+        &quot;password&quot; : &quot;password&quot;,
+        &quot;likedPosts&quot; : [ null, null ],
+        &quot;roles&quot; : [ &quot;roles&quot;, &quot;roles&quot; ],
+        &quot;id&quot; : 5,
+        &quot;email&quot; : &quot;email&quot;,
+        &quot;username&quot; : &quot;username&quot;
+      },
+      &quot;topic&quot; : {
+        &quot;name&quot; : &quot;name&quot;,
+        &quot;description&quot; : &quot;description&quot;,
+        &quot;id&quot; : 1
+      },
+      &quot;id&quot; : 5,
+      &quot;title&quot; : &quot;title&quot;,
+      &quot;usersThatLiked&quot; : [ {
+        &quot;likedComments&quot; : [ 2, 2 ],
+        &quot;password&quot; : &quot;password&quot;,
+        &quot;likedPosts&quot; : [ null, null ],
+        &quot;roles&quot; : [ &quot;roles&quot;, &quot;roles&quot; ],
+        &quot;id&quot; : 5,
+        &quot;email&quot; : &quot;email&quot;,
+        &quot;username&quot; : &quot;username&quot;
+      }, {
+        &quot;likedComments&quot; : [ 2, 2 ],
+        &quot;password&quot; : &quot;password&quot;,
+        &quot;likedPosts&quot; : [ null, null ],
+        &quot;roles&quot; : [ &quot;roles&quot;, &quot;roles&quot; ],
+        &quot;id&quot; : 5,
+        &quot;email&quot; : &quot;email&quot;,
+        &quot;username&quot; : &quot;username&quot;
+      } ],
+      &quot;content&quot; : &quot;content&quot;,
+      &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+      &quot;likes&quot; : 7
+    },
+    &quot;imageData&quot; : &quot;imageData&quot;,
+    &quot;id&quot; : 1,
+    &quot;contentType&quot; : &quot;contentType&quot;
   },
   &quot;email&quot; : &quot;email&quot;,
   &quot;username&quot; : &quot;username&quot;

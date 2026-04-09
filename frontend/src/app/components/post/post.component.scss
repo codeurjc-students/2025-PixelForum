@@ -287,6 +287,18 @@
 	}
 }
 
+.like-btn {
+	transition: all 0.2s ease;
+
+	.icon {
+		transition: all 0.2s ease;
+	}
+}
+
+.like-btn.liked .icon {
+	fill: #8BC34A;
+}
+
 .right-buttons {
 	display: flex;
 	gap: 0.5rem;

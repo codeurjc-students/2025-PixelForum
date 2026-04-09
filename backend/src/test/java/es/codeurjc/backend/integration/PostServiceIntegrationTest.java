@@ -175,7 +175,7 @@ class PostServiceIntegrationTest {
         Post post = postService.findAll().get(0);
 
         // WHEN
-        PostDTO dto = postService.getPost(post.getId());
+        PostDTO dto = postService.getPost(post.getId(), null);
 
         // THEN
         assertEquals(post.getTitle(), dto.title());
@@ -186,7 +186,7 @@ class PostServiceIntegrationTest {
     @DisplayName("Should throw EntityNotFoundException when getting non-existing post")
     void getPostNotFoundTest() {
         // WHEN & THEN
-        assertThrows(EntityNotFoundException.class, () -> postService.getPost(-1L));
+        assertThrows(EntityNotFoundException.class, () -> postService.getPost(-1L, null));
     }
 
     @Test
@@ -408,7 +408,7 @@ class PostServiceIntegrationTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // WHEN
-        var page = postService.searchAndFilterPosts("GTA VI", null, "GTA VI", pageable);
+        var page = postService.searchAndFilterPosts("GTA VI", null, "GTA VI", pageable, null);
 
         // THEN
         assertTrue(page.stream().allMatch(p -> p.title().contains("GTA VI")));
@@ -430,5 +430,60 @@ class PostServiceIntegrationTest {
     void findAllTest() {
         List<Post> posts = postService.findAll();
         assertFalse(posts.isEmpty(), "There should be posts in the database");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should add like to post")
+    void toggleLikeAddTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User user = userService.findByUsername("martin").orElseThrow();
+
+        // Ensure the post is not already liked by the user
+        user.getLikedPosts().clear();
+        post.getUsersThatLiked().clear();
+
+        // WHEN
+        PostDTO result = postService.toggleLike(post.getId(), user);
+
+        // THEN
+        assertTrue(user.getLikedPosts().contains(post));
+        assertTrue(post.getUsersThatLiked().contains(user));
+        assertEquals(1, result.likes());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should remove like from post")
+    void toggleLikeRemoveTest() {
+        // GIVEN
+        Post post = postService.findAll().get(0);
+        User user = userService.findByUsername("martin").orElseThrow();
+
+        // Ensure the post is liked by the user
+        user.getLikedPosts().clear();
+        post.getUsersThatLiked().clear();
+        postService.toggleLike(post.getId(), user);
+
+        // WHEN
+        PostDTO result = postService.toggleLike(post.getId(), user);
+
+        // THEN
+        assertFalse(user.getLikedPosts().contains(post));
+        assertFalse(post.getUsersThatLiked().contains(user));
+        assertEquals(0, result.likes());
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException when liking non-existing post")
+    void toggleLikePostNotFoundTest() {
+        // GIVEN
+        User user = userService.findByUsername("martin").orElseThrow();
+
+        // WHEN & THEN
+        assertThrows(EntityNotFoundException.class, () -> {
+            postService.toggleLike(-1L, user);
+        });
     }
 }
