@@ -432,4 +432,58 @@ class PostServiceUnitTest {
 			postService.deletePost(1L, user);
 		});
 	}
+
+	@Test
+	@DisplayName("toggleLike should add like when user has not liked the post")
+	void toggleLikeAddLikeTest() {
+		// GIVEN
+		post.setUsersThatLiked(new ArrayList<>());
+		user.setLikedPosts(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		PostDTO result = postService.toggleLike(1L, user);
+
+		// THEN
+		assertEquals(postDTO, result);
+		assertTrue(user.getLikedPosts().contains(post));
+		assertTrue(post.getUsersThatLiked().contains(user));
+		assertEquals(1, post.getLikes());
+		verify(postRepository).findById(1L);
+	}
+
+	@Test
+	@DisplayName("toggleLike should remove like when user has already liked the post")
+	void toggleLikeRemoveLikeTest() {
+		// GIVEN
+		post.setUsersThatLiked(new ArrayList<>(List.of(user)));
+		user.setLikedPosts(new ArrayList<>(List.of(post)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		PostDTO result = postService.toggleLike(1L, user);
+
+		// THEN
+		assertEquals(postDTO, result);
+		assertFalse(user.getLikedPosts().contains(post));
+		assertFalse(post.getUsersThatLiked().contains(user));
+		assertEquals(0, post.getLikes());
+		verify(postRepository).findById(1L);
+	}
+
+	@Test
+	@DisplayName("toggleLike should throw exception when post not found")
+	void toggleLikePostNotFoundTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.empty());
+
+		// WHEN & THEN
+		assertThrows(EntityNotFoundException.class, () -> {
+			postService.toggleLike(1L, user);
+		});
+	}
 }

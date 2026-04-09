@@ -202,7 +202,7 @@ public class PostService {
 				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
 
 		List<Post> likedPosts = user.getLikedPosts();
-		Boolean hasLiked = likedPosts.contains(post);
+		boolean hasLiked = likedPosts.contains(post);
 		if (hasLiked) {
 			user.getLikedPosts().remove(post);
 			post.getUsersThatLiked().remove(user);

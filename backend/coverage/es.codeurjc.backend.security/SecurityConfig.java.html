@@ -32,11 +32,11 @@ public class SecurityConfig {
 	private final RepositoryUserDetailsService userDetailsService;
 	private final UnauthorizedHandlerJwt unauthorizedHandlerJwt;
 
-<span class="fc" id="L35">	public SecurityConfig(</span>
+	public SecurityConfig(
 			JwtRequestFilter jwtRequestFilter,
 			RepositoryUserDetailsService userDetailsService,
 			UnauthorizedHandlerJwt unauthorizedHandlerJwt
-	) {
+<span class="fc" id="L39">	) {</span>
 <span class="fc" id="L40">		this.jwtRequestFilter = jwtRequestFilter;</span>
 <span class="fc" id="L41">		this.userDetailsService = userDetailsService;</span>
 <span class="fc" id="L42">		this.unauthorizedHandlerJwt = unauthorizedHandlerJwt;</span>

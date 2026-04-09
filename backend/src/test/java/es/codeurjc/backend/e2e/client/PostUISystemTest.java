@@ -265,4 +265,34 @@ class PostUISystemTest {
         WebElement error = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
         assertEquals("500", error.getText(), "The post should be deleted and not accessible");
     }
+
+    @Test
+    @DisplayName("Toggle like on a post")
+    void toggleLikeTest() {
+        // Login
+        login("martin", "user");
+
+        // Create a post to like
+        createPost("Post to Like");
+
+        // Like the post
+        WebElement likeButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".like-btn")));
+        likeButton.click();
+
+        // Wait until likes change
+        wait.until(d -> getLikes() != 0);
+        assertEquals(1, getLikes(), "Like should increase by 1");
+
+        // Click again (unlike)
+        likeButton.click();
+
+        // Wait until likes return
+        wait.until(d -> getLikes() == 0);
+        assertEquals(0, getLikes(), "Like should return to original value");
+    }
+
+    private int getLikes() {
+        return Integer.parseInt(
+                driver.findElement(By.cssSelector(".like-btn .count")).getText());
+    }
 }
