@@ -6,6 +6,8 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
 
 @Mapper(componentModel = "spring")
@@ -15,7 +17,33 @@ public interface UserMapper {
 
     List<UserDTO> toDTOs(Collection<User> users);
 
-    @Mapping(target = "likedPosts", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "likedComments", ignore = true)
     User toDomain(UserDTO userDTO);
 
+    // Image -> Long
+	default Long mapImage(Image image) {
+		return image != null ? image.getId() : null;
+	}
+
+	// Long -> Image
+	default Image mapImage(Long id) {
+		if (id == null) return null;
+		Image image = new Image();
+		image.setId(id);
+		return image;
+	}
+
+	// Post -> Long
+	default Long mapPost(Post post) {
+		return post != null ? post.getId() : null;
+	}
+
+	// Long -> Post
+	default Post mapPost(Long id) {
+		if (id == null) return null;
+		Post post = new Post();
+		post.setId(id);
+		return post;
+	}
 }
