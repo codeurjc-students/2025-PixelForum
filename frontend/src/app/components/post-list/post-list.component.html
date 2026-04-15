@@ -1,12 +1,4 @@
 <div class="post-list-container">
-	<!-- List Header -->
-	<div class="list-header">
-		<button *ngIf="filterType !== 'all'" class="back-btn-header" (click)="goBack()" title="Go back">
-			←
-		</button>
-		<h2>{{ filterName }}</h2>
-	</div>
-
 	<!-- Loading State -->
 	<div *ngIf="isLoading" class="state-container">
 		<div class="loading-spinner">

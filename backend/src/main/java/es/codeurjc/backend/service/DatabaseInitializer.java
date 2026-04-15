@@ -36,7 +36,8 @@ public class DatabaseInitializer {
 		User admin = new User("admin", "admin@host", "admin0", LocalDateTime.of(2023, 1, 23, 10, 43),
 				" This is the oficial Admin account", "ADMIN", "USER");
 		User user1 = new User("martin", "martin@gmail.com", "user", LocalDateTime.of(2023, 3, 13, 18, 12),
-				"Playing games since the NES, the best console, Nintendo games are the best", "USER");
+				"Been gaming since the PS2 days. Love everything from story-driven RPGs to competitive multiplayer. Currently obsessed with souls-like games and indie titles. Competitive but chill. Down to team up or just chat about games.",
+				"USER");
 		User user2 = new User("robert", "robert@gmail.com", "user", LocalDateTime.of(2023, 3, 20, 11, 03),
 				"I love playing video games!", "USER");
 		User user3 = new User("daniel", "daniel@gmail.com", "user", LocalDateTime.of(2023, 5, 9, 15, 01),

@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { Post } from '../../models/post.model';
-import { Topic } from '../../models/topic.model';
 import { AuthService } from '../../services/auth.service';
 import { map, Observable, take } from 'rxjs';
 import { PostService } from '../../services/post.service';
@@ -25,7 +24,6 @@ export class PostComponent implements OnInit {
 	currentImageIndex = 0;
 	imageCount = 0;
 	currentImage: string = '';
-	topicData: Topic | null = null;
 	hasUserLiked = false;
 	isOwner$!: Observable<boolean>;
 
@@ -44,7 +42,6 @@ export class PostComponent implements OnInit {
 		this.hasUserLiked = !!this.post.hasUserLiked;
 		this.imageCount = this.post.images?.length || 0;
 		if (this.post.topic?.id) {
-			this.topicData = this.post.topic;
 			this.updateCurrentImage();
 		}
 	}
@@ -72,7 +69,7 @@ export class PostComponent implements OnInit {
 
 	goToTopic(): void {
 		if (this.post.topic?.id) {
-			this.router.navigate(['/posts/topics', this.post.topic.id], {
+			this.router.navigate(['/topics', this.post.topic.id], {
 				state: { name: this.post.topic.name }
 			});
 		}
@@ -80,7 +77,7 @@ export class PostComponent implements OnInit {
 
 	goToUser(): void {
 		if (this.post.author?.id) {
-			this.router.navigate(['/posts/users', this.post.author.id], {
+			this.router.navigate(['/users', this.post.author.id], {
 				state: { name: this.post.author.username }
 			});
 		}
@@ -162,20 +159,19 @@ export class PostComponent implements OnInit {
 			return;
 		}
 
-		this.postService.delete(this.post.id).subscribe(
-			{
-				next: () => {
-					// Navigate back if in detail mode
-					if (this.mode === 'detail') {
-						this.router.navigate(['/posts']);
-					} else {
-						// In list mode, delete the post without reload
-						this.postDeleted.emit();
-					}
-					this.snackBar.open('Post deleted successfully', 'Close', {
-						duration: 3000
-					});
+		this.postService.delete(this.post.id).subscribe({
+			next: () => {
+				// Navigate back if in detail mode
+				if (this.mode === 'detail') {
+					this.router.navigate(['/posts']);
+				} else {
+					// In list mode, delete the post without reload
+					this.postDeleted.emit();
 				}
-			});
+				this.snackBar.open('Post deleted successfully', 'Close', {
+					duration: 3000
+				});
+			}
+		});
 	}
 }

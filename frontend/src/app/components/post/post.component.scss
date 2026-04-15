@@ -45,6 +45,12 @@
 	transition: all 0.2s ease;
 	padding: 0;
 
+	.back-icon {
+		stroke: currentColor;
+		stroke-width: 2;
+		fill: none;
+	}
+
 	&:hover {
 		color: #8BC34A;
 	}

@@ -69,7 +69,6 @@ describe('PostComponent', () => {
 
 		expect(component.imageCount).toBe(2);
 		expect(component.currentImage).toBe('api/v1/images/img1');
-		expect(component.topicData).toEqual(mockTopic);
 	});
 
 	// ---------- IMAGE NAVIGATION ----------
@@ -101,12 +100,12 @@ describe('PostComponent', () => {
 
 	it('should navigate to topic', () => {
 		component.goToTopic();
-		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts/topics', 1], { state: { name: 'Angular' } });
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/topics', 1], { state: { name: 'Angular' } });
 	});
 
 	it('should navigate to user', () => {
 		component.goToUser();
-		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts/users', 1], { state: { name: 'testuser' } });
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/users', 1], { state: { name: 'testuser' } });
 	});
 
 	it('should navigate to post', () => {

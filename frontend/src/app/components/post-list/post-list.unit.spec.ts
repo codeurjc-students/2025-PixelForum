@@ -111,7 +111,7 @@ describe('PostListComponent - Unit Tests', () => {
 		fixture.detectChanges();
 
 		const compiled = fixture.nativeElement as HTMLElement;
-		expect(compiled.textContent).toContain('Latest PostsLoading posts...');
+		expect(compiled.textContent).toContain('Loading posts...');
 	});
 
 	// ---------- RENDERING POSTS ----------
@@ -136,50 +136,6 @@ describe('PostListComponent - Unit Tests', () => {
 
 		const compiled = fixture.nativeElement as HTMLElement;
 		expect(compiled.textContent).toContain('No posts yet');
-	});
-
-	// ---------- FILTER LOADING ----------
-
-	it('should load topic name and posts', () => {
-		const mockTopic = { id: 1, name: 'Angular' } as any;
-		component.filterId = 1;
-		topicService.getById.and.returnValue(of(mockTopic));
-		postService.getPosts.and.returnValue(of(mockPageResponse));
-
-		component.loadTopicName();
-
-		expect(component.filterName).toBe('Angular');
-		expect(component.filterTopic).toBe('Angular');
-		expect(postService.getPosts).toHaveBeenCalled();
-	});
-
-	it('should navigate to error if topicId is invalid', () => {
-		component.filterId = null;
-
-		component.loadTopicName();
-
-		expect(router.navigate).toHaveBeenCalledWith(['/error']);
-	});
-
-	it('should load user name and posts', () => {
-		const mockUser = { id: 1, username: 'TestUser' } as any;
-		component.filterId = 1;
-		userService.getById.and.returnValue(of(mockUser));
-		postService.getPosts.and.returnValue(of(mockPageResponse));
-
-		component.loadUserName();
-
-		expect(component.filterName).toBe('TestUser');
-		expect(component.filterUsername).toBe('TestUser');
-		expect(postService.getPosts).toHaveBeenCalled();
-	});
-
-	it('should navigate to error if userId is invalid', () => {
-		component.filterId = null;
-
-		component.loadUserName();
-
-		expect(router.navigate).toHaveBeenCalledWith(['/error']);
 	});
 
 	// ---------- LOAD MORE & PAGINATION ----------
@@ -223,26 +179,11 @@ describe('PostListComponent - Unit Tests', () => {
 	// ---------- REMOVE POST ----------
 
 	it('should reload posts on removePost', () => {
-		spyOn(component, 'ngOnInit');
+		spyOn(component, 'loadPosts');
 
 		component.removePost();
 
 		expect(component.isLoading).toBeTrue();
-		expect(component.ngOnInit).toHaveBeenCalled();
+		expect(component.loadPosts).toHaveBeenCalled();
 	});
-
-	// ---------- GO BACK ----------
-
-	it('should go back using location if history length > 1', () => {
-		spyOn(window.history, 'back');
-
-		component.goBack();
-
-		if (window.history.length > 1) {
-			expect(window.history.back).toHaveBeenCalled();
-		} else {
-			expect(router.navigate).toHaveBeenCalledWith(['/posts']);
-		}
-	});
-
 });
