@@ -44,11 +44,11 @@ public class DatabaseInitializer {
 				"I'm suposed to add my bio here", "USER");
 		User user4 = new User("alvaro", "alvaro@gmail.com", "user", LocalDateTime.of(2024, 2, 15, 23, 40),
 				"If you are reading this, you are spying on me", "USER");
-		userService.save(admin);
-		userService.save(user1);
-		userService.save(user2);
-		userService.save(user3);
-		userService.save(user4);
+		userService.addUser(admin);
+		userService.addUser(user1);
+		userService.addUser(user2);
+		userService.addUser(user3);
+		userService.addUser(user4);
 
 		List<Topic> topics = List.of(
 				new Topic("GTA VI", "All news about Grand Theft Auto VI"),
@@ -123,7 +123,7 @@ public class DatabaseInitializer {
 			post.setLikes(post.getUsersThatLiked().size());
 			postService.save(post);
 		}
-		userService.update(user);
+		userService.save(user);
 	}
 
 }

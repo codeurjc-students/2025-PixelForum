@@ -3,59 +3,89 @@ package es.codeurjc.backend.controller.rest;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 import java.net.URI;
-import java.util.List;
+import java.security.Principal;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
-import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserRestController {
 
+    private static final String USER_NOT_FOUND = "User not found";
+
     private final UserService userService;
-	private final UserMapper mapper;
 
-	public UserRestController(UserService userService, UserMapper mapper) {
-		this.userService = userService;
-		this.mapper = mapper;
-	}
-    
-    @GetMapping("/me")
-	public UserDTO me() {
-		return userService.getLoggedUserDTO();
-	}
+    public UserRestController(UserService userService) {
+        this.userService = userService;
+    }
 
-    @GetMapping("/")
-	public List<UserDTO> getUsers() {
-		return mapper.toDTOs(userService.findAll());
-	}
+    @GetMapping
+    public ResponseEntity<Page<UserDTO>> getUsers(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+        return ResponseEntity.ok(userService.getUsers(pageable));
+    }
 
-    @PostMapping("/")
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUser(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserDTO userDTO) {
         UserDTO createdUserDTO = userService.createUser(userDTO);
         URI location = fromCurrentRequest().path("/{id}").buildAndExpand(createdUserDTO.id()).toUri();
         return ResponseEntity.created(location).body(createdUserDTO);
     }
 
-    @GetMapping("/{id}")
-	public UserDTO getUser(@PathVariable long id) {
-        return userService.getUser(id);
-	}
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody CreateUserDTO userDTO,
+            Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        return ResponseEntity.ok(userService.updateUser(id, userDTO, currentUser));
+    }
 
-	@DeleteMapping("/{id}")
-    public UserDTO deleteUser(@PathVariable long id) {
-        UserDTO deletedUser = userService.getUser(id);
-        userService.deleteById(id);
-        return deletedUser;
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        userService.deleteUser(id, currentUser);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<UserDTO> setProfileImage(@PathVariable Long id, @RequestParam("imageId") Long imageId,
+            Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+        UserDTO updatedUserDTO = userService.setProfileImage(id, imageId, currentUser);
+        return ResponseEntity.ok(updatedUserDTO);
+    }
+
+    @DeleteMapping("/{id}/avatar")
+    public ResponseEntity<Void> removeProfileImage(@PathVariable Long id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+        userService.removeProfileImage(id, currentUser);
+        return ResponseEntity.noContent().build();
     }
 }

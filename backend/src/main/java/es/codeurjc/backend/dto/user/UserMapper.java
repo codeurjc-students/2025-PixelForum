@@ -21,6 +21,13 @@ public interface UserMapper {
     @Mapping(target = "likedComments", ignore = true)
     User toDomain(UserDTO userDTO);
 
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "likedPosts", ignore = true)
+	@Mapping(target = "likedComments", ignore = true)
+	@Mapping(target = "roles", ignore = true)
+	User toDomain(CreateUserDTO userDTO);
+
     // Image -> Long
 	default Long mapImage(Image image) {
 		return image != null ? image.getId() : null;

@@ -1,140 +1,199 @@
 package es.codeurjc.backend.service;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
 import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
+import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
 
+	private static final String USER_NOT_FOUND = "User not found";
+	private static final String ADMIN = "ADMIN";
+
 	private final UserMapper mapper;
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final CommentRepository commentRepository;
+	private final ImageRepository imageRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository,
-			CommentRepository commentRepository, PasswordEncoder passwordEncoder) {
+			CommentRepository commentRepository, ImageRepository imageRepository, PasswordEncoder passwordEncoder) {
 		this.mapper = mapper;
 		this.userRepository = userRepository;
 		this.postRepository = postRepository;
 		this.commentRepository = commentRepository;
+		this.imageRepository = imageRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public Optional<User> findById(long id) {
-		return userRepository.findById(id);
+	public UserDTO getUser(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		return mapper.toDTO(user);
 	}
 
-	public List<User> findByEmail(String email) {
-		return userRepository.findByEmail(email);
+	public Page<UserDTO> getUsers(Pageable pageable) {
+		return userRepository.findAll(pageable)
+				.map(mapper::toDTO);
 	}
 
 	public Optional<User> findByUsername(String username) {
 		return userRepository.findByUsername(username);
 	}
 
-	public boolean exist(long id) {
-		return userRepository.existsById(id);
-	}
-
-	public List<User> findAll() {
-		return userRepository.findAll();
-	}
-
-	public User save(User user) {
+	public User addUser(User user) {
 		String password = user.getPassword();
 		String encodedPassword = passwordEncoder.encode(password);
 		user.setPassword(encodedPassword);
 		if (user.getUsername().equals("admin")) {
-			user.setRoles(List.of("USER", "ADMIN"));
+			user.setRoles(List.of("USER", ADMIN));
 		} else {
 			user.setRoles(List.of("USER"));
 		}
 		return userRepository.save(user);
 	}
 
-	public User update(User user) {
+	public User save(User user) {
 		return userRepository.save(user);
 	}
 
-	public UserDTO getLoggedUserDTO() {
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String username;
-		if (principal instanceof UserDetails userDetails) {
-			username = userDetails.getUsername();
-		} else {
-			username = principal.toString();
+	public UserDTO createUser(CreateUserDTO userDTO) {
+		if (userRepository.findByUsername(userDTO.username()).isPresent()) {
+			throw new IllegalArgumentException("Username already taken");
 		}
-
-		return toDTO(userRepository.findByUsername(username).orElseThrow());
-	}
-
-	public User getLoggedUser() {
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String username;
-		if (principal instanceof UserDetails userDetails) {
-			username = userDetails.getUsername();
-		} else {
-			username = principal.toString();
+		if (userRepository.findByEmail(userDTO.email()).isPresent()) {
+			throw new IllegalArgumentException("Email already taken");
 		}
+		User user = mapper.toDomain(userDTO);
 
-		return userRepository.findByUsername(username)
-				.orElseThrow(() -> new NoSuchElementException("User not logged or registered"));
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setCreatedAt(LocalDateTime.now());
+		user.setRoles(List.of("USER"));
+
+		return mapper.toDTO(userRepository.save(user));
 	}
 
 	@Transactional
-	public void deleteById(Long id) {
-		Optional<User> userOptional = userRepository.findById(id);
-		if (userOptional.isPresent()) {
-			User user = userOptional.get();
+	public UserDTO updateUser(Long id, CreateUserDTO userDTO, User currentUser) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
-			if (user.getId() != 1) {
-				postRepository.deleteByAuthor(user);
-				commentRepository.deleteByAuthor(user);
-				userRepository.delete(user);
-			}
+		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only edit your own profile");
 		}
+		if (!user.getUsername().equals(userDTO.username())
+				&& userRepository.findByUsername(userDTO.username()).isPresent()) {
+			throw new IllegalArgumentException("Username already taken");
+		}
+		if (!user.getEmail().equals(userDTO.email())
+				&& userRepository.findByEmail(userDTO.email()).isPresent()) {
+			throw new IllegalArgumentException("Email already taken");
+		}
+
+		user.setUsername(userDTO.username());
+		user.setEmail(userDTO.email());
+		user.setBio(userDTO.bio());
+
+		return mapper.toDTO(userRepository.save(user));
 	}
 
-	private UserDTO toDTO(User user) {
+	@Transactional
+	public void deleteUser(Long id, User currentUser) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only delete your own account");
+		}
+		commentRepository.deleteByAuthor(user);
+
+		List<Post> posts = postRepository.findByAuthor(user);
+		for (Post post : posts) {
+			for (User u : post.getUsersThatLiked()) {
+				u.getLikedPosts().remove(post);
+			}
+			post.getUsersThatLiked().clear();
+		}
+		postRepository.deleteByAuthor(user);
+
+		if (user.getAvatar() != null) {
+			Image avatar = user.getAvatar();
+			user.setAvatar(null);
+			imageRepository.delete(avatar);
+		}
+
+		userRepository.delete(user);
+	}
+
+	@Transactional
+	public UserDTO setProfileImage(Long id, Long imageId, User currentUser) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only set your own profile image");
+		}
+
+		Image image = imageRepository.findById(imageId)
+				.orElseThrow(() -> new EntityNotFoundException("Image not found"));
+
+		// Validate ownership of the image
+		if (image.getOwner().getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only set your own images as profile picture");
+		}
+
+		if (image.getPost() != null) {
+			throw new IllegalArgumentException("Image is associated with a post and cannot be used as profile picture");
+		}
+
+		// Remove old avatar if exists
+		if (user.getAvatar() != null) {
+			Image oldAvatar = user.getAvatar();
+			user.setAvatar(null);
+			imageRepository.delete(oldAvatar);
+		}
+
+		// Set new avatar
+		user.setAvatar(image);
+		userRepository.save(user);
 		return mapper.toDTO(user);
 	}
 
-	private User toDomain(UserDTO userDTO) {
-		return mapper.toDomain(userDTO);
-	}
+	@Transactional
+	public void removeProfileImage(Long id, User currentUser) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
-	private List<UserDTO> toDTOs(Collection<User> users) {
-		return mapper.toDTOs(users);
-	}
+		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only remove your own profile image");
+		}
 
-	public Collection<UserDTO> getUsers() {
-		return toDTOs(userRepository.findAll());
-	}
-
-	public UserDTO getUser(long id) {
-		return toDTO(userRepository.findById(id).orElseThrow());
-	}
-
-	public UserDTO createUser(UserDTO userDTO) {
-		User user = toDomain(userDTO);
-		this.save(user);
-		return toDTO(user);
+		if (user.getAvatar() != null) {
+			Image avatar = user.getAvatar();
+			user.setAvatar(null);
+			imageRepository.delete(avatar);
+			userRepository.save(user);
+		}
 	}
 
 }
