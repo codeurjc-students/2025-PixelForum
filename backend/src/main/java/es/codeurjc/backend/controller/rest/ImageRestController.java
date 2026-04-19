@@ -1,6 +1,5 @@
 package es.codeurjc.backend.controller.rest;
 
-import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.service.ImageService;
 import es.codeurjc.backend.service.UserService;
@@ -27,11 +26,15 @@ public class ImageRestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> getImage(@PathVariable long id) {
-        Image image = imageService.getImageById(id);
+    public ResponseEntity<byte[]> getImage(@PathVariable long id, @RequestParam(required = false) Integer w,
+            @RequestParam(required = false) Integer h, @RequestParam(required = false, defaultValue = "95") int q) {
+
+        byte[] imageData = imageService.getImage(id, w, h, q);
+
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(image.getContentType()))
-                .body(image.getImageData());
+                .contentType(MediaType.IMAGE_JPEG)
+                .header("Cache-Control", "public, max-age=31536000")
+                .body(imageData);
     }
 
     @PostMapping

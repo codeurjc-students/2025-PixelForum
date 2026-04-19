@@ -23,6 +23,7 @@ public interface UserMapper {
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "avatar", ignore = true)
 	@Mapping(target = "likedPosts", ignore = true)
 	@Mapping(target = "likedComments", ignore = true)
 	@Mapping(target = "roles", ignore = true)

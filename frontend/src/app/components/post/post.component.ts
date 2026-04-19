@@ -21,6 +21,7 @@ export class PostComponent implements OnInit {
 	@Input() post!: Post;
 	@Input() mode: 'list' | 'detail' = 'list';
 
+	avatarUrl: string = '';
 	currentImageIndex = 0;
 	imageCount = 0;
 	currentImage: string = '';
@@ -36,6 +37,7 @@ export class PostComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
+		this.avatarUrl = 'api/v1/images/' + this.post.author?.avatar + '?w=240&h=240';
 		this.isOwner$ = this.authService.user$.pipe(
 			map(user => user ? user.id === this.post.author?.id || user.roles.includes('ADMIN') : false)
 		);

@@ -23,7 +23,7 @@
 			<div class="profile-info">
 				<!-- Profile Picture -->
 				<div class="profile-picture">
-					<img [src]="user.avatar" [alt]="user.username" *ngIf="user.avatar" />
+					<img [src]="avatarUrl" [alt]="user.username" *ngIf="user.avatar" />
 					<svg class="btn-icon avatar" viewBox="0 0 24 24" *ngIf="!user.avatar">
 						<path d="M18 20a6 6 0 0 0-12 0" />
 						<circle cx="12" cy="10" r="4" />

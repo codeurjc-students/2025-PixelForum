@@ -20,6 +20,7 @@ import { PostListComponent } from '../post-list/post-list.component';
 export class ProfileComponent implements OnInit, OnDestroy {
 	// User data
 	user: User | null = null;
+	avatarUrl: string = '';
 	isLoadingUser = true;
 	isOwnProfile = false;
 
@@ -74,6 +75,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 					this.user = user;
 					this.filterUsername = user.username;
 					this.checkIfOwnProfile(userId);
+					this.avatarUrl = 'api/v1/images/' + this.user.avatar + '?w=240&h=240';
 					this.isLoadingUser = false;
 				}
 			});

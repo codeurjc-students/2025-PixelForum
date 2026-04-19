@@ -3,12 +3,14 @@ package es.codeurjc.backend.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
@@ -21,13 +23,13 @@ import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
 
 	private static final String USER_NOT_FOUND = "User not found";
 	private static final String ADMIN = "ADMIN";
+	private static final Set<String> ALLOWED_AVATAR_TYPES = Set.of("image/jpeg", "image/png");
 
 	private final UserMapper mapper;
 	private final UserRepository userRepository;
@@ -164,6 +166,12 @@ public class UserService {
 
 		if (image.getPost() != null) {
 			throw new IllegalArgumentException("Image is associated with a post and cannot be used as profile picture");
+		}
+
+		// Validate image type
+		if (!ALLOWED_AVATAR_TYPES.contains(image.getContentType())) {
+			imageRepository.delete(image);
+			return null;
 		}
 
 		// Remove old avatar if exists

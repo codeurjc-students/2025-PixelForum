@@ -77,6 +77,10 @@ public class UserRestController {
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
         UserDTO updatedUserDTO = userService.setProfileImage(id, imageId, currentUser);
+        if (updatedUserDTO == null) {
+            throw new IllegalArgumentException(
+					"Profile pictures must be JPG or PNG format. WebP and other formats are not allowed.");
+        }
         return ResponseEntity.ok(updatedUserDTO);
     }
 

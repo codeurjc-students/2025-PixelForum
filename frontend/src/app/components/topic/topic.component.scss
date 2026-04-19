@@ -146,11 +146,12 @@
 .topic-tabs {
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
 
     .tabs-content {
+        width: 100%;
         max-width: 930px;
+        margin: 0 auto;
         margin-top: 1rem;
 
         .tab-content {

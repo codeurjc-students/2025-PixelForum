@@ -10,7 +10,8 @@
 		</button>
 		<div class="author-info" (click)="goToUser(); $event.stopPropagation()">
 			<div class="avatar">
-				<svg class="btn-icon avatar" viewBox="0 0 24 24">
+				<img [src]="avatarUrl" [alt]="post.author?.username" *ngIf="post.author?.avatar" />
+				<svg class="btn-icon avatar" viewBox="0 0 24 24" *ngIf="!post.author?.avatar">
 					<path d="M18 20a6 6 0 0 0-12 0" />
 					<circle cx="12" cy="10" r="4" />
 					<circle cx="12" cy="12" r="10" />
