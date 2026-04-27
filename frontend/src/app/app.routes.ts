@@ -8,9 +8,11 @@ import { ErrorComponent } from './components/error/error.component';
 import { CreatePostComponent } from './components/create-post/create-post.component';
 import { TopicComponent } from './components/topic/topic.component';
 import { PostPageComponent } from './components/post-page/post-page.component';
+import { RegisterComponent } from './components/register/register.component';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent, canActivate: [GuestGuard] },
+	{ path: 'register', component: RegisterComponent, canActivate: [GuestGuard] },
 	{ path: 'posts', component: PostPageComponent },
 	{ path: 'topics/:topicId', component: TopicComponent },
 	{ path: 'users/:userId', component: ProfileComponent },

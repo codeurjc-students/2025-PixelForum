@@ -135,11 +135,10 @@ export class PostComponent implements OnInit {
 	openDeleteDialog(): void {
 		const dialogData: ConfirmDialogData = {
 			title: 'Delete Post',
-			message: 'Are you sure you want to delete this post? This action cannot be undone.',
+			message: 'Are you sure you want to delete this post?\nThis action cannot be undone.',
 			detail: this.post.title,
 			confirmText: 'Delete',
-			cancelText: 'Cancel',
-			color: 'warn'
+			color: 'danger'
 		};
 
 		const dialogRef = this.dialog.open(ConfirmDialogComponent, {

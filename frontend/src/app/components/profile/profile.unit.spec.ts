@@ -7,6 +7,8 @@ import { ErrorService } from '../../services/error.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '../../models/user.model';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageService } from '../../services/image.service';
 
 describe('ProfileComponent - Unit Tests', () => {
 
@@ -16,6 +18,8 @@ describe('ProfileComponent - Unit Tests', () => {
     let authService: jasmine.SpyObj<AuthService>;
     let errorService: jasmine.SpyObj<ErrorService>;
     let router: jasmine.SpyObj<Router>;
+    let imageService: jasmine.SpyObj<ImageService>;
+    let dialog: jasmine.SpyObj<MatDialog>;
 
     const mockUser: User = {
         id: 1,
@@ -28,17 +32,19 @@ describe('ProfileComponent - Unit Tests', () => {
     beforeEach(async () => {
         spyOn(console, 'error');
 
-        userService = jasmine.createSpyObj('UserService', ['getById']);
+        userService = jasmine.createSpyObj('UserService', ['getById', 'setAvatar', 'deleteAvatar']);
         errorService = jasmine.createSpyObj('ErrorService', ['setError']);
         router = jasmine.createSpyObj('Router', ['navigate']);
+        imageService = jasmine.createSpyObj('ImageService', ['uploadImages']);
+        dialog = jasmine.createSpyObj('MatDialog', ['open']);
 
         // Subjects to control observables in tests
         routeParams$ = new Subject();
         authUser$ = new Subject();
 
-        authService = {
+        authService = jasmine.createSpyObj('AuthService', ['checkAuth'], {
             user$: authUser$.asObservable()
-        } as any;
+        });
 
         const activatedRouteMock = {
             params: routeParams$.asObservable()
@@ -51,7 +57,9 @@ describe('ProfileComponent - Unit Tests', () => {
                 { provide: AuthService, useValue: authService },
                 { provide: ErrorService, useValue: errorService },
                 { provide: Router, useValue: router },
-                { provide: ActivatedRoute, useValue: activatedRouteMock }
+                { provide: ActivatedRoute, useValue: activatedRouteMock },
+                { provide: ImageService, useValue: imageService },
+                { provide: MatDialog, useValue: dialog }
             ]
         }).compileComponents();
 
@@ -105,6 +113,15 @@ describe('ProfileComponent - Unit Tests', () => {
         component['currentUserId'] = 1;
         component.loadUserProfile(1);
 
+        expect(component.isOwnProfile).toBeTrue();
+    });
+
+    it('should set isOwnProfile true when user is ADMIN', () => {
+        component.ngOnInit();
+
+        component.user = mockUser;
+        authUser$.next({ id: 2, roles: ['ADMIN'] });
+        
         expect(component.isOwnProfile).toBeTrue();
     });
 
@@ -171,4 +188,99 @@ describe('ProfileComponent - Unit Tests', () => {
         expect(component['destroy$'].next).toHaveBeenCalled();
         expect(component['destroy$'].complete).toHaveBeenCalled();
     });
+
+    // ---------- AVATAR ----------
+
+    it('should open upload flow when dialog returns true', () => {
+        const afterClosed$ = of(true);
+
+        dialog.open.and.returnValue({
+            afterClosed: () => afterClosed$
+        } as any);
+
+        const clickSpy = jasmine.createSpy('click');
+        spyOn(document, 'querySelector').and.returnValue({
+            click: clickSpy
+        } as any);
+
+        component.onAvatarEditClick();
+
+        expect(dialog.open).toHaveBeenCalled();
+        expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it('should trigger delete avatar when dialog returns secondary', () => {
+        const afterClosed$ = of('secondary');
+
+        dialog.open.and.returnValue({
+            afterClosed: () => afterClosed$
+        } as any);
+
+        spyOn(component, 'deleteAvatar');
+
+        component.onAvatarEditClick();
+
+        expect(component.deleteAvatar).toHaveBeenCalled();
+    });
+
+    it('should do nothing if no file selected', async () => {
+        const event = { target: { files: [] } } as any;
+
+        await component.onImageSelected(event);
+
+        expect(imageService.uploadImages).not.toHaveBeenCalled();
+    });
+
+    it('should reject non png/jpg images', async () => {
+        const file = { type: 'image/gif' } as File;
+        const event = { target: { files: [file] } } as any;
+
+        await component.onImageSelected(event);
+
+        expect(errorService.setError).toHaveBeenCalledWith(400, 'Only PNG and JPG images are allowed');
+    });
+
+    it('should upload image and update profile', async () => {
+        const file = { type: 'image/png' } as File;
+
+        const event = { target: { files: [file] } } as any;
+
+        imageService.uploadImages.and.returnValue(of(['10']));
+
+        spyOn(component as any, 'updateProfileImage');
+
+        await component.onImageSelected(event);
+
+        expect(imageService.uploadImages).toHaveBeenCalled();
+        expect((component as any).updateProfileImage).toHaveBeenCalledWith('10');
+    });
+
+    it('should update profile image and refresh auth', () => {
+        component.user = mockUser;
+
+        userService.setAvatar.and.returnValue(of(mockUser));
+        authService.checkAuth.and.returnValue(of());
+
+        component['updateProfileImage']('99');
+
+        expect(userService.setAvatar).toHaveBeenCalledWith(1, 99);
+        expect(authService.checkAuth).toHaveBeenCalled();
+        expect(component.refreshTrigger).toBe(2);
+    });
+
+    it('should delete avatar and reset state', () => {
+        component.user = mockUser;
+
+        userService.deleteAvatar.and.returnValue(of(void 0));
+        authService.checkAuth.and.returnValue(of());
+
+        component.deleteAvatar();
+
+        expect(userService.deleteAvatar).toHaveBeenCalledWith(1);
+        expect(component.user!.avatar).toBeUndefined();
+        expect(component.avatarUrl).toBe('');
+        expect(authService.checkAuth).toHaveBeenCalled();
+        expect(component.refreshTrigger).toBe(2);
+    });
+
 });

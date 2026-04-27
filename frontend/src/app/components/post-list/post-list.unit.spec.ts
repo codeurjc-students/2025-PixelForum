@@ -91,6 +91,27 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(component.isLoading).toBeFalse();
 	});
 
+	// ------- Destroy & Changes -------
+
+	it('should reload posts when refreshTrigger changes', () => {
+		spyOn(component, 'loadPosts');
+
+		component.refreshTrigger = 1;
+		component.ngOnChanges();
+
+		expect(component.loadPosts).toHaveBeenCalled();
+	});
+
+	it('should complete destroy$ on destroy', () => {
+		const nextSpy = spyOn(component['destroy$'], 'next');
+		const completeSpy = spyOn(component['destroy$'], 'complete');
+
+		component.ngOnDestroy();
+
+		expect(nextSpy).toHaveBeenCalled();
+		expect(completeSpy).toHaveBeenCalled();
+	});
+
 	// ---------- SORTING ----------
 
 	it('should sort posts by createdAt desc', () => {
@@ -100,6 +121,17 @@ describe('PostListComponent - Unit Tests', () => {
 
 		expect(component.posts[1].title).toBe('New post');
 		expect(component.posts[0].title).toBe('Old post');
+	});
+
+	it('should call service with filters', () => {
+		component.filterUsername = 'user1';
+		component.filterTopic = 'topic1';
+
+		postService.getPosts.and.returnValue(of(mockPageResponse));
+
+		component.loadPosts();
+
+		expect(postService.getPosts).toHaveBeenCalledWith(0, 10, undefined, 'user1', 'topic1', 'createdAt', 'desc');
 	});
 
 	// ---------- LOADING STATE ----------
@@ -161,6 +193,15 @@ describe('PostListComponent - Unit Tests', () => {
 
 		expect(component.isLoadingMore).toBeFalse();
 		expect(component.currentPage).toBe(0);
+	});
+
+	it('should not load more if already loading', () => {
+		component.hasMorePages = true;
+		component.isLoadingMore = true;
+
+		component.loadMorePosts();
+
+		expect(postService.getPosts).not.toHaveBeenCalled();
 	});
 
 	// ---------- FETCH POSTS ----------

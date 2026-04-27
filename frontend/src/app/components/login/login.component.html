@@ -8,15 +8,8 @@
 			<!-- USERNAME -->
 			<mat-form-field appearance="outline" class="full-width">
 				<mat-label>Username</mat-label>
-				<input
-					matInput
-					name="username"
-					type="text"
-					[(ngModel)]="username"
-					required
-					#usernameInput="ngModel"
-					id="username"
-				/>
+				<input matInput name="username" type="text" [(ngModel)]="username" required #usernameInput="ngModel"
+					id="username" />
 				<mat-error *ngIf="usernameInput.invalid && usernameInput.touched">
 					Please enter your username
 				</mat-error>
@@ -25,29 +18,16 @@
 			<!-- PASSWORD -->
 			<mat-form-field appearance="outline" class="full-width">
 				<mat-label>Password</mat-label>
-				<input
-					matInput
-					name="password"
-					type="password"
-					[(ngModel)]="password"
-					required
-					#passwordInput="ngModel"
-					id="password"
-				/>
+				<input matInput name="password" type="password" [(ngModel)]="password" required #passwordInput="ngModel"
+					id="password" />
 				<mat-error *ngIf="passwordInput.invalid && passwordInput.touched">
 					Please enter your password
 				</mat-error>
 			</mat-form-field>
 
-			<!-- BUTTON -->
-			<button
-				mat-raised-button
-				color="primary"
-				type="submit"
-				class="full-width"
-				[disabled]="!username || !password"
-				id="login-button"
-			>
+			<!-- LOGIN BUTTON -->
+			<button mat-raised-button type="submit" class="submit-button"
+				[disabled]="!username || !password" id="login-button">
 				Log In
 			</button>
 
@@ -58,5 +38,9 @@
 
 		</form>
 
+		<!-- REGISTER LINK -->
+		<div class="footer">
+			<p>Don't have an account? <a routerLink="/register" class="link">Sign up</a></p>
+		</div>
 	</mat-card>
 </div>

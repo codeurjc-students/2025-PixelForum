@@ -35,8 +35,4 @@ export class HeaderComponent {
 			}
 		});
 	}
-
-	onCreatePost() {
-		this.router.navigate(['/create-post']);
-	}
 }

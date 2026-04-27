@@ -29,7 +29,9 @@
 						<circle cx="12" cy="10" r="4" />
 						<circle cx="12" cy="12" r="10" />
 					</svg>
-					<div class="edit-overlay" *ngIf="isOwnProfile">
+					<input type="file" id="avatarFileInput" accept="image/png, image/jpeg" (change)="onImageSelected($event)"
+						hidden />
+					<div class="edit-overlay" *ngIf="isOwnProfile" (click)="onAvatarEditClick()">
 						<svg viewBox="0 0 24 24">
 							<path d="M16 5h6" />
 							<path d="M19 2v6" />
@@ -100,7 +102,7 @@
 		<div class="tabs-content">
 			<!-- Posts Tab -->
 			<div class="tab-content" *ngIf="activeTab === 'posts'">
-				<app-post-list [filterUsername]="filterUsername" [pageSize]="10"></app-post-list>
+				<app-post-list [filterUsername]="filterUsername" [pageSize]="10" [refreshTrigger]="refreshTrigger"></app-post-list>
 			</div>
 
 			<!-- Comments Tab -->

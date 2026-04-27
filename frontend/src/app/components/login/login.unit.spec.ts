@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../services/auth.service';
@@ -8,7 +8,7 @@ describe('LoginComponent - Unit Tests', () => {
     let component: LoginComponent;
     let fixture: ComponentFixture<LoginComponent>;
     let authService: jasmine.SpyObj<AuthService>;
-    let router: jasmine.SpyObj<Router>;
+    let router: Router;
 
     beforeEach(async () => {
         authService = jasmine.createSpyObj('AuthService', ['login', 'checkAuth']);
@@ -17,11 +17,13 @@ describe('LoginComponent - Unit Tests', () => {
         await TestBed.configureTestingModule({
             imports: [LoginComponent],
             providers: [
+                provideRouter([]),
                 { provide: AuthService, useValue: authService },
-                { provide: Router, useValue: router }
             ]
         }).compileComponents();
 
+        router = TestBed.inject(Router);
+        spyOn(router, 'navigate');
         fixture = TestBed.createComponent(LoginComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

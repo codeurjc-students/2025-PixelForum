@@ -1,20 +1,36 @@
 <div class="dialog-container">
-    <h2 mat-dialog-title>{{ data.title }}</h2>
+	<!-- Close Button X -->
+	<button class="close-btn" (click)="onCancel()" aria-label="Close dialog">
+		<mat-icon>close</mat-icon>
+	</button>
 
-    <mat-dialog-content>
-        <p>{{ data.message }}</p>
-        <p class="detail-display" *ngIf="data.detail">
-            <strong>{{ data.detail }}</strong>
-        </p>
-    </mat-dialog-content>
+	<!-- Decorative Icon -->
+	<div class="icon-wrapper" *ngIf="data.icon" [class]="'icon-primary'">
+		<mat-icon class="dialog-icon">{{ data.icon }}</mat-icon>
+	</div>
 
-    <mat-dialog-actions align="end">
-        <button mat-button (click)="onCancel()" [disabled]="isLoading">
-            {{ data.cancelText || 'Cancel' }}
-        </button>
-        <button mat-raised-button [color]="data.color || 'warn'" (click)="onConfirm()" [disabled]="isLoading" id="confirm-button">
-            <mat-spinner *ngIf="isLoading" diameter="20" class="spinner-inline"></mat-spinner>
-            {{ isLoading ? 'Please wait...' : (data.confirmText || 'Confirm') }}
-        </button>
-    </mat-dialog-actions>
+	<!-- Main Content -->
+	<div class="content">
+		<h2 class="dialog-title">{{ data.title }}</h2>
+		<p class="dialog-message">{{ data.message }}</p>
+		<p class="detail-display" *ngIf="data.detail">
+			{{ data.detail }}
+		</p>
+	</div>
+
+	<!-- Buttons -->
+	<div class="dialog-actions">
+		<div class="action-group">
+			<!-- Secondary Action (Danger - Delete) -->
+			<button *ngIf="data.showSecondaryAction" class="btn"
+				[ngClass]="'btn-' + (data.secondaryActionColor || 'danger')" (click)="onSecondaryAction()">
+				{{ data.secondaryActionText || 'Delete' }}
+			</button>
+
+			<!-- Primary Action (Confirm - Primary) -->
+			<button class="btn" [ngClass]="'btn-' + (data.color || 'primary')" (click)="onConfirm()">
+				{{ data.confirmText || 'Confirm' }}
+			</button>
+		</div>
+	</div>
 </div>

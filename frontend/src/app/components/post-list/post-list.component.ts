@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs/internal/Subject';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
@@ -14,13 +14,14 @@ import { PageResponse } from '../../models/pageResponse.model';
 	templateUrl: './post-list.component.html',
 	styleUrls: ['./post-list.component.scss']
 })
-export class PostListComponent implements OnInit, OnDestroy {
+export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 	// Input filters
 	@Input() filterUsername?: string;
 	@Input() filterTopic?: string;
 	@Input() sortBy: string = 'createdAt';
 	@Input() sortOrder: 'asc' | 'desc' = 'desc';
 	@Input() pageSize: number = 10;
+	@Input() refreshTrigger!: number;
 
 	// State
 	posts: Post[] = [];
@@ -42,6 +43,10 @@ export class PostListComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		this.loadPosts();
+	}
+
+	ngOnChanges() {
+		if (this.refreshTrigger !== undefined) this.loadPosts();
 	}
 
 	ngOnDestroy(): void {

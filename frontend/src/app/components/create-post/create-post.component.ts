@@ -18,7 +18,6 @@ import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 	styleUrls: ['./create-post.component.scss']
 })
 export class CreatePostComponent implements OnInit {
-	@ViewChild('formContainer') formContainer!: ElementRef<HTMLDivElement>;
 	@ViewChild('errorMessageRef') errorMessageRef!: ElementRef<HTMLDivElement>;
 	createPostForm!: FormGroup;
 	allTopics: Topic[] = [];
@@ -37,7 +36,7 @@ export class CreatePostComponent implements OnInit {
 	isLoadingPost = false;
 	existingImageIds: string[] = []; // IDs of existing images for edit mode
 
-	private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+	private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 	constructor(
 		private fb: FormBuilder,
@@ -191,7 +190,7 @@ export class CreatePostComponent implements OnInit {
 
 			// Validate size
 			if (file.size > this.MAX_FILE_SIZE) {
-				this.setError('Each image must be smaller than 10 MB');
+				this.setError('Each image must be smaller than 5 MB');
 				return;
 			}
 
