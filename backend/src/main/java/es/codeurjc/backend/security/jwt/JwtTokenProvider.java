@@ -5,9 +5,9 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import es.codeurjc.backend.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
@@ -62,22 +62,22 @@ public class JwtTokenProvider {
 		return jwtParser.parseSignedClaims(token).getPayload();
 	}
 
-	public String generateAccessToken(UserDetails userDetails) {
-		return buildToken(TokenType.ACCESS, userDetails).compact();
+	public String generateAccessToken(User user) {
+		return buildToken(TokenType.ACCESS, user).compact();
 	}
 
-	public String generateRefreshToken(UserDetails userDetails) {
-		var token = buildToken(TokenType.REFRESH, userDetails);
+	public String generateRefreshToken(User user) {
+		var token = buildToken(TokenType.REFRESH, user);
         return token.compact();
 	}
 
-	private JwtBuilder buildToken(TokenType tokenType, UserDetails userDetails) {
+	private JwtBuilder buildToken(TokenType tokenType, User user) {
 		var currentDate = new Date();
 		var expiryDate = Date.from(new Date().toInstant().plus(tokenType.duration));
 		return Jwts.builder()
-				.claim("roles", userDetails.getAuthorities())
+				.claim("roles", user.getRoles())
 				.claim("type", tokenType.name())
-				.subject(userDetails.getUsername())
+				.subject(String.valueOf(user.getId()))
 				.issuedAt(currentDate)
 				.expiration(expiryDate)
 				.signWith(jwtSecret);

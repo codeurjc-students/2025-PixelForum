@@ -9,7 +9,7 @@ export class UserService {
 
     private baseUrl = environment.apiUrl + 'users';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     getAll(): Observable<User[]> {
         return this.http.get<User[]>(this.baseUrl, { withCredentials: true });
@@ -21,6 +21,14 @@ export class UserService {
 
     register(userData: any): Observable<User> {
         return this.http.post<User>(this.baseUrl, userData, { headers: { 'skip-error': 'true' }, withCredentials: true });
+    }
+
+    updateProfile(id: number, data: { username: string; email: string; bio: string }): Observable<User> {
+        return this.http.patch<User>(`${this.baseUrl}/${id}`, data, { headers: { 'skip-error': 'true' }, withCredentials: true });
+    }
+
+    changePassword(id: number, data: { oldPassword: string; newPassword: string }): Observable<void> {
+        return this.http.patch<void>(`${this.baseUrl}/${id}/password`, data, { headers: { 'skip-error': 'true' }, withCredentials: true });
     }
 
     setAvatar(id: number, imageId: number): Observable<User> {

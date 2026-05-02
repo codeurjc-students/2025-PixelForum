@@ -7,11 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.security.jwt.JwtTokenProvider;
 import es.codeurjc.backend.security.jwt.TokenType;
 
@@ -23,33 +21,30 @@ import java.util.List;
 class JwtTokenProviderUnitTest {
 
     private JwtTokenProvider jwtTokenProvider;
-    private UserDetails userDetails;
+    private User user;
 
     @BeforeEach
     void init() {
         jwtTokenProvider = new JwtTokenProvider();
-        userDetails = User.builder()
-                .username("testuser")
-                .password("password")
-                .authorities(List.of(
-                    new SimpleGrantedAuthority("USER"),
-                    new SimpleGrantedAuthority("ADMIN")
-                ))
-                .build();
+        user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+        user.setPassword("password");
+        user.setRoles(List.of("USER", "ADMIN"));
     }
 
     @Test
     @DisplayName("Should generate valid Access Token")
     void generateAccessTokenTest() {
         // WHEN
-        String token = jwtTokenProvider.generateAccessToken(userDetails);
+        String token = jwtTokenProvider.generateAccessToken(user);
 
         // THEN
         assertNotNull(token);
         assertFalse(token.isEmpty());
         
         Claims claims = jwtTokenProvider.validateToken(token);
-        assertEquals("testuser", claims.getSubject());
+        assertEquals("1", claims.getSubject());
         assertEquals("ACCESS", claims.get("type"));
     }
 
@@ -57,14 +52,14 @@ class JwtTokenProviderUnitTest {
     @DisplayName("Should generate valid Refresh Token")
     void generateRefreshTokenTest() {
         // WHEN
-        String token = jwtTokenProvider.generateRefreshToken(userDetails);
+        String token = jwtTokenProvider.generateRefreshToken(user);
 
         // THEN
         assertNotNull(token);
         assertFalse(token.isEmpty());
         
         Claims claims = jwtTokenProvider.validateToken(token);
-        assertEquals("testuser", claims.getSubject());
+        assertEquals("1", claims.getSubject());
         assertEquals("REFRESH", claims.get("type"));
     }
 
@@ -72,14 +67,14 @@ class JwtTokenProviderUnitTest {
     @DisplayName("Should validate token successfully")
     void validateTokenTest() {
         // GIVEN
-        String token = jwtTokenProvider.generateAccessToken(userDetails);
+        String token = jwtTokenProvider.generateAccessToken(user);
 
         // WHEN
         Claims claims = jwtTokenProvider.validateToken(token);
 
         // THEN
         assertNotNull(claims);
-        assertEquals("testuser", claims.getSubject());
+        assertEquals("1", claims.getSubject());
         assertNotNull(claims.get("roles"));
     }
 
@@ -99,7 +94,7 @@ class JwtTokenProviderUnitTest {
     @DisplayName("Access Token should expire in 5 minutes")
     void accessTokenExpirationTest() {
         // GIVEN
-        String token = jwtTokenProvider.generateAccessToken(userDetails);
+        String token = jwtTokenProvider.generateAccessToken(user);
         Claims claims = jwtTokenProvider.validateToken(token);
 
         // WHEN
@@ -115,7 +110,7 @@ class JwtTokenProviderUnitTest {
     @DisplayName("Refresh Token should expire in 7 days")
     void refreshTokenExpirationTest() {
         // GIVEN
-        String token = jwtTokenProvider.generateRefreshToken(userDetails);
+        String token = jwtTokenProvider.generateRefreshToken(user);
         Claims claims = jwtTokenProvider.validateToken(token);
 
         // WHEN
@@ -131,7 +126,7 @@ class JwtTokenProviderUnitTest {
     @DisplayName("Token should contain user roles")
     void tokenContainsRolesTest() {
         // GIVEN
-        String token = jwtTokenProvider.generateAccessToken(userDetails);
+        String token = jwtTokenProvider.generateAccessToken(user);
 
         // WHEN
         Claims claims = jwtTokenProvider.validateToken(token);
@@ -146,7 +141,7 @@ class JwtTokenProviderUnitTest {
     @DisplayName("isTokenType with Claims should return true for correct token type")
     void isTokenTypeWithClaimsTest() {
         // GIVEN
-        String token = jwtTokenProvider.generateAccessToken(userDetails);
+        String token = jwtTokenProvider.generateAccessToken(user);
         Claims claims = jwtTokenProvider.validateToken(token);
 
         // WHEN
@@ -160,7 +155,7 @@ class JwtTokenProviderUnitTest {
     @DisplayName("isTokenType with token string should return false for wrong token type")
     void isTokenTypeWithTokenStringWrongTypeTest() {
         // GIVEN
-        String token = jwtTokenProvider.generateRefreshToken(userDetails);
+        String token = jwtTokenProvider.generateRefreshToken(user);
 
         // WHEN
         boolean result = jwtTokenProvider.isTokenType(token, TokenType.ACCESS);

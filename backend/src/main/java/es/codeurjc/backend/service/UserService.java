@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
 import es.codeurjc.backend.dto.user.UserMapper;
@@ -103,20 +104,45 @@ public class UserService {
 		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only edit your own profile");
 		}
-		if (!user.getUsername().equals(userDTO.username())
-				&& userRepository.findByUsername(userDTO.username()).isPresent()) {
-			throw new IllegalArgumentException("Username already taken");
-		}
-		if (!user.getEmail().equals(userDTO.email())
-				&& userRepository.findByEmail(userDTO.email()).isPresent()) {
-			throw new IllegalArgumentException("Email already taken");
+
+		// USERNAME
+		if (userDTO.username() != null && !user.getUsername().equals(userDTO.username())) {
+			if (userRepository.findByUsername(userDTO.username()).isPresent()) {
+				throw new IllegalArgumentException("Username already taken");
+			}
+			user.setUsername(userDTO.username());
 		}
 
-		user.setUsername(userDTO.username());
-		user.setEmail(userDTO.email());
-		user.setBio(userDTO.bio());
+		// EMAIL
+		if (userDTO.email() != null && !user.getEmail().equals(userDTO.email())) {
+			if (userRepository.findByEmail(userDTO.email()).isPresent()) {
+				throw new IllegalArgumentException("Email already taken");
+			}
+			user.setEmail(userDTO.email());
+		}
+
+		// BIO
+		if (userDTO.bio() != null) {
+			user.setBio(userDTO.bio());
+		}
 
 		return mapper.toDTO(userRepository.save(user));
+	}
+
+	@Transactional
+	public void changePassword(Long id, ChangePasswordDTO dto, User currentUser) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only change your own password");
+		}
+
+		if (!passwordEncoder.matches(dto.oldPassword(), user.getPassword())) {
+			throw new IllegalArgumentException("Invalid current password");
+		}
+
+		user.setPassword(passwordEncoder.encode(dto.newPassword()));
 	}
 
 	@Transactional

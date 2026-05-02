@@ -121,7 +121,7 @@ describe('ProfileComponent - Unit Tests', () => {
 
         component.user = mockUser;
         authUser$.next({ id: 2, roles: ['ADMIN'] });
-        
+
         expect(component.isOwnProfile).toBeTrue();
     });
 
@@ -172,9 +172,11 @@ describe('ProfileComponent - Unit Tests', () => {
     });
 
     it('should navigate to edit profile', () => {
+        component.user = mockUser;
+
         component.editProfile();
 
-        expect(router.navigate).toHaveBeenCalledWith(['/profile/edit']);
+        expect(router.navigate).toHaveBeenCalledWith(['/users', 1, 'edit']);
     });
 
     // ---------- DESTROY ----------

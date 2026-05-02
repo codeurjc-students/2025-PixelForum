@@ -40,9 +40,9 @@ public class ImageService {
         try {
             return resizeImage(image.getImageData(), width, height, quality);
         } catch (IOException e) {
-            System.err.println("Error redimensionando imagen ID: " + id);
+            System.err.println("Error resizing imagen ID: " + id);
             System.err.println("Content-Type: " + image.getContentType());
-            System.err.println("Tamaño: " + image.getImageData().length);
+            System.err.println("Image Size: " + image.getImageData().length);
             e.printStackTrace();
             // If resizing fails, return original image as fallback
             return image.getImageData();

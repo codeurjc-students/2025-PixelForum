@@ -110,8 +110,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
 	}
 
 	editProfile(): void {
-		// TODO
-		this.router.navigate(['/profile/edit']);
+		if (this.user?.id) {
+			this.router.navigate(['/users', this.user.id, 'edit']);
+		}
 	}
 
 	onAvatarEditClick(): void {
@@ -154,7 +155,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 			this.errorService.setError(400, 'Only image files are allowed');
 			return;
 		}
-		
+
 		if (!file.type.includes('png') && !file.type.includes('jpeg')) {
 			this.errorService.setError(400, 'Only PNG and JPG images are allowed');
 			return;
