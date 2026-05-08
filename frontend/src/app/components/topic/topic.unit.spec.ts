@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, Subject } from 'rxjs';
 import { TopicComponent } from './topic.component';
 import { TopicService } from '../../services/topic.service';
-import { ErrorService } from '../../services/error.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Topic } from '../../models/topic.model';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -12,7 +11,6 @@ describe('TopicComponent - Unit Tests', () => {
     let component: TopicComponent;
     let fixture: ComponentFixture<TopicComponent>;
     let topicService: jasmine.SpyObj<TopicService>;
-    let errorService: jasmine.SpyObj<ErrorService>;
     let router: jasmine.SpyObj<Router>;
 
     const mockTopic: Topic = {
@@ -26,7 +24,6 @@ describe('TopicComponent - Unit Tests', () => {
         spyOn(console, 'error');
 
         topicService = jasmine.createSpyObj('TopicService', ['getById']);
-        errorService = jasmine.createSpyObj('ErrorService', ['setError']);
         router = jasmine.createSpyObj('Router', ['navigate']);
 
         // Subject to control observables in tests
@@ -40,7 +37,6 @@ describe('TopicComponent - Unit Tests', () => {
             imports: [TopicComponent, HttpClientTestingModule],
             providers: [
                 { provide: TopicService, useValue: topicService },
-                { provide: ErrorService, useValue: errorService },
                 { provide: Router, useValue: router },
                 { provide: ActivatedRoute, useValue: activatedRouteMock }
             ]
@@ -61,18 +57,9 @@ describe('TopicComponent - Unit Tests', () => {
 
         component.ngOnInit();
 
-        routeParams$.next({ topicId: '1' });
+        routeParams$.next({ topicId: 1 });
 
         expect(component.loadTopic).toHaveBeenCalledWith(1);
-    });
-
-    it('should set error and navigate if no topicId in params', () => {
-        component.ngOnInit();
-
-        routeParams$.next({}); // No topicId
-
-        expect(errorService.setError).toHaveBeenCalledWith(400, 'Bad Request');
-        expect(router.navigate).toHaveBeenCalledWith(['/error']);
     });
 
     // ---------- LOAD TOPIC ----------

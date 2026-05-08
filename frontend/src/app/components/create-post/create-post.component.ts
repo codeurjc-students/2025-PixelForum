@@ -9,6 +9,8 @@ import { ImageService } from '../../services/image.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { ErrorService } from '../../services/error.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
 	selector: 'app-create-post',
@@ -43,6 +45,8 @@ export class CreatePostComponent implements OnInit {
 		private postService: PostService,
 		private topicService: TopicService,
 		private imageService: ImageService,
+		private authService: AuthService,
+		private errorService: ErrorService,
 		private route: ActivatedRoute,
 		private router: Router,
 		private snackBar: MatSnackBar
@@ -313,11 +317,30 @@ export class CreatePostComponent implements OnInit {
 
 	private loadPostForEdit(): void {
 		this.isLoadingPost = true;
+
 		this.postService.getById(this.postId!).subscribe({
 			next: (post) => {
-				this.existingPost = post;
-				this.populateFormWithPost(post);
-				this.isLoadingPost = false;
+				this.authService.checkAuth().subscribe({
+					next: (user) => {
+						if (!user) {
+							this.router.navigate(['/login']);
+							return;
+						}
+
+						const isOwner = post.author?.id === user.id;
+						const isAdmin = user.roles.includes('ADMIN');
+
+						if (!isOwner && !isAdmin) {
+							this.errorService.setError(403, 'Forbidden', "You don't have permission to edit this post");
+							this.router.navigate(['/error']);
+							return;
+						}
+
+						this.existingPost = post;
+						this.populateFormWithPost(post);
+						this.isLoadingPost = false;
+					}
+				});
 			}
 		});
 	}

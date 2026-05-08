@@ -4,7 +4,7 @@ import { UserService } from '../../services/user.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('RegisterComponent - Unit Tests', () => {
 
@@ -111,6 +111,71 @@ describe('RegisterComponent - Unit Tests', () => {
         component.onSubmit();
 
         expect(userService.register).not.toHaveBeenCalled();
+    });
+
+    it('should set backend error message for status 400', () => {
+        component.registerForm.setValue({
+            username: 'test',
+            email: 'test@test.com',
+            password: '12345678',
+            confirmPassword: '12345678',
+            bio: ''
+        });
+
+        userService.register.and.returnValue(
+            throwError(() => ({
+                status: 400,
+                error: { message: 'Username already exists' }
+            }))
+        );
+
+        component.onSubmit();
+
+        expect(component.isLoading).toBeFalse();
+        expect(component.errorMessage).toBe('Username already exists');
+    });
+
+    it('should send null bio when empty', () => {
+        component.registerForm.setValue({
+            username: 'test',
+            email: 'test@test.com',
+            password: '12345678',
+            confirmPassword: '12345678',
+            bio: '   '
+        });
+
+        userService.register.and.returnValue(of());
+
+        component.onSubmit();
+
+        expect(userService.register).toHaveBeenCalledWith(jasmine.objectContaining({
+            bio: null
+        }));
+    });
+
+    it('should clear password mismatch after fixing confirmation', () => {
+        component.registerForm.patchValue({
+            password: '12345678',
+            confirmPassword: 'wrong'
+        });
+
+        let confirm = component.registerForm.get('confirmPassword');
+        expect(confirm?.hasError('passwordMismatch')).toBeTrue();
+
+        component.registerForm.patchValue({
+            confirmPassword: '12345678'
+        });
+
+        confirm = component.registerForm.get('confirmPassword');
+        expect(confirm?.hasError('passwordMismatch')).toBeFalse();
+    });
+
+    it('should return bio maxlength error', () => {
+        const field = component.registerForm.get('bio');
+        field?.setErrors({ maxlength: true });
+
+        expect(component.getErrorMessage('bio'))
+            .toBe('Bio must not exceed 255 characters');
     });
 
     // --------- Form Errors ---------

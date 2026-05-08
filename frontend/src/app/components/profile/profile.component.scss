@@ -244,6 +244,17 @@
 								box-shadow: 0 4px 12px rgba(139, 195, 74, 0.25);
 							}
 						}
+
+						&.delete-btn {
+							background-color: #e53935;
+							color: white;
+
+							&:hover {
+								background-color: #c62828;
+								transform: translateY(-2px);
+								box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25);
+							}
+						}
 					}
 				}
 			}

@@ -109,8 +109,8 @@ export class RegisterComponent {
                 this.isLoading = false;
                 let errorMessage = 'An error occurred. Please try again.';
 
-                if (err.status === 500) {
-                    errorMessage = err.error?.error || errorMessage;
+                if (err.status === 400) {
+                    errorMessage = err.error?.message || errorMessage;
                 } else if (err.status === 0) {
                     errorMessage = 'Unable to connect to the server';
                 }

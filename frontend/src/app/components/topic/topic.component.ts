@@ -5,7 +5,6 @@ import { Subject } from 'rxjs/internal/Subject';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Topic } from '../../models/topic.model';
 import { TopicService } from '../../services/topic.service';
-import { ErrorService } from '../../services/error.service';
 import { PostListComponent } from '../post-list/post-list.component';
 
 @Component({
@@ -28,7 +27,6 @@ export class TopicComponent implements OnInit, OnDestroy {
 
     constructor(
         private topicService: TopicService,
-        private errorService: ErrorService,
         private route: ActivatedRoute,
         private router: Router
     ) { }
@@ -38,12 +36,8 @@ export class TopicComponent implements OnInit, OnDestroy {
         this.route.params
             .pipe(takeUntil(this.destroy$))
             .subscribe(params => {
-                if (params['topicId']) {
-                    this.loadTopic(parseInt(params['topicId'], 10));
-                } else {
-                    this.errorService.setError(400, "Bad Request");
-                    this.router.navigate(['/error']);
-                }
+                const id = params['topicId'];
+                this.loadTopic(id);
             });
     }
 

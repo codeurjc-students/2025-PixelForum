@@ -38,4 +38,8 @@ export class UserService {
     deleteAvatar(id: number): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/${id}/avatar`, { withCredentials: true });
     }
+
+    deleteAccount(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
+    }
 }

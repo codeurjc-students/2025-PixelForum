@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -66,6 +67,7 @@ public class SecurityConfig {
 
 		http
 			.securityMatcher("/api/**")
+			.cors(Customizer.withDefaults())
 			.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
 		
 		http
@@ -84,7 +86,7 @@ public class SecurityConfig {
 					// USERS
 					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()
 					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
-					.requestMatchers(HttpMethod.PUT, API_USERS).hasRole("USER")
+					.requestMatchers(HttpMethod.PATCH, API_USERS).hasRole("USER")
 					.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole("USER")
 					
 					// AUTH

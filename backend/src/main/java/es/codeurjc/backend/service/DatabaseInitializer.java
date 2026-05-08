@@ -50,6 +50,8 @@ public class DatabaseInitializer {
 		userService.addUser(user3);
 		userService.addUser(user4);
 
+		addAvatar(user1, "/images/avatar.png");
+
 		List<Topic> topics = List.of(
 				new Topic("GTA VI", "All news about Grand Theft Auto VI"),
 				new Topic("Cyberpunk", "All news about Cyberpunk"),
@@ -104,16 +106,29 @@ public class DatabaseInitializer {
 		addLikes(admin, List.of(post1));
 	}
 
+	private Image uploadImage(String route, User user) throws IOException {
+		InputStream is = getClass().getResourceAsStream(route);
+		if (is == null) {
+			throw new IOException("Image not found: " + route);
+		}
+		byte[] data = is.readAllBytes();
+
+		return imageService.saveImage(data, route.substring(route.lastIndexOf("/") + 1),
+				"image/" + route.substring(route.lastIndexOf(".") + 1), user);
+	}
+
 	private void addImages(Post post, List<String> imageRoutes, User user) throws IOException {
 		for (String route : imageRoutes) {
-			InputStream is = getClass().getResourceAsStream(route);
-			byte[] data = is.readAllBytes();
-			Image image = imageService.saveImage(data, route.substring(route.lastIndexOf("/") + 1),
-					"image/" + route.substring(route.lastIndexOf(".") + 1), user);
+			Image image = uploadImage(route, user);
 			image.setPost(post);
 			post.getImages().add(image);
 		}
 		postService.save(post);
+	}
+
+	private void addAvatar(User user, String route) throws IOException {
+		user.setAvatar(uploadImage(route, user));
+		userService.save(user);
 	}
 
 	private void addLikes(User user, List<Post> posts) {

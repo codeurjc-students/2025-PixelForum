@@ -209,6 +209,7 @@ public class UserService {
 
 		// Set new avatar
 		user.setAvatar(image);
+		image.setOwner(user);
 		userRepository.save(user);
 		return mapper.toDTO(user);
 	}

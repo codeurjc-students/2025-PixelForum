@@ -3,7 +3,6 @@ import { of, Subject, throwError } from 'rxjs';
 import { EditProfileComponent } from './edit-profile.component';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
-import { ErrorService } from '../../services/error.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '../../models/user.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,7 +14,6 @@ describe('EditProfileComponent - Unit Tests', () => {
     let fixture: ComponentFixture<EditProfileComponent>;
     let userService: jasmine.SpyObj<UserService>;
     let authService: jasmine.SpyObj<AuthService>;
-    let errorService: jasmine.SpyObj<ErrorService>;
     let router: jasmine.SpyObj<Router>;
     let snackBar: jasmine.SpyObj<MatSnackBar>;
     let dialog: jasmine.SpyObj<MatDialog>;
@@ -32,7 +30,6 @@ describe('EditProfileComponent - Unit Tests', () => {
     beforeEach(async () => {
         userService = jasmine.createSpyObj('UserService', ['getById', 'updateProfile', 'changePassword']);
         authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
-        errorService = jasmine.createSpyObj('ErrorService', ['setError']);
         router = jasmine.createSpyObj('Router', ['navigate']);
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
         dialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -48,7 +45,6 @@ describe('EditProfileComponent - Unit Tests', () => {
             providers: [
                 { provide: UserService, useValue: userService },
                 { provide: AuthService, useValue: authService },
-                { provide: ErrorService, useValue: errorService },
                 { provide: Router, useValue: router },
                 { provide: ActivatedRoute, useValue: activatedRouteMock },
                 { provide: MatSnackBar, useValue: snackBar },
@@ -70,17 +66,9 @@ describe('EditProfileComponent - Unit Tests', () => {
         spyOn(component as any, 'loadUserProfile');
 
         component.ngOnInit();
-        routeParams$.next({ userId: '1' });
+        routeParams$.next({ userId: 1 });
 
         expect((component as any).loadUserProfile).toHaveBeenCalledWith(1);
-    });
-
-    it('should set error and navigate if no userId', () => {
-        component.ngOnInit();
-        routeParams$.next({});
-
-        expect(errorService.setError).toHaveBeenCalledWith(400, 'Bad Request');
-        expect(router.navigate).toHaveBeenCalledWith(['/error']);
     });
 
     // ---------- LOAD USER ----------
@@ -181,7 +169,7 @@ describe('EditProfileComponent - Unit Tests', () => {
         userService.updateProfile.and.returnValue(
             throwError(() => ({
                 status: 400,
-                error: { error: 'username already exists' }
+                error: { message: 'Username already taken' }
             }))
         );
 
@@ -244,7 +232,7 @@ describe('EditProfileComponent - Unit Tests', () => {
         userService.changePassword.and.returnValue(
             throwError(() => ({
                 status: 400,
-                error: { error: 'old password is incorrect' }
+                error: { message: 'Current password is incorrect' }
             }))
         );
 

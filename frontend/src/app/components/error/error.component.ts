@@ -16,6 +16,7 @@ export class ErrorComponent implements OnInit {
 
 	status!: number;
 	errorName!: string;
+	message!: string;
 
 	constructor(
 		private errorService: ErrorService,
@@ -28,11 +29,13 @@ export class ErrorComponent implements OnInit {
 		if (!error) {
 			this.status = 404;
 			this.errorName = 'Page not found';
+			this.message = 'The page you are looking for does not exist';
 			return;
 		}
 
 		this.status = error.status;
 		this.errorName = error.errorName;
+		this.message = error.message;
 	}
 
 	goHome(): void {

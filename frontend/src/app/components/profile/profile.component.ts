@@ -62,12 +62,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 		this.route.params
 			.pipe(takeUntil(this.destroy$))
 			.subscribe(params => {
-				if (params['userId']) {
-					this.loadUserProfile(parseInt(params['userId'], 10));
-				} else {
-					this.errorService.setError(400, "Bad Request");
-					this.router.navigate(['/error']);
-				}
+					const id = params['userId'];
+					this.loadUserProfile(id);
 			});
 	}
 
@@ -107,6 +103,33 @@ export class ProfileComponent implements OnInit, OnDestroy {
 		} else {
 			this.router.navigate(['/posts']);
 		}
+	}
+
+	deleteAccount(): void {
+		const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+			width: '400px',
+			autoFocus: false,
+			data: {
+				title: 'Delete Account',
+				message: 'Are you sure you want to delete your account? This action cannot be undone.',
+				icon: 'warning',
+				confirmText: 'Delete',
+				color: 'danger'
+			}
+		});
+
+		dialogRef.afterClosed().subscribe(result => {
+			if (result === true && this.user) {
+				this.userService.deleteAccount(this.user.id).subscribe({
+					next: () => {
+						if (this.loggedUser?.id === this.user?.id) {
+							this.authService.logout().subscribe();
+						}
+						this.router.navigate(['/']);
+					}
+				});
+			}
+		});
 	}
 
 	editProfile(): void {
@@ -152,12 +175,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
 		// Validate file type
 		if (!file.type.startsWith('image/')) {
-			this.errorService.setError(400, 'Only image files are allowed');
+			this.errorService.setError(400, 'Bad Request', 'Only image files are allowed');
 			return;
 		}
 
 		if (!file.type.includes('png') && !file.type.includes('jpeg')) {
-			this.errorService.setError(400, 'Only PNG and JPG images are allowed');
+			this.errorService.setError(400, 'Bad Request', 'Only PNG and JPG images are allowed');
 			return;
 		}
 

@@ -32,7 +32,7 @@ describe('ProfileComponent - Unit Tests', () => {
     beforeEach(async () => {
         spyOn(console, 'error');
 
-        userService = jasmine.createSpyObj('UserService', ['getById', 'setAvatar', 'deleteAvatar']);
+        userService = jasmine.createSpyObj('UserService', ['getById', 'setAvatar', 'deleteAvatar', 'deleteAccount']);
         errorService = jasmine.createSpyObj('ErrorService', ['setError']);
         router = jasmine.createSpyObj('Router', ['navigate']);
         imageService = jasmine.createSpyObj('ImageService', ['uploadImages']);
@@ -42,7 +42,7 @@ describe('ProfileComponent - Unit Tests', () => {
         routeParams$ = new Subject();
         authUser$ = new Subject();
 
-        authService = jasmine.createSpyObj('AuthService', ['checkAuth'], {
+        authService = jasmine.createSpyObj('AuthService', ['checkAuth', 'logout'], {
             user$: authUser$.asObservable()
         });
 
@@ -79,19 +79,9 @@ describe('ProfileComponent - Unit Tests', () => {
         component.ngOnInit();
 
         authUser$.next({ id: 1 });
-        routeParams$.next({ userId: '1' });
+        routeParams$.next({ userId: 1 });
 
         expect(component.loadUserProfile).toHaveBeenCalledWith(1);
-    });
-
-    it('should set error and navigate if no userId in params', () => {
-        component.ngOnInit();
-
-        authUser$.next({ id: 1 });
-        routeParams$.next({}); // No userId
-
-        expect(errorService.setError).toHaveBeenCalledWith(400, 'Bad Request');
-        expect(router.navigate).toHaveBeenCalledWith(['/error']);
     });
 
     // ---------- LOAD USER PROFILE ----------
@@ -239,7 +229,7 @@ describe('ProfileComponent - Unit Tests', () => {
 
         await component.onImageSelected(event);
 
-        expect(errorService.setError).toHaveBeenCalledWith(400, 'Only PNG and JPG images are allowed');
+        expect(errorService.setError).toHaveBeenCalledWith(400, 'Bad Request', 'Only PNG and JPG images are allowed');
     });
 
     it('should upload image and update profile', async () => {
@@ -283,6 +273,57 @@ describe('ProfileComponent - Unit Tests', () => {
         expect(component.avatarUrl).toBe('');
         expect(authService.checkAuth).toHaveBeenCalled();
         expect(component.refreshTrigger).toBe(2);
+    });
+
+    // ---------- DELETE ACCOUNT ----------
+
+    it('should delete account and navigate home when confirmed', () => {
+        component.user = mockUser;
+        component.loggedUser = { id: 2 } as any;
+
+        dialog.open.and.returnValue({
+            afterClosed: () => of(true)
+        } as any);
+
+        userService.deleteAccount.and.returnValue(of(void 0));
+
+        component.deleteAccount();
+
+        expect(userService.deleteAccount).toHaveBeenCalledWith(1);
+        expect(router.navigate).toHaveBeenCalledWith(['/']);
+        expect(authService.logout).not.toHaveBeenCalled();
+    });
+
+    it('should logout and navigate home when deleting own account', () => {
+        component.user = mockUser;
+        component.loggedUser = { id: 1 } as any;
+
+        dialog.open.and.returnValue({
+            afterClosed: () => of(true)
+        } as any);
+
+        userService.deleteAccount.and.returnValue(of(void 0));
+        authService.logout.and.returnValue(of());
+
+        component.deleteAccount();
+
+        expect(userService.deleteAccount).toHaveBeenCalledWith(1);
+        expect(authService.logout).toHaveBeenCalled();
+        expect(router.navigate).toHaveBeenCalledWith(['/']);
+    });
+
+    it('should not delete account when dialog is cancelled', () => {
+        component.user = mockUser;
+
+        dialog.open.and.returnValue({
+            afterClosed: () => of(false)
+        } as any);
+
+        component.deleteAccount();
+
+        expect(userService.deleteAccount).not.toHaveBeenCalled();
+        expect(authService.logout).not.toHaveBeenCalled();
+        expect(router.navigate).not.toHaveBeenCalled();
     });
 
 });

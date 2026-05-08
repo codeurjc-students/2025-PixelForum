@@ -11,7 +11,7 @@ describe('ErrorComponent', () => {
     let errorServiceSpy: jasmine.SpyObj<ErrorService>;
     let routerSpy: jasmine.SpyObj<Router>;
 
-    const mockError = { status: 500, errorName: 'Internal Server Error' };
+    const mockError = { status: 500, errorName: 'Internal Server Error', message: 'An unexpected error occurred' };
 
     beforeEach(async () => {
         errorServiceSpy = jasmine.createSpyObj('ErrorService', ['getError', 'clear']);
@@ -43,6 +43,7 @@ describe('ErrorComponent', () => {
 
         expect(component.status).toBe(500);
         expect(component.errorName).toBe('Internal Server Error');
+        expect(component.message).toBe('An unexpected error occurred');
     });
 
     it('should default to 404 if no error', () => {
@@ -52,6 +53,7 @@ describe('ErrorComponent', () => {
 
         expect(component.status).toBe(404);
         expect(component.errorName).toBe('Page not found');
+        expect(component.message).toBe('The page you are looking for does not exist');
     });
 
     // ---------- GO HOME ----------

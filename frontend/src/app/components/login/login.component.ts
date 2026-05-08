@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -23,7 +23,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 	templateUrl: './login.component.html',
 	styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
 	username = '';
 	password = '';
@@ -34,6 +34,10 @@ export class LoginComponent {
 		private router: Router,
 		private snackBar: MatSnackBar
 	) { }
+
+	ngOnInit(): void {
+		this.authService.checkAuth().subscribe();
+	}
 
 	onSubmit(): void {
 		this.errorMessage = '';

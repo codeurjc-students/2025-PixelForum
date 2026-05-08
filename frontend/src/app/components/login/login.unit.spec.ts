@@ -22,6 +22,8 @@ describe('LoginComponent - Unit Tests', () => {
             ]
         }).compileComponents();
 
+        authService.checkAuth.and.returnValue(of(null));
+
         router = TestBed.inject(Router);
         spyOn(router, 'navigate');
         fixture = TestBed.createComponent(LoginComponent);
@@ -33,13 +35,18 @@ describe('LoginComponent - Unit Tests', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should call authService.checkAuth on init', () => {
+        component.ngOnInit();
+
+        expect(authService.checkAuth).toHaveBeenCalled();
+    });
+
     it('should call authService.login with username and password', () => {
         authService.login.and.returnValue(of({
             id: 1,
             username: 'testuser',
             roles: ['USER']
         }));
-        authService.checkAuth.and.returnValue(of(null));
 
         component.username = 'testuser';
         component.password = 'password123';
@@ -55,7 +62,6 @@ describe('LoginComponent - Unit Tests', () => {
             username: 'testuser',
             roles: ['USER']
         }));
-        authService.checkAuth.and.returnValue(of(null));
 
         component.username = 'testuser';
         component.password = 'password123';

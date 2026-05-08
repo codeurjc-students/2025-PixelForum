@@ -10,7 +10,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
-import { ErrorService } from '../../services/error.service';
 import { User } from '../../models/user.model';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -52,7 +51,6 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         private fb: FormBuilder,
         private userService: UserService,
         private authService: AuthService,
-        private errorService: ErrorService,
         private snackBar: MatSnackBar,
         public router: Router,
         private route: ActivatedRoute,
@@ -66,13 +64,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         this.route.params
             .pipe(takeUntil(this.destroy$))
             .subscribe(params => {
-                if (params['userId']) {
-                    this.userId = parseInt(params['userId'], 10);
-                    this.loadUserProfile(this.userId);
-                } else {
-                    this.errorService.setError(400, 'Bad Request');
-                    this.router.navigate(['/error']);
-                }
+                const id = params['userId'];
+                this.userId = id;
+                this.loadUserProfile(id);
             });
     }
 
@@ -199,13 +193,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                     let errorMessage = 'Failed to update profile';
 
                     if (err.status === 400) {
-                        if (err.error?.error?.includes('username')) {
-                            errorMessage = 'Username already taken';
-                        } else if (err.error?.error?.includes('email')) {
-                            errorMessage = 'Email already in use';
-                        } else {
-                            errorMessage = err.error?.error || errorMessage;
-                        }
+                        errorMessage = err.error?.message || errorMessage;
                     } else if (err.status === 0) {
                         errorMessage = 'Unable to connect to the server';
                     }
@@ -247,11 +235,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
                     let errorMessage = 'Failed to change password';
 
                     if (err.status === 400) {
-                        if (err.error?.error?.includes('old password') || err.error?.error?.includes('current password')) {
-                            errorMessage = 'Current password is incorrect';
-                        } else {
-                            errorMessage = err.error?.error || errorMessage;
-                        }
+                        errorMessage = err.error?.message || errorMessage;
                     } else if (err.status === 0) {
                         errorMessage = 'Unable to connect to the server';
                     }
@@ -268,6 +252,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             data: {
                 title,
                 message,
+                icon: 'edit',
                 confirmText: 'Confirm',
                 color: 'primary'
             }
