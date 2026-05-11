@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class PostComponent implements OnInit {
 	@Output() postDeleted = new EventEmitter<void>();
+	@Output() removeUnlikedPost = new EventEmitter<number | undefined>();
 	@Input() post!: Post;
 	@Input() mode: 'list' | 'detail' = 'list';
 
@@ -26,6 +27,7 @@ export class PostComponent implements OnInit {
 	imageCount = 0;
 	currentImage: string = '';
 	hasUserLiked = false;
+	currentUserId: number | undefined = undefined;
 	isOwner$!: Observable<boolean>;
 
 	constructor(
@@ -39,7 +41,10 @@ export class PostComponent implements OnInit {
 	ngOnInit(): void {
 		this.avatarUrl = 'api/v1/images/' + this.post.author?.avatar + '?w=240&h=240';
 		this.isOwner$ = this.authService.user$.pipe(
-			map(user => user ? user.id === this.post.author?.id || user.roles.includes('ADMIN') : false)
+			map(user => {
+				this.currentUserId = user?.id;
+				return user ? user.id === this.post.author?.id || user.roles.includes('ADMIN') : false;
+			})
 		);
 		this.hasUserLiked = !!this.post.hasUserLiked;
 		this.imageCount = this.post.images?.length || 0;
@@ -105,6 +110,7 @@ export class PostComponent implements OnInit {
 						next: (updatedPost: Post) => {
 							this.post = updatedPost;
 							this.hasUserLiked = !!updatedPost.hasUserLiked;
+							this.removeUnlikedPost.emit(this.currentUserId);
 						}
 					});
 				}

@@ -1,6 +1,7 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.dto.user.BasicUserDTO;
 import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
@@ -35,29 +39,41 @@ public class UserService {
 	private final UserMapper mapper;
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
+	private final PostMapper postMapper;
 	private final CommentRepository commentRepository;
 	private final ImageRepository imageRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository,
-			CommentRepository commentRepository, ImageRepository imageRepository, PasswordEncoder passwordEncoder) {
+			PostMapper postMapper, CommentRepository commentRepository, ImageRepository imageRepository,
+			PasswordEncoder passwordEncoder) {
 		this.mapper = mapper;
 		this.userRepository = userRepository;
 		this.postRepository = postRepository;
+		this.postMapper = postMapper;
 		this.commentRepository = commentRepository;
 		this.imageRepository = imageRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public UserDTO getUser(Long id) {
+	public BasicUserDTO getUser(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		return mapper.toBasicDTO(user);
+	}
+
+	public Page<BasicUserDTO> getUsers(Pageable pageable) {
+		return userRepository.findAll(pageable)
+				.map(mapper::toBasicDTO);
+	}
+
+	public UserDTO getUserDetails(Long id, User currentUser) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only view your own secret details");
+		}
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 		return mapper.toDTO(user);
-	}
-
-	public Page<UserDTO> getUsers(Pageable pageable) {
-		return userRepository.findAll(pageable)
-				.map(mapper::toDTO);
 	}
 
 	public Optional<User> findByUsername(String username) {
@@ -98,12 +114,11 @@ public class UserService {
 
 	@Transactional
 	public UserDTO updateUser(Long id, CreateUserDTO userDTO, User currentUser) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-
-		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only edit your own profile");
 		}
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
 		// USERNAME
 		if (userDTO.username() != null && !user.getUsername().equals(userDTO.username())) {
@@ -131,12 +146,11 @@ public class UserService {
 
 	@Transactional
 	public void changePassword(Long id, ChangePasswordDTO dto, User currentUser) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-
-		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only change your own password");
 		}
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
 		if (!passwordEncoder.matches(dto.oldPassword(), user.getPassword())) {
 			throw new IllegalArgumentException("Invalid current password");
@@ -147,14 +161,22 @@ public class UserService {
 
 	@Transactional
 	public void deleteUser(Long id, User currentUser) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only delete your own account");
+		}
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
-		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
-			throw new AccessDeniedException("You can only delete your own account");
-		}
 		commentRepository.deleteByAuthor(user);
 
+		// Remove likes made by this user
+		for (Post likedPost : new ArrayList<>(user.getLikedPosts())) {
+			likedPost.getUsersThatLiked().remove(user);
+			likedPost.setLikes(likedPost.getUsersThatLiked().size());
+		}
+		user.getLikedPosts().clear();
+
+		// Remove likes on posts authored by this user
 		List<Post> posts = postRepository.findByAuthor(user);
 		for (Post post : posts) {
 			for (User u : post.getUsersThatLiked()) {
@@ -175,12 +197,11 @@ public class UserService {
 
 	@Transactional
 	public UserDTO setProfileImage(Long id, Long imageId, User currentUser) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-
-		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only set your own profile image");
 		}
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
 		Image image = imageRepository.findById(imageId)
 				.orElseThrow(() -> new EntityNotFoundException("Image not found"));
@@ -216,12 +237,11 @@ public class UserService {
 
 	@Transactional
 	public void removeProfileImage(Long id, User currentUser) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-
-		if (user.getId() != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only remove your own profile image");
 		}
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
 		if (user.getAvatar() != null) {
 			Image avatar = user.getAvatar();
@@ -229,6 +249,16 @@ public class UserService {
 			imageRepository.delete(avatar);
 			userRepository.save(user);
 		}
+	}
+
+	public Page<PostDTO> getLikedPosts(Long id, User currentUser, Pageable pageable) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only view your own liked posts");
+		}
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		return postRepository.findByUsersThatLikedContains(user, pageable)
+				.map(post -> postMapper.toDTOWithLike(post, currentUser));
 	}
 
 }

@@ -167,7 +167,7 @@ describe('PostComponent', () => {
 
 	it('should toggle like when user is logged in', () => {
 		const updatedPost: Post = { ...mockPost, likes: 1, hasUserLiked: true };
-
+		spyOn(component.removeUnlikedPost, 'emit');
 		postServiceSpy.toggleLike.and.returnValue(of(updatedPost));
 
 		component.toggleLike();
@@ -175,13 +175,13 @@ describe('PostComponent', () => {
 		expect(postServiceSpy.toggleLike).toHaveBeenCalledWith(1);
 		expect(component.post).toEqual(updatedPost);
 		expect(component.hasUserLiked).toBeTrue();
+		expect(component.removeUnlikedPost.emit).toHaveBeenCalledWith(component.currentUserId);
 	});
 
 	it('should remove like when already liked', () => {
 		component.hasUserLiked = true;
-
 		const updatedPost: Post = { ...mockPost, likes: 0, hasUserLiked: false };
-
+		spyOn(component.removeUnlikedPost, 'emit');
 		postServiceSpy.toggleLike.and.returnValue(of(updatedPost));
 
 		component.toggleLike();
@@ -189,6 +189,7 @@ describe('PostComponent', () => {
 		expect(postServiceSpy.toggleLike).toHaveBeenCalledWith(1);
 		expect(component.post.likes).toBe(0);
 		expect(component.hasUserLiked).toBeFalse();
+		expect(component.removeUnlikedPost.emit).toHaveBeenCalledWith(component.currentUserId);
 	});
 
 	it('should not call toggleLike when user is not logged in', () => {

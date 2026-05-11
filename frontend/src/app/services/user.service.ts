@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { User } from '../models/user.model';
+import { PageResponse } from '../models/pageResponse.model';
+import { Post } from '../models/post.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -17,6 +19,14 @@ export class UserService {
 
     getById(id: number): Observable<User> {
         return this.http.get<User>(`${this.baseUrl}/${id}`, { withCredentials: true });
+    }
+
+    getUserDetails(userId: number): Observable<User> {
+        return this.http.get<User>(`${this.baseUrl}/${userId}/details`, { withCredentials: true });
+    }
+
+    getLikedPosts(userId: number, page: number, size: number) {
+        return this.http.get<PageResponse<Post>>(`${this.baseUrl}/${userId}/liked-posts`, { params: { page, size }, withCredentials: true });
     }
 
     register(userData: any): Observable<User> {

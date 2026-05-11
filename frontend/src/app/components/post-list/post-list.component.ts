@@ -6,6 +6,7 @@ import { Post } from '../../models/post.model';
 import { PostComponent } from '../post/post.component';
 import { PostService } from '../../services/post.service';
 import { PageResponse } from '../../models/pageResponse.model';
+import { UserService } from '../../services/user.service';
 
 @Component({
 	selector: 'app-post-list',
@@ -22,6 +23,7 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 	@Input() sortOrder: 'asc' | 'desc' = 'desc';
 	@Input() pageSize: number = 10;
 	@Input() refreshTrigger!: number;
+	@Input() likedByUserId?: number;
 
 	// State
 	posts: Post[] = [];
@@ -39,6 +41,7 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 
 	constructor(
 		private postService: PostService,
+		private userService: UserService
 	) { }
 
 	ngOnInit(): void {
@@ -72,15 +75,23 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	fetchPosts(isInitialLoad: boolean): void {
-		this.postService.getPosts(
-			this.currentPage,
-			this.pageSize,
-			undefined,
-			this.filterUsername,
-			this.filterTopic,
-			this.sortBy,
-			this.sortOrder
-		)
+		const request$ = this.likedByUserId
+			? this.userService.getLikedPosts(
+				this.likedByUserId,
+				this.currentPage,
+				this.pageSize
+			)
+			: this.postService.getPosts(
+				this.currentPage,
+				this.pageSize,
+				undefined,
+				this.filterUsername,
+				this.filterTopic,
+				this.sortBy,
+				this.sortOrder
+			);
+
+		request$
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response: PageResponse<Post>) => {
@@ -107,4 +118,10 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 		this.loadPosts();
 	}
 
+	removeUnlikedPost(id: number | undefined): void {
+		if (!this.likedByUserId || !id || id != this.likedByUserId) {
+			return;
+		}
+		this.loadPosts();
+	}
 }

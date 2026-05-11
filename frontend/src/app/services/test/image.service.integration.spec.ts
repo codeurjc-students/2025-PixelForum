@@ -41,7 +41,15 @@ describe('ImageService - Integration Tests', () => {
                 expect(response).toBeTruthy();
                 expect(response.length).toBeGreaterThan(0);
                 expect(typeof response[0]).toBe('number');
-                done();
+                
+                const imageId = Number(response[0]);
+                service.deleteImage(imageId).subscribe({
+                    next: () => done(),
+                    error: err => {
+                        fail('Cleanup failed: ' + err.message);
+                        done();
+                    }
+                });
             },
             error: (err) => {
                 fail('Upload failed: ' + err.message);
@@ -65,7 +73,7 @@ describe('ImageService - Integration Tests', () => {
                                 done();
                             },
                             error: (err) => {
-                                expect(err.status).toBe(500);
+                                expect(err.status).toBe(404);
                                 done();
                             }
                         });

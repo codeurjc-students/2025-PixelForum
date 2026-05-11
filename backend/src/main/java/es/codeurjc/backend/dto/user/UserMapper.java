@@ -14,6 +14,7 @@ import es.codeurjc.backend.model.User;
 public interface UserMapper {
 
     UserDTO toDTO(User user);
+	BasicUserDTO toBasicDTO(User user);
 
     List<UserDTO> toDTOs(Collection<User> users);
 

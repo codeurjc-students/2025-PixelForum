@@ -84,6 +84,8 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole("USER")
 					
 					// USERS
+					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-posts").hasRole("USER")
+					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/details").hasRole("USER")
 					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()
 					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
 					.requestMatchers(HttpMethod.PATCH, API_USERS).hasRole("USER")

@@ -363,6 +363,10 @@ export class CreatePostComponent implements OnInit {
 	}
 
 	onCancel(): void {
-		this.router.navigate(['/posts']);
+		if (window.history.length > 1) {
+			window.history.back();
+		} else {
+			this.router.navigate(['/posts']);
+		}
 	}
 }

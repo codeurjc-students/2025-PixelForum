@@ -3,9 +3,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { PostListComponent } from './post-list.component';
 import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
-import { TopicService } from '../../services/topic.service';
 import { UserService } from '../../services/user.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { PageResponse } from '../../models/pageResponse.model';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
@@ -14,9 +12,7 @@ describe('PostListComponent - Unit Tests', () => {
 	let component: PostListComponent;
 	let fixture: ComponentFixture<PostListComponent>;
 	let postService: jasmine.SpyObj<PostService>;
-	let topicService: jasmine.SpyObj<TopicService>;
 	let userService: jasmine.SpyObj<UserService>;
-	let router: jasmine.SpyObj<Router>;
 
 	const mockPosts: Post[] = [
 		{
@@ -52,22 +48,13 @@ describe('PostListComponent - Unit Tests', () => {
 		spyOn(console, 'error');
 
 		postService = jasmine.createSpyObj('PostService', ['getPosts']);
-		topicService = jasmine.createSpyObj('TopicService', ['getById']);
-		userService = jasmine.createSpyObj('UserService', ['getById']);
-		router = jasmine.createSpyObj('Router', ['navigate']);
-
-		const activatedRouteMock = {
-			params: of({})
-		};
+		userService = jasmine.createSpyObj('UserService', ['getLikedPosts']);
 
 		await TestBed.configureTestingModule({
 			imports: [PostListComponent, HttpClientTestingModule],
 			providers: [
 				{ provide: PostService, useValue: postService },
-				{ provide: TopicService, useValue: topicService },
-				{ provide: UserService, useValue: userService },
-				{ provide: Router, useValue: router },
-				{ provide: ActivatedRoute, useValue: activatedRouteMock }
+				{ provide: UserService, useValue: userService }
 			]
 		}).compileComponents();
 
@@ -114,7 +101,7 @@ describe('PostListComponent - Unit Tests', () => {
 
 	// ---------- SORTING ----------
 
-	it('should sort posts by createdAt desc', () => {
+	it('should keep posts in backend order', () => {
 		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.loadPosts();
@@ -170,6 +157,17 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(compiled.textContent).toContain('No posts yet');
 	});
 
+	it('should load liked posts when likedByUserId is defined', () => {
+		component.likedByUserId = 5;
+		userService.getLikedPosts.and.returnValue(of(mockPageResponse));
+
+		component.loadPosts();
+
+		expect(userService.getLikedPosts).toHaveBeenCalledWith(5, 0, 10);
+		expect(postService.getPosts).not.toHaveBeenCalled();
+		expect(component.posts.length).toBe(2);
+	});
+
 	// ---------- LOAD MORE & PAGINATION ----------
 
 	it('should load more posts if has more pages', () => {
@@ -217,7 +215,7 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(component.isLoadingMore).toBeFalse();
 	});
 
-	// ---------- REMOVE POST ----------
+	// ---------- RELOAD POST ----------
 
 	it('should reload posts on removePost', () => {
 		spyOn(component, 'loadPosts');
@@ -227,4 +225,23 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(component.isLoading).toBeTrue();
 		expect(component.loadPosts).toHaveBeenCalled();
 	});
+
+	it('should reload posts when removing unliked post from current user', () => {
+		component.likedByUserId = 4;
+		spyOn(component, 'loadPosts');
+
+		component.removeUnlikedPost(4);
+
+		expect(component.loadPosts).toHaveBeenCalled();
+	});
+
+	it('should not reload posts if removed like belongs to another user', () => {
+		component.likedByUserId = 4;
+		spyOn(component, 'loadPosts');
+
+		component.removeUnlikedPost(8);
+
+		expect(component.loadPosts).not.toHaveBeenCalled();
+	});
+
 });

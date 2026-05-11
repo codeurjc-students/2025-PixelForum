@@ -401,9 +401,23 @@ describe('CreatePostComponent', () => {
 
     // ---------- CANCEL ----------
 
-    it('should navigate to posts on cancel', () => {
+    it('should call window.history.back if history length > 1', () => {
+        spyOnProperty(window.history, 'length', 'get').and.returnValue(2);
+        spyOn(window.history, 'back');
+
         component.onCancel();
 
+        expect(window.history.back).toHaveBeenCalled();
+        expect(routerSpy.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to /posts if history length <= 1', () => {
+        spyOnProperty(window.history, 'length', 'get').and.returnValue(1);
+        spyOn(window.history, 'back');
+
+        component.onCancel();
+
+        expect(window.history.back).not.toHaveBeenCalled();
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts']);
     });
 

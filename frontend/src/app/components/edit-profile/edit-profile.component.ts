@@ -117,7 +117,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     }
 
     private loadUserProfile(userId: number): void {
-        this.userService.getById(userId)
+        this.userService.getUserDetails(userId)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (user: User) => {

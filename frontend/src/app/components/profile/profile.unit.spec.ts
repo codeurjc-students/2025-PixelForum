@@ -95,6 +95,7 @@ describe('ProfileComponent - Unit Tests', () => {
         expect(component.user).toEqual(mockUser);
         expect(component.filterUsername).toBe('testuser');
         expect(component.isLoadingUser).toBeFalse();
+        expect(component.activeTab).toBe('posts');
     });
 
     it('should set isOwnProfile true when user is the same as current user', () => {

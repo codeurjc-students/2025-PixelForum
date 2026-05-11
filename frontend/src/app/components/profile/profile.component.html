@@ -118,9 +118,8 @@
 
 			<!-- Likes Tab -->
 			<div class="tab-content" *ngIf="activeTab === 'likes'">
-				<div class="empty-state">
-					<p class="empty-text">Likes in development</p>
-				</div>
+				<app-post-list [likedByUserId]="user.id" [pageSize]="10"
+					[refreshTrigger]="refreshTrigger"></app-post-list>
 			</div>
 		</div>
 	</div>

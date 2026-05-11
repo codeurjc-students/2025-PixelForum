@@ -44,7 +44,7 @@ public class LoginController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<AuthResponse> logOut(HttpServletResponse response) {
+    public ResponseEntity<AuthResponse> logout(HttpServletResponse response) {
         return ResponseEntity.ok(new AuthResponse(Status.SUCCESS, userLoginService.logout(response)));
     }
 
@@ -52,7 +52,7 @@ public class LoginController {
     public UserDTO me(Principal principal) {
         User currentUser = userService.findByUsername(principal.getName())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        return userService.getUser(currentUser.getId());
+        return userService.getUserDetails(currentUser.getId(), currentUser);
     }
 
 }

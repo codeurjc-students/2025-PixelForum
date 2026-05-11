@@ -28,7 +28,7 @@ describe('EditProfileComponent - Unit Tests', () => {
     let routeParams$: Subject<any>;
 
     beforeEach(async () => {
-        userService = jasmine.createSpyObj('UserService', ['getById', 'updateProfile', 'changePassword']);
+        userService = jasmine.createSpyObj('UserService', ['getUserDetails', 'updateProfile', 'changePassword']);
         authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
         router = jasmine.createSpyObj('Router', ['navigate']);
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -74,11 +74,11 @@ describe('EditProfileComponent - Unit Tests', () => {
     // ---------- LOAD USER ----------
 
     it('should load user and patch form', () => {
-        userService.getById.and.returnValue(of(mockUser));
+        userService.getUserDetails.and.returnValue(of(mockUser));
 
         (component as any).loadUserProfile(1);
 
-        expect(userService.getById).toHaveBeenCalledWith(1);
+        expect(userService.getUserDetails).toHaveBeenCalledWith(1);
         expect(component.user).toEqual(mockUser);
         expect(component.profileForm.value.username).toBe('testuser');
         expect(component.profileForm.value.email).toBe('test@test.com');

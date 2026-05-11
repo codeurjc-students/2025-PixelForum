@@ -82,6 +82,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 					this.filterUsername = user.username;
 					this.avatarUrl = 'api/v1/images/' + this.user.avatar + '?w=240&h=240';
 					this.isLoadingUser = false;
+					this.activeTab = 'posts';
 					this.checkIfOwnProfile();
 				}
 			});

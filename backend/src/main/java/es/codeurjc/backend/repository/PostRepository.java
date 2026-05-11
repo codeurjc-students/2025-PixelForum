@@ -27,5 +27,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     void deleteByAuthor(User user);
     List<Post> findByAuthor(User user);
+    Page<Post> findByUsersThatLikedContains(User user, Pageable pageable);
 
 }

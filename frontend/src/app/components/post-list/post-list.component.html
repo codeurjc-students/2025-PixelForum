@@ -9,7 +9,8 @@
 
 	<!-- Posts Feed -->
 	<div *ngIf="!isLoading && posts.length > 0" class="posts-feed">
-		<app-post *ngFor="let post of posts" [post]="post" [mode]="'list'" (postDeleted)="removePost()"></app-post>
+		<app-post *ngFor="let post of posts" [post]="post" [mode]="'list'" (postDeleted)="removePost()"
+			(removeUnlikedPost)="removeUnlikedPost($event)"></app-post>
 	</div>
 
 	<!-- Empty State -->

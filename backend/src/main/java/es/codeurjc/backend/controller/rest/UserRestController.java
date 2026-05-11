@@ -7,6 +7,7 @@ import java.security.Principal;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.user.BasicUserDTO;
 import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
@@ -39,13 +42,20 @@ public class UserRestController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> getUsers(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+    public ResponseEntity<Page<BasicUserDTO>> getUsers(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         return ResponseEntity.ok(userService.getUsers(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+    public ResponseEntity<BasicUserDTO> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUser(id));
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<UserDTO> getUserDetails(@PathVariable Long id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        return ResponseEntity.ok(userService.getUserDetails(id, currentUser));
     }
 
     @PostMapping
@@ -101,5 +111,15 @@ public class UserRestController {
 
         userService.removeProfileImage(id, currentUser);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/liked-posts")
+    public ResponseEntity<Page<PostDTO>> getLikedPosts(@PathVariable Long id, Principal principal,
+            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+        Page<PostDTO> likedPosts = userService.getLikedPosts(id, currentUser, pageable);
+        return ResponseEntity.ok(likedPosts);
     }
 }
