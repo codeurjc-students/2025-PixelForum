@@ -1,18 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs/internal/Subject';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
-
 import { Post } from '../../models/post.model';
 import { PostComponent } from '../post/post.component';
 import { PostService } from '../../services/post.service';
-import { TopicService } from '../../services/topic.service';
-import { Topic } from '../../models/topic.model';
-import { UserService } from '../../services/user.service';
-import { User } from '../../models/user.model';
 import { PageResponse } from '../../models/pageResponse.model';
-import { ErrorService } from '../../services/error.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
 	selector: 'app-post-list',
@@ -21,7 +15,16 @@ import { ErrorService } from '../../services/error.service';
 	templateUrl: './post-list.component.html',
 	styleUrls: ['./post-list.component.scss']
 })
-export class PostListComponent implements OnInit, OnDestroy {
+export class PostListComponent implements OnInit, OnChanges, OnDestroy {
+	// Input filters
+	@Input() filterUsername?: string;
+	@Input() filterTopic?: string;
+	@Input() sortBy: string = 'createdAt';
+	@Input() sortOrder: 'asc' | 'desc' = 'desc';
+	@Input() pageSize: number = 10;
+	@Input() refreshTrigger!: number;
+	@Input() likedByUserId?: number;
+
 	// State
 	posts: Post[] = [];
 	isLoading = true;
@@ -29,51 +32,24 @@ export class PostListComponent implements OnInit, OnDestroy {
 
 	// Pagination
 	currentPage = 0;
-	pageSize = 10;
 	totalPages = 0;
 	hasMorePages = false;
 	totalElements = 0;
-
-	// Filters
-	filterType: 'all' | 'topic' | 'user' = 'all';
-	filterId: number | null = null;
-	filterName: string = '';
-	filterUsername?: string;
-	filterTopic?: string;
 
 	// RxJS
 	private destroy$ = new Subject<void>();
 
 	constructor(
 		private postService: PostService,
-		private topicService: TopicService,
-		private userService: UserService,
-		private errorService: ErrorService,
-		private route: ActivatedRoute,
-		private router: Router
+		private userService: UserService
 	) { }
 
 	ngOnInit(): void {
-		this.route.params
-			.pipe(takeUntil(this.destroy$))
-			.subscribe(params => {
-				this.resetPagination();
-				this.resetFilters();
+		this.loadPosts();
+	}
 
-				if (params['topicId']) {
-					this.filterType = 'topic';
-					this.filterId = parseInt(params['topicId'], 10);
-					this.loadTopicName();
-				} else if (params['userId']) {
-					this.filterType = 'user';
-					this.filterId = parseInt(params['userId'], 10);
-					this.loadUserName();
-				} else {
-					this.filterType = 'all';
-					this.filterName = 'Latest Posts';
-					this.loadPosts();
-				}
-			});
+	ngOnChanges() {
+		if (this.refreshTrigger !== undefined) this.loadPosts();
 	}
 
 	ngOnDestroy(): void {
@@ -81,38 +57,10 @@ export class PostListComponent implements OnInit, OnDestroy {
 		this.destroy$.complete();
 	}
 
-	loadTopicName(): void {
-		if (this.filterId) {
-			this.topicService.getById(this.filterId).subscribe({
-				next: (topic: Topic) => {
-					this.filterName = topic.name;
-					this.filterTopic = topic.name;
-					this.loadPosts();
-				}
-			});
-		} else {
-			this.errorService.setError(400, "Bad Request");
-			this.router.navigate(['/error']);
-		}
-	}
-
-	loadUserName(): void {
-		if (this.filterId) {
-			this.userService.getById(this.filterId).subscribe({
-				next: (user: User) => {
-					this.filterName = user.username;
-					this.filterUsername = user.username;
-					this.loadPosts();
-				}
-			});
-		} else {
-			this.errorService.setError(400, "Bad Request");
-			this.router.navigate(['/error']);
-		}
-	}
-
 	loadPosts(): void {
 		this.isLoading = true;
+		this.currentPage = 0;
+		this.posts = [];
 		this.fetchPosts(true);
 	}
 
@@ -127,15 +75,23 @@ export class PostListComponent implements OnInit, OnDestroy {
 	}
 
 	fetchPosts(isInitialLoad: boolean): void {
-		this.postService.getPosts(
-			this.currentPage,
-			this.pageSize,
-			undefined,
-			this.filterUsername,
-			this.filterTopic,
-			'createdAt',
-			'desc'
-		)
+		const request$ = this.likedByUserId
+			? this.userService.getLikedPosts(
+				this.likedByUserId,
+				this.currentPage,
+				this.pageSize
+			)
+			: this.postService.getPosts(
+				this.currentPage,
+				this.pageSize,
+				undefined,
+				this.filterUsername,
+				this.filterTopic,
+				this.sortBy,
+				this.sortOrder
+			);
+
+		request$
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response: PageResponse<Post>) => {
@@ -158,32 +114,14 @@ export class PostListComponent implements OnInit, OnDestroy {
 		this.hasMorePages = !response.last;
 	}
 
-	private resetPagination(): void {
-		this.currentPage = 0;
-		this.totalPages = 0;
-		this.hasMorePages = false;
-		this.totalElements = 0;
-		this.posts = [];
+	removePost(): void {
+		this.loadPosts();
 	}
 
-	private resetFilters(): void {
-		this.filterUsername = undefined;
-		this.filterTopic = undefined;
-		this.filterType = 'all';
-		this.filterId = null;
-		this.filterName = '';
-	}
-
-	removePost() {
-		this.isLoading = true;
-		this.ngOnInit();
-	}
-
-	goBack(): void {
-		if (window.history.length > 1) {
-			window.history.back();
-		} else {
-			this.router.navigate(['/posts']);
+	removeUnlikedPost(id: number | undefined): void {
+		if (!this.likedByUserId || !id || id != this.likedByUserId) {
+			return;
 		}
+		this.loadPosts();
 	}
 }

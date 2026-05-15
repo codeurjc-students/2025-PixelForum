@@ -4,52 +4,21 @@ import java.util.Collection;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
-import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.dto.user.UserMapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = UserMapper.class)
 public interface PostMapper {
 
-    @Mapping(target = "images", source = "images", qualifiedByName = "imagesToIds")
     @Mapping(target = "hasUserLiked", ignore = true)
     PostDTO toDTO(Post post);
 
     List<PostDTO> toDTOs(Collection<Post> posts);
 
-    @Mapping(target = "author.password", ignore = true)
-    @Mapping(target = "author.avatar", ignore = true)
-    @Mapping(target = "author.likedPosts", ignore = true)
-    @Mapping(target = "author.likedComments", ignore = true)
-    @Mapping(target = "author.roles", ignore = true)
-    @Mapping(target = "images", source = "images", qualifiedByName = "idsToImages")
+    @Mapping(target = "author", ignore = true)
     @Mapping(target = "usersThatLiked", ignore = true)
     Post toDomain(PostDTO postDTO);
-
-    @Named("imagesToIds")
-    default List<Long> imagesToIds(List<Image> images) {
-        if (images == null || images.isEmpty()) {
-            return List.of();
-        }
-        return images.stream()
-                .map(Image::getId)
-                .toList();
-    }
-
-    @Named("idsToImages")
-    default List<Image> idsToImages(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return List.of();
-        }
-        return ids.stream()
-                .map(id -> {
-                    Image image = new Image();
-                    image.setId(id);
-                    return image;
-                })
-                .toList();
-    }
 
     default PostDTO toDTOWithLike(Post post, User currentUser) {
         PostDTO dto = toDTO(post);

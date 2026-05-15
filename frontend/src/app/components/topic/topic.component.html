@@ -1,0 +1,49 @@
+<div class="topic-container">
+    <!-- Back button -->
+    <div class="topic-header">
+        <div class="topic-cover">
+            <button class="back-btn-cover" (click)="goBack()" aria-label="Back">
+                <svg viewBox="0 0 24 24" class="back-icon">
+                    <path d="m12 19-7-7 7-7"/>
+                    <path d="M19 12H5"/>
+                </svg>
+            </button>
+
+            <!-- Topic Wrapper -->
+            <div class="topic-wrapper" *ngIf="!isLoadingTopic && topic">
+                <div class="topic-info">
+                    <!-- Topic Information -->
+                    <div class="topic-details">
+                        <div class="topic-header-info">
+                            <div>
+                                <h1 class="topicname">{{ topic.name }}</h1>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="desc" *ngIf="topic.description">{{ topic.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="state-container" *ngIf="isLoadingTopic">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading topic...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="topic-tabs" *ngIf="!isLoadingTopic && topic">
+        <!-- Content -->
+        <div class="tabs-content">
+            <!-- Posts Tab -->
+            <div class="tab-content">
+                <app-post-list [filterTopic]="filterTopicName" [pageSize]="10"></app-post-list>
+            </div>
+        </div>
+    </div>
+</div>

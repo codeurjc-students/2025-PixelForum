@@ -5,69 +5,168 @@ import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.ImageRepository;
 import jakarta.persistence.EntityNotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 
 @Service
 public class ImageService {
 
     private final ImageRepository imageRepository;
     private static final long MAX_FILE_SIZE = 5242880; // 5 MB
-<span class="fc" id="L20">    private static final Set&lt;String&gt; ALLOWED_TYPES = Set.of(&quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;, &quot;image/webp&quot;);</span>
+<span class="fc" id="L27">    private static final Set&lt;String&gt; ALLOWED_TYPES = Set.of(&quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;, &quot;image/webp&quot;);</span>
+    private static final String IMAGE_NOT_FOUND = &quot;Image not found&quot;;
+<span class="fc" id="L29">    private static final Logger logger = LoggerFactory.getLogger(ImageService.class);</span>
 
-<span class="fc" id="L22">    public ImageService(ImageRepository imageRepository) {</span>
-<span class="fc" id="L23">        this.imageRepository = imageRepository;</span>
-<span class="fc" id="L24">    }</span>
+<span class="fc" id="L31">    public ImageService(ImageRepository imageRepository) {</span>
+<span class="fc" id="L32">        this.imageRepository = imageRepository;</span>
+<span class="fc" id="L33">    }</span>
+
+    public byte[] getImage(Long id, Integer width, Integer height, int quality) {
+<span class="fc" id="L36">        Image image = imageRepository.findById(id)</span>
+<span class="fc" id="L37">                .orElseThrow(() -&gt; new EntityNotFoundException(IMAGE_NOT_FOUND));</span>
+        // If no resizing is requested, return original data
+<span class="pc bpc" id="L39" title="1 of 4 branches missed.">        if (width == null &amp;&amp; height == null) {</span>
+<span class="fc" id="L40">            return image.getImageData();</span>
+        }
+
+        try {
+<span class="fc" id="L44">            return resizeImage(image.getImageData(), width, height, quality);</span>
+<span class="fc" id="L45">        } catch (IOException e) {</span>
+<span class="fc" id="L46">            logger.error(&quot;Error resizing image. ID: {}, Content-Type: {}, Image Size: {} bytes&quot;, id, image.getContentType(), image.getImageData().length, e);</span>
+            // If resizing fails, return original image as fallback
+<span class="fc" id="L48">            return image.getImageData();</span>
+        }
+    }
+
+    private byte[] resizeImage(byte[] imageData, Integer targetWidth, Integer targetHeight, int quality)
+            throws IOException {
+        // Read original image
+<span class="fc" id="L55">        BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageData));</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (originalImage == null) {</span>
+<span class="fc" id="L57">            throw new IOException(&quot;Could not read image data&quot;);</span>
+        }
+
+        // If only one dimension is provided, calculate the other to maintain aspect ratio
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        int width = targetWidth != null ? targetWidth : targetHeight;</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        int height = targetHeight != null ? targetHeight : targetWidth;</span>
+
+        // Crop and resize
+<span class="fc" id="L65">        BufferedImage resized = scaleAndCrop(originalImage, width, height);</span>
+
+        // Convert to JPEG
+<span class="fc" id="L68">        return toJpegBytes(resized, quality);</span>
+    }
+
+    private BufferedImage scaleAndCrop(BufferedImage img, int targetWidth, int targetHeight) {
+<span class="fc" id="L72">        int originalWidth = img.getWidth();</span>
+<span class="fc" id="L73">        int originalHeight = img.getHeight();</span>
+
+        // Calculate scale to fill the target dimensions
+<span class="fc" id="L76">        double scaleX = (double) targetWidth / originalWidth;</span>
+<span class="fc" id="L77">        double scaleY = (double) targetHeight / originalHeight;</span>
+<span class="fc" id="L78">        double scale = Math.max(scaleX, scaleY);</span>
+
+        // Scale the image
+<span class="fc" id="L81">        int scaledWidth = (int) (originalWidth * scale);</span>
+<span class="fc" id="L82">        int scaledHeight = (int) (originalHeight * scale);</span>
+
+<span class="fc" id="L84">        BufferedImage scaled = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_RGB);</span>
+<span class="fc" id="L85">        java.awt.Graphics2D g2d = scaled.createGraphics();</span>
+<span class="fc" id="L86">        g2d.setRenderingHint(</span>
+                java.awt.RenderingHints.KEY_INTERPOLATION,
+                java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+<span class="fc" id="L89">        g2d.drawImage(img, 0, 0, scaledWidth, scaledHeight, null);</span>
+<span class="fc" id="L90">        g2d.dispose();</span>
+
+        // Crop to target dimensions
+<span class="fc" id="L93">        int x = (scaledWidth - targetWidth) / 2;</span>
+<span class="fc" id="L94">        int y = (scaledHeight - targetHeight) / 2;</span>
+
+<span class="fc" id="L96">        BufferedImage cropped = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);</span>
+<span class="fc" id="L97">        cropped.getGraphics().drawImage(scaled, -x, -y, null);</span>
+
+<span class="fc" id="L99">        return cropped;</span>
+    }
+
+    private byte[] toJpegBytes(BufferedImage image, int quality) throws IOException {
+<span class="fc" id="L103">        ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+<span class="fc" id="L105">        var writers = ImageIO.getImageWritersByFormatName(&quot;JPEG&quot;);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (!writers.hasNext()) {</span>
+<span class="nc" id="L107">            throw new IOException(&quot;No JPEG writer found&quot;);</span>
+        }
+
+<span class="fc" id="L110">        var writer = writers.next();</span>
+<span class="fc" id="L111">        var ios = ImageIO.createImageOutputStream(baos);</span>
+<span class="fc" id="L112">        writer.setOutput(ios);</span>
+
+<span class="fc" id="L114">        var params = writer.getDefaultWriteParam();</span>
+<span class="fc" id="L115">        params.setCompressionMode(javax.imageio.ImageWriteParam.MODE_EXPLICIT);</span>
+<span class="fc" id="L116">        params.setCompressionQuality(Math.min(1.0f, quality / 100f));</span>
+
+<span class="fc" id="L118">        writer.write(null, new javax.imageio.IIOImage(image, null, null), params);</span>
+<span class="fc" id="L119">        writer.dispose();</span>
+<span class="fc" id="L120">        ios.close();</span>
+
+<span class="fc" id="L122">        return baos.toByteArray();</span>
+    }
 
     public Image getImageById(Long id) {
-<span class="fc" id="L27">        return imageRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Image not found&quot;));</span>
+<span class="fc" id="L126">        return imageRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(IMAGE_NOT_FOUND));</span>
     }
 
     public Image saveImage(byte[] data, String filename, String contentType, User user) {
-<span class="fc" id="L31">        Image image = new Image(data, filename, contentType, user);</span>
-<span class="fc" id="L32">        return imageRepository.save(image);</span>
+<span class="fc" id="L130">        Image image = new Image(data, filename, contentType, user);</span>
+<span class="fc" id="L131">        return imageRepository.save(image);</span>
     }
 
     public Long uploadImage(MultipartFile file, User user) {
         // Validate file
-<span class="fc bfc" id="L37" title="All 4 branches covered.">        if (file == null || file.isEmpty()) {</span>
-<span class="fc" id="L38">            throw new IllegalArgumentException(&quot;The file is empty&quot;);</span>
+<span class="fc bfc" id="L136" title="All 4 branches covered.">        if (file == null || file.isEmpty()) {</span>
+<span class="fc" id="L137">            throw new IllegalArgumentException(&quot;The file is empty&quot;);</span>
         }
 
-<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (!ALLOWED_TYPES.contains(file.getContentType())) {</span>
-<span class="fc" id="L42">            throw new IllegalArgumentException(&quot;File type not allowed&quot;);</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (!ALLOWED_TYPES.contains(file.getContentType())) {</span>
+<span class="fc" id="L141">            throw new IllegalArgumentException(&quot;File type not allowed&quot;);</span>
         }
 
-<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (file.getSize() &gt; MAX_FILE_SIZE) {</span>
-<span class="fc" id="L46">            throw new IllegalArgumentException(&quot;File exceeds the maximum size of 5MB&quot;);</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        if (file.getSize() &gt; MAX_FILE_SIZE) {</span>
+<span class="fc" id="L145">            throw new IllegalArgumentException(&quot;File exceeds the maximum size of 5MB&quot;);</span>
         }
 
         try {
             // Create Image
-<span class="fc" id="L51">            Image image = new Image(</span>
-<span class="fc" id="L52">                    file.getBytes(),</span>
-<span class="fc" id="L53">                    file.getOriginalFilename(),</span>
-<span class="fc" id="L54">                    file.getContentType(),</span>
+<span class="fc" id="L150">            Image image = new Image(</span>
+<span class="fc" id="L151">                    file.getBytes(),</span>
+<span class="fc" id="L152">                    file.getOriginalFilename(),</span>
+<span class="fc" id="L153">                    file.getContentType(),</span>
                     user);
 
             // Save to DB and return Id
-<span class="fc" id="L58">            Image savedImage = imageRepository.save(image);</span>
-<span class="fc" id="L59">            return savedImage.getId();</span>
-<span class="fc" id="L60">        } catch (IOException e) {</span>
-<span class="fc" id="L61">            throw new IllegalStateException(&quot;Error processing the file&quot;, e);</span>
+<span class="fc" id="L157">            Image savedImage = imageRepository.save(image);</span>
+<span class="fc" id="L158">            return savedImage.getId();</span>
+<span class="fc" id="L159">        } catch (IOException e) {</span>
+<span class="fc" id="L160">            throw new IllegalStateException(&quot;Error processing the file&quot;, e);</span>
         }
     }
 
     public void deleteImage(Long id, User user) {
-<span class="fc" id="L66">        Image image = imageRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Image not found&quot;));</span>
-<span class="fc bfc" id="L67" title="All 4 branches covered.">        if (image.getOwner().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
-<span class="fc" id="L68">            throw new AccessDeniedException(&quot;You can only delete your own images&quot;);</span>
+<span class="fc" id="L165">        Image image = imageRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(IMAGE_NOT_FOUND));</span>
+<span class="fc bfc" id="L166" title="All 4 branches covered.">        if (image.getOwner().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L167">            throw new AccessDeniedException(&quot;You can only delete your own images&quot;);</span>
         }
-<span class="fc" id="L70">        imageRepository.deleteById(id);</span>
-<span class="fc" id="L71">    }</span>
+<span class="fc" id="L169">        imageRepository.deleteById(id);</span>
+<span class="fc" id="L170">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

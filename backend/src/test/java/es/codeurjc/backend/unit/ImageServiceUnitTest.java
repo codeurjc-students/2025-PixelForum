@@ -1,11 +1,16 @@
 package es.codeurjc.backend.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +37,7 @@ class ImageServiceUnitTest {
 
 	@BeforeEach
 	void init() {
+		System.setProperty("java.awt.headless", "true");
 		imageRepository = mock(ImageRepository.class);
 		imageService = new ImageService(imageRepository);
 
@@ -42,6 +48,72 @@ class ImageServiceUnitTest {
 		image = new Image();
 		image.setId(1L);
 		image.setOwner(user);
+	}
+
+	// ------------------- getImage -------------------
+
+	@Test
+	@DisplayName("getImage should return original image when width and height are null")
+	void getImageOriginalTest() {
+		// GIVEN
+		byte[] data = "image-data".getBytes();
+		image.setImageData(data);
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN
+		byte[] result = imageService.getImage(1L, null, null, 80);
+
+		// THEN
+		assertArrayEquals(data, result);
+		verify(imageRepository).findById(1L);
+	}
+
+	@Test
+	@DisplayName("getImage should throw when image does not exist")
+	void getImageNotFoundTest() {
+		// GIVEN
+		when(imageRepository.findById(1L)).thenReturn(Optional.empty());
+
+		// WHEN & THEN
+		assertThrows(EntityNotFoundException.class, () -> {
+			imageService.getImage(1L, 100, 100, 80);
+		});
+	}
+
+	@Test
+	@DisplayName("getImage should resize image successfully")
+	void getImageResizeTest() throws Exception {
+		// GIVEN
+		BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "png", baos);
+		image.setImageData(baos.toByteArray());
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN
+		byte[] result = imageService.getImage(1L, 100, 100, 80);
+
+		// THEN
+		assertNotNull(result);
+		assertTrue(result.length > 0);
+	}
+
+	@Test
+	@DisplayName("getImage should return original image when resize fails")
+	void getImageResizeFallbackTest() {
+		// GIVEN
+		byte[] invalidData = "invalid-image".getBytes();
+		image.setImageData(invalidData);
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN
+		byte[] result = imageService.getImage(1L, 100, 100, 80);
+
+		// THEN
+		assertArrayEquals(invalidData, result);
 	}
 
 	// ------------------- getImageById -------------------
@@ -88,6 +160,24 @@ class ImageServiceUnitTest {
 		// THEN
 		assertEquals(image, result);
 		verify(imageRepository).save(any(Image.class));
+	}
+
+	@Test
+	@DisplayName("saveImage should create image with correct attributes")
+	void saveImageAttributesTest() {
+		// GIVEN
+		byte[] data = "test".getBytes();
+
+		when(imageRepository.save(any(Image.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		// WHEN
+		Image result = imageService.saveImage(data, "file.png", "image/png", user);
+
+		// THEN
+		assertArrayEquals(data, result.getImageData());
+		assertEquals("file.png", result.getFilename());
+		assertEquals("image/png", result.getContentType());
+		assertEquals(user, result.getOwner());
 	}
 
 	// ------------------- uploadImage -------------------

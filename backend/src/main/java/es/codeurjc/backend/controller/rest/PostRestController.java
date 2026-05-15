@@ -52,8 +52,7 @@ public class PostRestController {
         if (principal != null) {
             user = userService.findByUsername(principal.getName()).orElse(null);
         }
-        Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable,
-                user);
+        Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable, user);
         return ResponseEntity.ok(page);
     }
 

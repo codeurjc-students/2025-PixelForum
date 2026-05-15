@@ -3,9 +3,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { PostListComponent } from './post-list.component';
 import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post.model';
-import { TopicService } from '../../services/topic.service';
 import { UserService } from '../../services/user.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { PageResponse } from '../../models/pageResponse.model';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
@@ -14,9 +12,7 @@ describe('PostListComponent - Unit Tests', () => {
 	let component: PostListComponent;
 	let fixture: ComponentFixture<PostListComponent>;
 	let postService: jasmine.SpyObj<PostService>;
-	let topicService: jasmine.SpyObj<TopicService>;
 	let userService: jasmine.SpyObj<UserService>;
-	let router: jasmine.SpyObj<Router>;
 
 	const mockPosts: Post[] = [
 		{
@@ -52,22 +48,13 @@ describe('PostListComponent - Unit Tests', () => {
 		spyOn(console, 'error');
 
 		postService = jasmine.createSpyObj('PostService', ['getPosts']);
-		topicService = jasmine.createSpyObj('TopicService', ['getById']);
-		userService = jasmine.createSpyObj('UserService', ['getById']);
-		router = jasmine.createSpyObj('Router', ['navigate']);
-
-		const activatedRouteMock = {
-			params: of({})
-		};
+		userService = jasmine.createSpyObj('UserService', ['getLikedPosts']);
 
 		await TestBed.configureTestingModule({
 			imports: [PostListComponent, HttpClientTestingModule],
 			providers: [
 				{ provide: PostService, useValue: postService },
-				{ provide: TopicService, useValue: topicService },
-				{ provide: UserService, useValue: userService },
-				{ provide: Router, useValue: router },
-				{ provide: ActivatedRoute, useValue: activatedRouteMock }
+				{ provide: UserService, useValue: userService }
 			]
 		}).compileComponents();
 
@@ -91,15 +78,47 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(component.isLoading).toBeFalse();
 	});
 
+	// ------- Destroy & Changes -------
+
+	it('should reload posts when refreshTrigger changes', () => {
+		spyOn(component, 'loadPosts');
+
+		component.refreshTrigger = 1;
+		component.ngOnChanges();
+
+		expect(component.loadPosts).toHaveBeenCalled();
+	});
+
+	it('should complete destroy$ on destroy', () => {
+		const nextSpy = spyOn(component['destroy$'], 'next');
+		const completeSpy = spyOn(component['destroy$'], 'complete');
+
+		component.ngOnDestroy();
+
+		expect(nextSpy).toHaveBeenCalled();
+		expect(completeSpy).toHaveBeenCalled();
+	});
+
 	// ---------- SORTING ----------
 
-	it('should sort posts by createdAt desc', () => {
+	it('should keep posts in backend order', () => {
 		postService.getPosts.and.returnValue(of(mockPageResponse));
 
 		component.loadPosts();
 
 		expect(component.posts[1].title).toBe('New post');
 		expect(component.posts[0].title).toBe('Old post');
+	});
+
+	it('should call service with filters', () => {
+		component.filterUsername = 'user1';
+		component.filterTopic = 'topic1';
+
+		postService.getPosts.and.returnValue(of(mockPageResponse));
+
+		component.loadPosts();
+
+		expect(postService.getPosts).toHaveBeenCalledWith(0, 10, undefined, 'user1', 'topic1', 'createdAt', 'desc');
 	});
 
 	// ---------- LOADING STATE ----------
@@ -111,7 +130,7 @@ describe('PostListComponent - Unit Tests', () => {
 		fixture.detectChanges();
 
 		const compiled = fixture.nativeElement as HTMLElement;
-		expect(compiled.textContent).toContain('Latest PostsLoading posts...');
+		expect(compiled.textContent).toContain('Loading posts...');
 	});
 
 	// ---------- RENDERING POSTS ----------
@@ -138,48 +157,15 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(compiled.textContent).toContain('No posts yet');
 	});
 
-	// ---------- FILTER LOADING ----------
+	it('should load liked posts when likedByUserId is defined', () => {
+		component.likedByUserId = 5;
+		userService.getLikedPosts.and.returnValue(of(mockPageResponse));
 
-	it('should load topic name and posts', () => {
-		const mockTopic = { id: 1, name: 'Angular' } as any;
-		component.filterId = 1;
-		topicService.getById.and.returnValue(of(mockTopic));
-		postService.getPosts.and.returnValue(of(mockPageResponse));
+		component.loadPosts();
 
-		component.loadTopicName();
-
-		expect(component.filterName).toBe('Angular');
-		expect(component.filterTopic).toBe('Angular');
-		expect(postService.getPosts).toHaveBeenCalled();
-	});
-
-	it('should navigate to error if topicId is invalid', () => {
-		component.filterId = null;
-
-		component.loadTopicName();
-
-		expect(router.navigate).toHaveBeenCalledWith(['/error']);
-	});
-
-	it('should load user name and posts', () => {
-		const mockUser = { id: 1, username: 'TestUser' } as any;
-		component.filterId = 1;
-		userService.getById.and.returnValue(of(mockUser));
-		postService.getPosts.and.returnValue(of(mockPageResponse));
-
-		component.loadUserName();
-
-		expect(component.filterName).toBe('TestUser');
-		expect(component.filterUsername).toBe('TestUser');
-		expect(postService.getPosts).toHaveBeenCalled();
-	});
-
-	it('should navigate to error if userId is invalid', () => {
-		component.filterId = null;
-
-		component.loadUserName();
-
-		expect(router.navigate).toHaveBeenCalledWith(['/error']);
+		expect(userService.getLikedPosts).toHaveBeenCalledWith(5, 0, 10);
+		expect(postService.getPosts).not.toHaveBeenCalled();
+		expect(component.posts.length).toBe(2);
 	});
 
 	// ---------- LOAD MORE & PAGINATION ----------
@@ -207,6 +193,15 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(component.currentPage).toBe(0);
 	});
 
+	it('should not load more if already loading', () => {
+		component.hasMorePages = true;
+		component.isLoadingMore = true;
+
+		component.loadMorePosts();
+
+		expect(postService.getPosts).not.toHaveBeenCalled();
+	});
+
 	// ---------- FETCH POSTS ----------
 
 	it('should append posts on fetchPosts with isInitialLoad false', () => {
@@ -220,29 +215,33 @@ describe('PostListComponent - Unit Tests', () => {
 		expect(component.isLoadingMore).toBeFalse();
 	});
 
-	// ---------- REMOVE POST ----------
+	// ---------- RELOAD POST ----------
 
 	it('should reload posts on removePost', () => {
-		spyOn(component, 'ngOnInit');
+		spyOn(component, 'loadPosts');
 
 		component.removePost();
 
 		expect(component.isLoading).toBeTrue();
-		expect(component.ngOnInit).toHaveBeenCalled();
+		expect(component.loadPosts).toHaveBeenCalled();
 	});
 
-	// ---------- GO BACK ----------
+	it('should reload posts when removing unliked post from current user', () => {
+		component.likedByUserId = 4;
+		spyOn(component, 'loadPosts');
 
-	it('should go back using location if history length > 1', () => {
-		spyOn(window.history, 'back');
+		component.removeUnlikedPost(4);
 
-		component.goBack();
+		expect(component.loadPosts).toHaveBeenCalled();
+	});
 
-		if (window.history.length > 1) {
-			expect(window.history.back).toHaveBeenCalled();
-		} else {
-			expect(router.navigate).toHaveBeenCalledWith(['/posts']);
-		}
+	it('should not reload posts if removed like belongs to another user', () => {
+		component.likedByUserId = 4;
+		spyOn(component, 'loadPosts');
+
+		component.removeUnlikedPost(8);
+
+		expect(component.loadPosts).not.toHaveBeenCalled();
 	});
 
 });

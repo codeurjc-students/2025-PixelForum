@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class ErrorService {
 
-	private error: { status: number; errorName: string } | null = null;
+	private error: { status: number; errorName: string; message: string } | null = null;
 
-	setError(status: number, errorName: string): void {
-		this.error = { status, errorName };
+	setError(status: number, errorName: string, message: string): void {
+		this.error = { status, errorName, message };
 	}
 
-	getError(): { status: number; errorName: string } | null {
+	getError(): { status: number; errorName: string; message: string } | null {
 		return this.error;
 	}
 

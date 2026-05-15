@@ -9,6 +9,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Topic } from '../../models/topic.model';
 import { Post } from '../../models/post.model';
+import { AuthService } from '../../services/auth.service';
+import { ErrorService } from '../../services/error.service';
 
 describe('CreatePostComponent', () => {
 
@@ -18,6 +20,8 @@ describe('CreatePostComponent', () => {
     let postServiceSpy: jasmine.SpyObj<PostService>;
     let topicServiceSpy: jasmine.SpyObj<TopicService>;
     let imageServiceSpy: jasmine.SpyObj<ImageService>;
+    let authService: jasmine.SpyObj<AuthService>;
+    let errorService: jasmine.SpyObj<ErrorService>;
     let routerSpy: jasmine.SpyObj<Router>;
     let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
@@ -31,17 +35,25 @@ describe('CreatePostComponent', () => {
         title: 'Test Post',
         content: 'Test Content',
         topic: mockTopic,
-        images: []
+        images: [],
+        author: {
+            id: 1,
+            username: '',
+            roles: ['USER']
+        }
     };
 
     beforeEach(async () => {
         postServiceSpy = jasmine.createSpyObj('PostService', ['create', 'update', 'getById']);
         topicServiceSpy = jasmine.createSpyObj('TopicService', ['getAll']);
         imageServiceSpy = jasmine.createSpyObj('ImageService', ['uploadImages']);
+        authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
+        errorService = jasmine.createSpyObj('ErrorService', ['setError']);
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
         snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
         topicServiceSpy.getAll.and.returnValue(of([mockTopic]));
+        authService.checkAuth.and.returnValue(of(null));
 
         await TestBed.configureTestingModule({
             imports: [CreatePostComponent],
@@ -50,6 +62,8 @@ describe('CreatePostComponent', () => {
                 { provide: PostService, useValue: postServiceSpy },
                 { provide: TopicService, useValue: topicServiceSpy },
                 { provide: ImageService, useValue: imageServiceSpy },
+                { provide: AuthService, useValue: authService },
+                { provide: ErrorService, useValue: errorService },
                 { provide: Router, useValue: routerSpy },
                 { provide: MatSnackBar, useValue: snackBarSpy },
                 {
@@ -269,7 +283,7 @@ describe('CreatePostComponent', () => {
         await component.createPost();
 
         expect(imageServiceSpy.uploadImages).toHaveBeenCalled();
-        expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({images: ['img1']}));
+        expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({ images: ['img1'] }));
     });
 
     it('should handle upload error', async () => {
@@ -305,6 +319,55 @@ describe('CreatePostComponent', () => {
         expect(postServiceSpy.getById).toHaveBeenCalledWith(1);
     });
 
+    it('should load post for edit and populate form when user is owner', () => {
+        postServiceSpy.getById.and.returnValue(of(mockPost));
+
+        authService.checkAuth.and.returnValue(of({
+            id: 1,
+            username: '',
+            roles: ['USER']
+        }));
+
+        component.postId = 1;
+
+        spyOn<any>(component, 'populateFormWithPost');
+
+        component['loadPostForEdit']();
+
+        expect(postServiceSpy.getById).toHaveBeenCalledWith(1);
+        expect(authService.checkAuth).toHaveBeenCalled();
+        expect(component['populateFormWithPost']).toHaveBeenCalled();
+    });
+
+    it('should redirect to login if user is not authenticated', () => {
+        postServiceSpy.getById.and.returnValue(of(mockPost));
+
+        authService.checkAuth.and.returnValue(of(null));
+
+        component.postId = 1;
+
+        component['loadPostForEdit']();
+
+        expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should redirect to error if user is not owner nor admin', () => {
+        postServiceSpy.getById.and.returnValue(of(mockPost));
+
+        authService.checkAuth.and.returnValue(of({
+            id: 2,
+            username: '',
+            roles: ['USER']
+        }));
+
+        component.postId = 1;
+
+        component['loadPostForEdit']();
+
+        expect(errorService.setError).toHaveBeenCalledWith(403, 'Forbidden', "You don't have permission to edit this post");
+        expect(routerSpy.navigate).toHaveBeenCalledWith(['/error']);
+    });
+
     it('should populate form with post', () => {
         component['populateFormWithPost'](mockPost);
 
@@ -338,9 +401,23 @@ describe('CreatePostComponent', () => {
 
     // ---------- CANCEL ----------
 
-    it('should navigate to posts on cancel', () => {
+    it('should call window.history.back if history length > 1', () => {
+        spyOnProperty(window.history, 'length', 'get').and.returnValue(2);
+        spyOn(window.history, 'back');
+
         component.onCancel();
 
+        expect(window.history.back).toHaveBeenCalled();
+        expect(routerSpy.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to /posts if history length <= 1', () => {
+        spyOnProperty(window.history, 'length', 'get').and.returnValue(1);
+        spyOn(window.history, 'back');
+
+        component.onCancel();
+
+        expect(window.history.back).not.toHaveBeenCalled();
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts']);
     });
 

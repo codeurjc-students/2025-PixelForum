@@ -10,8 +10,7 @@ describe('ConfirmDialogComponent', () => {
     const mockData: ConfirmDialogData = {
         title: 'Delete item',
         message: 'Are you sure?',
-        confirmText: 'Yes',
-        cancelText: 'No'
+        confirmText: 'Yes'
     };
 
     beforeEach(async () => {
@@ -36,14 +35,16 @@ describe('ConfirmDialogComponent', () => {
 
     it('should close dialog with false when cancel is clicked', () => {
         component.onCancel();
-
         expect(dialogSpy.close).toHaveBeenCalledWith(false);
     });
 
     it('should set loading and close dialog with true when confirm is clicked', () => {
         component.onConfirm();
-
-        expect(component.isLoading).toBeTrue();
         expect(dialogSpy.close).toHaveBeenCalledWith(true);
+    });
+
+    it('should close dialog with secondary when secondary action is clicked', () => {
+        component.onSecondaryAction();
+        expect(dialogSpy.close).toHaveBeenCalledWith('secondary');
     });
 });

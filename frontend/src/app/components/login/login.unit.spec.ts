@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../services/auth.service';
@@ -8,7 +8,7 @@ describe('LoginComponent - Unit Tests', () => {
     let component: LoginComponent;
     let fixture: ComponentFixture<LoginComponent>;
     let authService: jasmine.SpyObj<AuthService>;
-    let router: jasmine.SpyObj<Router>;
+    let router: Router;
 
     beforeEach(async () => {
         authService = jasmine.createSpyObj('AuthService', ['login', 'checkAuth']);
@@ -17,11 +17,15 @@ describe('LoginComponent - Unit Tests', () => {
         await TestBed.configureTestingModule({
             imports: [LoginComponent],
             providers: [
+                provideRouter([]),
                 { provide: AuthService, useValue: authService },
-                { provide: Router, useValue: router }
             ]
         }).compileComponents();
 
+        authService.checkAuth.and.returnValue(of(null));
+
+        router = TestBed.inject(Router);
+        spyOn(router, 'navigate');
         fixture = TestBed.createComponent(LoginComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -31,13 +35,18 @@ describe('LoginComponent - Unit Tests', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should call authService.checkAuth on init', () => {
+        component.ngOnInit();
+
+        expect(authService.checkAuth).toHaveBeenCalled();
+    });
+
     it('should call authService.login with username and password', () => {
         authService.login.and.returnValue(of({
             id: 1,
             username: 'testuser',
             roles: ['USER']
         }));
-        authService.checkAuth.and.returnValue(of(null));
 
         component.username = 'testuser';
         component.password = 'password123';
@@ -53,7 +62,6 @@ describe('LoginComponent - Unit Tests', () => {
             username: 'testuser',
             roles: ['USER']
         }));
-        authService.checkAuth.and.returnValue(of(null));
 
         component.username = 'testuser';
         component.password = 'password123';

@@ -31,9 +31,10 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class AuthUISystemTest {
+
     @LocalServerPort
     int port;
-    
+
     private WebDriver driver;
     private WebDriverWait wait;
 
@@ -73,27 +74,27 @@ class AuthUISystemTest {
     void loginFlowSeleniumTest() {
         // Navigate to login page
         driver.get("https://localhost:" + port + "/login");
-        
+
         // Wait for page load
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
-        
+
         // Fill login form
         WebElement usernameInput = driver.findElement(By.id("username"));
         WebElement passwordInput = driver.findElement(By.id("password"));
         WebElement loginButton = driver.findElement(By.id("login-button"));
-        
+
         usernameInput.sendKeys("admin");
         passwordInput.sendKeys("admin0");
         loginButton.click();
-        
+
         // Verify redirect to posts
         wait.until(ExpectedConditions.urlContains("/posts"));
         assertTrue(driver.getCurrentUrl().contains("/posts"));
-        
+
         // Verify cookies exist
         Cookie authToken = driver.manage().getCookieNamed("AuthToken");
         Cookie refreshToken = driver.manage().getCookieNamed("RefreshToken");
-        
+
         assertNotNull(authToken, "AuthToken cookie should exist");
         assertNotNull(refreshToken, "RefreshToken cookie should exist");
         assertTrue(authToken.isHttpOnly(), "AuthToken should be HttpOnly");
@@ -105,23 +106,23 @@ class AuthUISystemTest {
     void loginInvalidSeleniumTest() {
         // Navigate to login
         driver.get("https://localhost:" + port + "/login");
-        
+
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
-        
+
         // Fill with invalid credentials
         WebElement usernameInput = driver.findElement(By.id("username"));
         WebElement passwordInput = driver.findElement(By.id("password"));
         WebElement loginButton = driver.findElement(By.id("login-button"));
-        
+
         usernameInput.sendKeys("invalid");
         passwordInput.sendKeys("wrong");
         loginButton.click();
-        
+
         // Verify error message appears
         wait.until(ExpectedConditions.presenceOfElementLocated(By.className("server-error")));
         WebElement errorMessage = driver.findElement(By.className("server-error"));
         assertTrue(errorMessage.isDisplayed());
-        
+
         // Verify no cookies
         assertNull(driver.manage().getCookieNamed("AuthToken"));
         assertNull(driver.manage().getCookieNamed("RefreshToken"));
@@ -131,8 +132,8 @@ class AuthUISystemTest {
     @DisplayName("Access protected route without auth should redirect to login")
     void accessProtectedWithoutAuthTest() {
         // Try to access protected route directly
-        driver.get("https://localhost:" + port + "/profile");
-        
+        driver.get("https://localhost:" + port + "/create-post");
+
         // Verify redirect to login
         wait.until(ExpectedConditions.urlContains("/login"));
         assertTrue(driver.getCurrentUrl().contains("/login"));
@@ -144,22 +145,22 @@ class AuthUISystemTest {
         // Login first
         driver.get("https://localhost:" + port + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
-        
+
         driver.findElement(By.id("username")).sendKeys("admin");
         driver.findElement(By.id("password")).sendKeys("admin0");
         driver.findElement(By.id("login-button")).click();
-        
+
         wait.until(ExpectedConditions.urlContains("/posts"));
-        
+
         // Navigate to protected route
-        driver.get("https://localhost:" + port + "/profile");
-        
+        driver.get("https://localhost:" + port + "/create-post");
+
         // Should access profile page
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-profile")));
-        assertTrue(driver.getCurrentUrl().contains("/profile"));
-        
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-create-post")));
+        assertTrue(driver.getCurrentUrl().contains("/create-post"));
+
         // Verify content loaded
-        WebElement profileContent = driver.findElement(By.cssSelector("app-profile"));
+        WebElement profileContent = driver.findElement(By.cssSelector("app-create-post"));
         assertTrue(profileContent.isDisplayed());
     }
 
@@ -169,31 +170,28 @@ class AuthUISystemTest {
         // Login first
         driver.get("https://localhost:" + port + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
-        
+
         driver.findElement(By.id("username")).sendKeys("admin");
         driver.findElement(By.id("password")).sendKeys("admin0");
         driver.findElement(By.id("login-button")).click();
-        
+
         wait.until(ExpectedConditions.urlContains("/posts"));
-        
+
         // Verify cookies exist
         assertNotNull(driver.manage().getCookieNamed("AuthToken"));
-        
+
         // Click logout
         WebElement logoutButton = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.id("logout-button"))
-        );
+                ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
 
         ((JavascriptExecutor) driver).executeScript(
-            "arguments[0].click();", logoutButton
-        );
-        
+                "arguments[0].click();", logoutButton);
+
         // Verify redirect to login/posts
         wait.until(ExpectedConditions.or(
-            ExpectedConditions.urlContains("/login"),
-            ExpectedConditions.urlContains("/posts")
-        ));
-        
+                ExpectedConditions.urlContains("/login"),
+                ExpectedConditions.urlContains("/posts")));
+
         // Verify cookies removed
         assertNull(driver.manage().getCookieNamed("AuthToken"));
         assertNull(driver.manage().getCookieNamed("RefreshToken"));
@@ -205,18 +203,18 @@ class AuthUISystemTest {
         // Login
         driver.get("https://localhost:" + port + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
-        
+
         driver.findElement(By.id("username")).sendKeys("admin");
         driver.findElement(By.id("password")).sendKeys("admin0");
         driver.findElement(By.id("login-button")).click();
-        
+
         wait.until(ExpectedConditions.urlContains("/posts"));
-        
+
         // Reload page
         driver.navigate().refresh();
-        
+
         // Should stay authenticated
-        wait.until(ExpectedConditions.urlContains("/posts"));     
+        wait.until(ExpectedConditions.urlContains("/posts"));
         assertNotNull(driver.manage().getCookieNamed("AuthToken"));
     }
 }

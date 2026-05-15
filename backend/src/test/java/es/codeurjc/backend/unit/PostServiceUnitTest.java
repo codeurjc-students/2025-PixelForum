@@ -45,7 +45,6 @@ class PostServiceUnitTest {
 
 	@BeforeEach
 	void init() {
-
 		postRepository = mock(PostRepository.class);
 		imageRepository = mock(ImageRepository.class);
 		mapper = mock(PostMapper.class);
@@ -188,6 +187,24 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("createPost should initialize default fields")
+	void createPostInitializeFieldsTest() {
+		// GIVEN
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(postRepository.save(any(Post.class))).thenReturn(post);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		postService.createPost(postDTO, user);
+
+		// THEN
+		assertNotNull(post.getCreatedAt());
+		assertNotNull(post.getUpdatedAt());
+		assertEquals(0, post.getLikes());
+		assertEquals(user, post.getAuthor());
+	}
+
+	@Test
 	@DisplayName("createPost should assign images correctly")
 	void createPostWithImagesTest() {
 		// GIVEN
@@ -246,6 +263,55 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("createPost should fail when image already belongs to another post")
+	void createPostImageAlreadyAssignedTest() {
+		// GIVEN
+		Post otherPost = new Post();
+		otherPost.setId(99L);
+
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+		img.setPost(otherPost);
+
+		when(postDTO.images()).thenReturn(List.of(1L));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			postService.createPost(postDTO, user);
+		});
+	}
+
+	@Test
+	@DisplayName("createPost should allow admin to use foreign images")
+	void createPostAdminCanUseForeignImagesTest() {
+		// GIVEN
+		User admin = new User();
+		admin.setId(10L);
+		admin.setRoles(List.of("ADMIN"));
+
+		User owner = new User();
+		owner.setId(99L);
+
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(owner);
+
+		when(postDTO.images()).thenReturn(List.of(1L));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(postRepository.save(any())).thenReturn(post);
+		when(mapper.toDTOWithLike(post, admin)).thenReturn(postDTO);
+
+		// WHEN & THEN
+		assertDoesNotThrow(() -> {
+			postService.createPost(postDTO, admin);
+		});
+	}
+
+	@Test
 	@DisplayName("updatePost should update post when author edits")
 	void updatePostSuccessTest() {
 		// GIVEN
@@ -277,6 +343,53 @@ class PostServiceUnitTest {
 		// THEN
 		assertEquals(postDTO, result);
 		verify(postRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("updatePost should fail when image belongs to another post")
+	void updatePostImageAlreadyAssignedTest() {
+		// GIVEN
+		Post otherPost = new Post();
+		otherPost.setId(99L);
+
+		Image img = new Image();
+		img.setId(5L);
+		img.setOwner(user);
+		img.setPost(otherPost);
+
+		post.setImages(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(List.of(5L));
+		when(imageRepository.findAllById(List.of(5L))).thenReturn(List.of(img));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			postService.updatePost(1L, postDTO, user);
+		});
+	}
+
+	@Test
+	@DisplayName("updatePost should assign owner to added images")
+	void updatePostAssignOwnerToImagesTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(2L);
+		img.setOwner(user);
+
+		post.setImages(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(List.of(2L));
+		when(imageRepository.findAllById(List.of(2L))).thenReturn(List.of(img));
+		when(postRepository.save(post)).thenReturn(post);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals(user, img.getOwner());
+		assertEquals(post, img.getPost());
 	}
 
 	@Test
@@ -312,6 +425,40 @@ class PostServiceUnitTest {
 		assertThrows(AccessDeniedException.class, () -> {
 			postService.updatePost(1L, postDTO, otherUser);
 		});
+	}
+
+	@Test
+	@DisplayName("updatePost should throw when post not found")
+	void updatePostNotFoundTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.empty());
+
+		// WHEN & THEN
+		assertThrows(EntityNotFoundException.class, () -> {
+			postService.updatePost(1L, postDTO, user);
+		});
+	}
+
+	@Test
+	@DisplayName("updatePost should update topic")
+	void updatePostTopicUpdateTest() {
+		// GIVEN
+		Topic oldTopic = new Topic();
+		oldTopic.setId(1L);
+		Topic newTopic = new Topic();
+		newTopic.setId(2L);
+
+		post.setTopic(oldTopic);
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.topic()).thenReturn(newTopic);
+		when(postRepository.save(post)).thenReturn(post);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals(newTopic, post.getTopic());
 	}
 
 	@Test
@@ -385,6 +532,24 @@ class PostServiceUnitTest {
 		postService.deletePost(1L, user);
 
 		// THEN
+		verify(postRepository).delete(post);
+	}
+
+	@Test
+	@DisplayName("deletePost should remove post from liked posts")
+	void deletePostShouldRemoveLikesTest() {
+		// GIVEN
+		User liker = new User();
+		liker.setLikedPosts(new ArrayList<>(List.of(post)));
+		post.setUsersThatLiked(new ArrayList<>(List.of(liker)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+		// WHEN
+		postService.deletePost(1L, user);
+
+		// THEN
+		assertFalse(liker.getLikedPosts().contains(post));
 		verify(postRepository).delete(post);
 	}
 

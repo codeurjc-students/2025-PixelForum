@@ -15,24 +15,33 @@ import es.codeurjc.backend.repository.UserRepository;
 
 @Service
 public class RepositoryUserDetailsService implements UserDetailsService {
-    
-    private final UserRepository userRepository;
 
-    public RepositoryUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+	private final UserRepository userRepository;
+
+	public RepositoryUserDetailsService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
 
-		User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		User user;
+
+		if (input.matches("\\d+")) {
+			Long id = Long.parseLong(input);
+			user = userRepository.findById(id)
+					.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		} else {
+			user = userRepository.findByUsername(input)
+					.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		}
 
 		List<GrantedAuthority> roles = new ArrayList<>();
 		for (String role : user.getRoles()) {
 			roles.add(new SimpleGrantedAuthority("ROLE_" + role));
 		}
 
-		return new org.springframework.security.core.userdetails.User(user.getUsername(), 
+		return new org.springframework.security.core.userdetails.User(user.getUsername(),
 				user.getPassword(), roles);
 
 	}

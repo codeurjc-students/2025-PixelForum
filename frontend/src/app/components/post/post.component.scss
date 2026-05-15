@@ -1,4 +1,7 @@
 .post-card {
+	width: 100%;
+	max-width: 930px;
+	margin: 0 auto;
 	background: #e5e5e5;
 	border: 1px solid #ccc;
 	border-radius: 10px;
@@ -45,6 +48,12 @@
 	transition: all 0.2s ease;
 	padding: 0;
 
+	.back-icon {
+		stroke: currentColor;
+		stroke-width: 2;
+		fill: none;
+	}
+
 	&:hover {
 		color: #8BC34A;
 	}
@@ -78,6 +87,15 @@
 	stroke: currentColor;
 	stroke-width: 1.5;
 	fill: none;
+
+	img {
+		border-radius: 50%;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		display: block;
+	}
 }
 
 .author-meta {
@@ -158,6 +176,7 @@
 	width: 95%;
 	border-radius: 25px;
 	border: 1px solid #ccc;
+	aspect-ratio: 1 / 1;
 }
 
 .main-image {
@@ -246,7 +265,6 @@
 	padding: 0.5rem 1rem;
 	border-top: 1px solid #ccc;
 	display: flex;
-	gap: rem;
 	align-items: center;
 	background: #e5e5e5;
 }

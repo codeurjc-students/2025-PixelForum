@@ -3,60 +3,124 @@
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 import java.net.URI;
-import java.util.List;
+import java.security.Principal;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.codeurjc.backend.dto.post.PostDTO;
+import es.codeurjc.backend.dto.user.BasicUserDTO;
+import es.codeurjc.backend.dto.user.ChangePasswordDTO;
+import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
-import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping(&quot;/api/v1/users&quot;)
 public class UserRestController {
 
+    private static final String USER_NOT_FOUND = &quot;User not found&quot;;
+
     private final UserService userService;
-	private final UserMapper mapper;
 
-<span class="fc" id="L28">	public UserRestController(UserService userService, UserMapper mapper) {</span>
-<span class="fc" id="L29">		this.userService = userService;</span>
-<span class="fc" id="L30">		this.mapper = mapper;</span>
-<span class="fc" id="L31">	}</span>
-    
-    @GetMapping(&quot;/me&quot;)
-	public UserDTO me() {
-<span class="nc" id="L35">		return userService.getLoggedUserDTO();</span>
-	}
+<span class="fc" id="L40">    public UserRestController(UserService userService) {</span>
+<span class="fc" id="L41">        this.userService = userService;</span>
+<span class="fc" id="L42">    }</span>
 
-    @GetMapping(&quot;/&quot;)
-	public List&lt;UserDTO&gt; getUsers() {
-<span class="nc" id="L40">		return mapper.toDTOs(userService.findAll());</span>
-	}
-
-    @PostMapping(&quot;/&quot;)
-    public ResponseEntity&lt;UserDTO&gt; createUser(@RequestBody UserDTO userDTO) {
-<span class="nc" id="L45">        UserDTO createdUserDTO = userService.createUser(userDTO);</span>
-<span class="nc" id="L46">        URI location = fromCurrentRequest().path(&quot;/{id}&quot;).buildAndExpand(createdUserDTO.id()).toUri();</span>
-<span class="nc" id="L47">        return ResponseEntity.created(location).body(createdUserDTO);</span>
+    @GetMapping
+    public ResponseEntity&lt;Page&lt;BasicUserDTO&gt;&gt; getUsers(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+<span class="fc" id="L46">        return ResponseEntity.ok(userService.getUsers(pageable));</span>
     }
 
     @GetMapping(&quot;/{id}&quot;)
-	public UserDTO getUser(@PathVariable long id) {
-<span class="nc" id="L52">        return userService.getUser(id);</span>
-	}
+    public ResponseEntity&lt;BasicUserDTO&gt; getUser(@PathVariable Long id) {
+<span class="fc" id="L51">        return ResponseEntity.ok(userService.getUser(id));</span>
+    }
 
-	@DeleteMapping(&quot;/{id}&quot;)
-    public UserDTO deleteUser(@PathVariable long id) {
-<span class="nc" id="L57">        UserDTO deletedUser = userService.getUser(id);</span>
-<span class="nc" id="L58">        userService.deleteById(id);</span>
-<span class="nc" id="L59">        return deletedUser;</span>
+    @GetMapping(&quot;/{id}/details&quot;)
+    public ResponseEntity&lt;UserDTO&gt; getUserDetails(@PathVariable Long id, Principal principal) {
+<span class="fc" id="L56">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L57">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L58">        return ResponseEntity.ok(userService.getUserDetails(id, currentUser));</span>
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;UserDTO&gt; createUser(@RequestBody CreateUserDTO userDTO) {
+<span class="fc" id="L63">        UserDTO createdUserDTO = userService.createUser(userDTO);</span>
+<span class="fc" id="L64">        URI location = fromCurrentRequest().path(&quot;/{id}&quot;).buildAndExpand(createdUserDTO.id()).toUri();</span>
+<span class="fc" id="L65">        return ResponseEntity.created(location).body(createdUserDTO);</span>
+    }
+
+    @PatchMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;UserDTO&gt; updateUser(@PathVariable Long id, @RequestBody CreateUserDTO userDTO,
+            Principal principal) {
+<span class="fc" id="L71">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L72">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L73">        return ResponseEntity.ok(userService.updateUser(id, userDTO, currentUser));</span>
+    }
+
+    @PatchMapping(&quot;/{id}/password&quot;)
+    public ResponseEntity&lt;Void&gt; changePassword(@PathVariable Long id, @RequestBody ChangePasswordDTO changePasswordDTO,
+            Principal principal) {
+<span class="fc" id="L79">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L80">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L81">        userService.changePassword(id, changePasswordDTO, currentUser);</span>
+<span class="fc" id="L82">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteUser(@PathVariable Long id, Principal principal) {
+<span class="fc" id="L87">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L88">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L89">        userService.deleteUser(id, currentUser);</span>
+<span class="fc" id="L90">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PostMapping(&quot;/{id}/avatar&quot;)
+    public ResponseEntity&lt;UserDTO&gt; setProfileImage(@PathVariable Long id, @RequestParam(&quot;imageId&quot;) Long imageId,
+            Principal principal) {
+<span class="fc" id="L96">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L97">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+
+<span class="fc" id="L99">        UserDTO updatedUserDTO = userService.setProfileImage(id, imageId, currentUser);</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (updatedUserDTO == null) {</span>
+<span class="nc" id="L101">            throw new IllegalArgumentException(</span>
+                    &quot;Profile pictures must be JPG or PNG format. WebP and other formats are not allowed.&quot;);
+        }
+<span class="fc" id="L104">        return ResponseEntity.ok(updatedUserDTO);</span>
+    }
+
+    @DeleteMapping(&quot;/{id}/avatar&quot;)
+    public ResponseEntity&lt;Void&gt; removeProfileImage(@PathVariable Long id, Principal principal) {
+<span class="fc" id="L109">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L110">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+
+<span class="fc" id="L112">        userService.removeProfileImage(id, currentUser);</span>
+<span class="fc" id="L113">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @GetMapping(&quot;/{id}/liked-posts&quot;)
+    public ResponseEntity&lt;Page&lt;PostDTO&gt;&gt; getLikedPosts(@PathVariable Long id, Principal principal,
+            @PageableDefault(size = 10, page = 0, sort = &quot;createdAt&quot;, direction = Sort.Direction.DESC) Pageable pageable) {
+<span class="fc" id="L119">        User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L120">                .orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+
+<span class="fc" id="L122">        Page&lt;PostDTO&gt; likedPosts = userService.getLikedPosts(id, currentUser, pageable);</span>
+<span class="fc" id="L123">        return ResponseEntity.ok(likedPosts);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

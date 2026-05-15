@@ -21,6 +21,7 @@ describe('HeaderComponent - Unit Tests', () => {
 
         authService.checkAuth.and.returnValue(of(null));
         authService.logout.and.returnValue(of({}));
+        authService.user$ = of({ id: 1, username: 'testuser', roles: ['USER'] });
 
         await TestBed.configureTestingModule({
             imports: [

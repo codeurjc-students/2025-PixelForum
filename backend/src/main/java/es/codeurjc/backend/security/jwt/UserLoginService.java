@@ -9,10 +9,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -22,25 +24,26 @@ public class UserLoginService {
 	private static final Logger log = LoggerFactory.getLogger(UserLoginService.class);
 
 	private final AuthenticationManager authenticationManager;
-	private final UserDetailsService userDetailsService;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final UserRepository userRepository;
 
-	public UserLoginService(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, JwtTokenProvider jwtTokenProvider) {
+	public UserLoginService(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
+			UserRepository userRepository) {
 		this.authenticationManager = authenticationManager;
-		this.userDetailsService = userDetailsService;
 		this.jwtTokenProvider = jwtTokenProvider;
+		this.userRepository = userRepository;
 	}
 
 	public ResponseEntity<AuthResponse> login(HttpServletResponse response, LoginRequest loginRequest) {
-		
+
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		
 		String username = loginRequest.getUsername();
-		UserDetails user = userDetailsService.loadUserByUsername(username);
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
 		HttpHeaders responseHeaders = new HttpHeaders();
 		var newAccessToken = jwtTokenProvider.generateAccessToken(user);
@@ -60,15 +63,17 @@ public class UserLoginService {
 			if (!jwtTokenProvider.isTokenType(claims, TokenType.REFRESH)) {
 				log.error("Token is not a refresh token");
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.body(new AuthResponse(AuthResponse.Status.FAILURE, "Invalid token type"));
+						.body(new AuthResponse(AuthResponse.Status.FAILURE, "Invalid token type"));
 			}
-			UserDetails user = userDetailsService.loadUserByUsername(claims.getSubject());
+			Long userId = Long.parseLong(claims.getSubject());
+			User user = userRepository.findById(userId)
+					.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
 			var newAccessToken = jwtTokenProvider.generateAccessToken(user);
 			response.addCookie(buildTokenCookie(TokenType.ACCESS, newAccessToken));
 
 			var newRefreshToken = jwtTokenProvider.generateRefreshToken(user);
-        	response.addCookie(buildTokenCookie(TokenType.REFRESH, newRefreshToken));
+			response.addCookie(buildTokenCookie(TokenType.REFRESH, newRefreshToken));
 
 			AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.SUCCESS,
 					"Auth successful. Tokens are created in cookie.");
@@ -100,7 +105,7 @@ public class UserLoginService {
 		return cookie;
 	}
 
-	private Cookie removeTokenCookie(TokenType type){
+	private Cookie removeTokenCookie(TokenType type) {
 		Cookie cookie = new Cookie(type.cookieName, "");
 		cookie.setMaxAge(0);
 		cookie.setHttpOnly(true);

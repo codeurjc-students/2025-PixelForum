@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -17,12 +17,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 		MatFormFieldModule,
 		MatInputModule,
 		MatButtonModule,
-		MatCardModule
+		MatCardModule,
+		RouterLink
 	],
 	templateUrl: './login.component.html',
 	styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
 	username = '';
 	password = '';
@@ -33,6 +34,10 @@ export class LoginComponent {
 		private router: Router,
 		private snackBar: MatSnackBar
 	) { }
+
+	ngOnInit(): void {
+		this.authService.checkAuth().subscribe();
+	}
 
 	onSubmit(): void {
 		this.errorMessage = '';

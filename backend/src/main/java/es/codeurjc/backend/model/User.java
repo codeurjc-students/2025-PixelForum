@@ -1,5 +1,6 @@
 package es.codeurjc.backend.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private LocalDateTime createdAt;
+    private String bio;
+
     @OneToOne
     @JoinColumn(name = "profile_image_id")
     private Image avatar;
@@ -50,10 +54,12 @@ public class User {
 
     }
 
-    public User(String username, String email, String password, String... roles) {
+    public User(String username, String email, String password, LocalDateTime createdAt, String bio, String... roles) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.createdAt = createdAt;
+        this.bio = bio;
         likedPosts = new ArrayList<>();
         likedComments = new ArrayList<>();
         this.roles = List.of(roles);
@@ -74,6 +80,14 @@ public class User {
 
     public String getPassword() {
         return this.password;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getBio() {
+        return bio;
     }
 
     public Image getAvatar() {
@@ -107,6 +121,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     public void setAvatar(Image avatar) {

@@ -179,7 +179,10 @@ public class PostService {
 
 		if (!imagesToAdd.isEmpty()) {
 			post.getImages().addAll(newImages);
-			newImages.forEach(img -> img.setPost(post));
+			for (Image img : newImages) {
+				img.setPost(post);
+				img.setOwner(post.getAuthor());
+			}
 		}
 	}
 

@@ -23,25 +23,22 @@ export class ErrorInterceptor implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
+        if (req.headers.has('skip-error')) {
+            return next.handle(req);
+        }
+
         return next.handle(req).pipe(
             catchError((error: HttpErrorResponse) => {
-
-                if (req.url.includes('/me')) {
-                    return throwError(() => error);
-                }
-
                 // Use backend response directly
-                const status = error.error?.status ?? error.status;
-                let errorName = error.error?.error ?? 'Unexpected error occurred.';
-                if (status == 404) errorName = 'Page not found';
-                this.errorService.setError(status, errorName);
-
+                const status = error.status;
                 if (status === 401) {
                     this.authService.logout();
                     this.router.navigate(['/login']);
-                } else {
-                    this.router.navigate(['/error']);
+                    return throwError(() => error);
                 }
+                let errorName = error.error?.error ?? 'Unable to connect to the server';
+                this.errorService.setError(status, errorName, error.error?.message ?? '');
+                this.router.navigate(['/error']);
 
                 return throwError(() => error);
             })

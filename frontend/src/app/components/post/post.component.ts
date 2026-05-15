@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { Post } from '../../models/post.model';
-import { Topic } from '../../models/topic.model';
 import { AuthService } from '../../services/auth.service';
 import { map, Observable, take } from 'rxjs';
 import { PostService } from '../../services/post.service';
@@ -19,14 +18,16 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class PostComponent implements OnInit {
 	@Output() postDeleted = new EventEmitter<void>();
+	@Output() removeUnlikedPost = new EventEmitter<number | undefined>();
 	@Input() post!: Post;
 	@Input() mode: 'list' | 'detail' = 'list';
 
+	avatarUrl: string = '';
 	currentImageIndex = 0;
 	imageCount = 0;
 	currentImage: string = '';
-	topicData: Topic | null = null;
 	hasUserLiked = false;
+	currentUserId: number | undefined = undefined;
 	isOwner$!: Observable<boolean>;
 
 	constructor(
@@ -38,13 +39,16 @@ export class PostComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
+		this.avatarUrl = 'api/v1/images/' + this.post.author?.avatar + '?w=240&h=240';
 		this.isOwner$ = this.authService.user$.pipe(
-			map(user => user ? user.id === this.post.author?.id || user.roles.includes('ADMIN') : false)
+			map(user => {
+				this.currentUserId = user?.id;
+				return user ? user.id === this.post.author?.id || user.roles.includes('ADMIN') : false;
+			})
 		);
 		this.hasUserLiked = !!this.post.hasUserLiked;
 		this.imageCount = this.post.images?.length || 0;
 		if (this.post.topic?.id) {
-			this.topicData = this.post.topic;
 			this.updateCurrentImage();
 		}
 	}
@@ -72,7 +76,7 @@ export class PostComponent implements OnInit {
 
 	goToTopic(): void {
 		if (this.post.topic?.id) {
-			this.router.navigate(['/posts/topics', this.post.topic.id], {
+			this.router.navigate(['/topics', this.post.topic.id], {
 				state: { name: this.post.topic.name }
 			});
 		}
@@ -80,7 +84,7 @@ export class PostComponent implements OnInit {
 
 	goToUser(): void {
 		if (this.post.author?.id) {
-			this.router.navigate(['/posts/users', this.post.author.id], {
+			this.router.navigate(['/users', this.post.author.id], {
 				state: { name: this.post.author.username }
 			});
 		}
@@ -106,6 +110,7 @@ export class PostComponent implements OnInit {
 						next: (updatedPost: Post) => {
 							this.post = updatedPost;
 							this.hasUserLiked = !!updatedPost.hasUserLiked;
+							this.removeUnlikedPost.emit(this.currentUserId);
 						}
 					});
 				}
@@ -136,11 +141,10 @@ export class PostComponent implements OnInit {
 	openDeleteDialog(): void {
 		const dialogData: ConfirmDialogData = {
 			title: 'Delete Post',
-			message: 'Are you sure you want to delete this post? This action cannot be undone.',
+			message: 'Are you sure you want to delete this post?\nThis action cannot be undone.',
 			detail: this.post.title,
 			confirmText: 'Delete',
-			cancelText: 'Cancel',
-			color: 'warn'
+			color: 'danger'
 		};
 
 		const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -162,20 +166,19 @@ export class PostComponent implements OnInit {
 			return;
 		}
 
-		this.postService.delete(this.post.id).subscribe(
-			{
-				next: () => {
-					// Navigate back if in detail mode
-					if (this.mode === 'detail') {
-						this.router.navigate(['/posts']);
-					} else {
-						// In list mode, delete the post without reload
-						this.postDeleted.emit();
-					}
-					this.snackBar.open('Post deleted successfully', 'Close', {
-						duration: 3000
-					});
+		this.postService.delete(this.post.id).subscribe({
+			next: () => {
+				// Navigate back if in detail mode
+				if (this.mode === 'detail') {
+					this.router.navigate(['/posts']);
+				} else {
+					// In list mode, delete the post without reload
+					this.postDeleted.emit();
 				}
-			});
+				this.snackBar.open('Post deleted successfully', 'Close', {
+					duration: 3000
+				});
+			}
+		});
 	}
 }

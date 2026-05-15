@@ -33,17 +33,24 @@ public class DatabaseInitializer {
 	@PostConstruct
 	public void init() throws IOException {
 
-		User admin = new User("admin", "admin@host", "admin0", "ADMIN", "USER");
-		User user1 = new User("martin", "martin@gmail.com", "user", "USER");
-		User user2 = new User("robert", "robert@gmail.com", "user", "USER");
-		User user3 = new User("daniel", "daniel@gmail.com", "user", "USER");
-		User user4 = new User("alvaro", "alvaro@gmail.com", "user", "USER");
+		User admin = new User("admin", "admin@host", "admin0", LocalDateTime.of(2023, 1, 23, 10, 43),
+				" This is the oficial Admin account", "ADMIN", "USER");
+		User user1 = new User("martin", "martin@gmail.com", "user", LocalDateTime.of(2023, 3, 13, 18, 12),
+				"Been gaming since the PS2 days. Love everything from story-driven RPGs to competitive multiplayer. Currently obsessed with souls-like games and indie titles. Competitive but chill. Down to team up or just chat about games.",
+				"USER");
+		User user2 = new User("robert", "robert@gmail.com", "user", LocalDateTime.of(2023, 3, 20, 11, 03),
+				"I love playing video games!", "USER");
+		User user3 = new User("daniel", "daniel@gmail.com", "user", LocalDateTime.of(2023, 5, 9, 15, 01),
+				"I'm suposed to add my bio here", "USER");
+		User user4 = new User("alvaro", "alvaro@gmail.com", "user", LocalDateTime.of(2024, 2, 15, 23, 40),
+				"If you are reading this, you are spying on me", "USER");
+		userService.addUser(admin);
+		userService.addUser(user1);
+		userService.addUser(user2);
+		userService.addUser(user3);
+		userService.addUser(user4);
 
-		userService.save(admin);
-		userService.save(user1);
-		userService.save(user2);
-		userService.save(user3);
-		userService.save(user4);
+		addAvatar(user1, "/images/avatar.png");
 
 		List<Topic> topics = List.of(
 				new Topic("GTA VI", "All news about Grand Theft Auto VI"),
@@ -99,16 +106,29 @@ public class DatabaseInitializer {
 		addLikes(admin, List.of(post1));
 	}
 
+	private Image uploadImage(String route, User user) throws IOException {
+		InputStream is = getClass().getResourceAsStream(route);
+		if (is == null) {
+			throw new IOException("Image not found: " + route);
+		}
+		byte[] data = is.readAllBytes();
+
+		return imageService.saveImage(data, route.substring(route.lastIndexOf("/") + 1),
+				"image/" + route.substring(route.lastIndexOf(".") + 1), user);
+	}
+
 	private void addImages(Post post, List<String> imageRoutes, User user) throws IOException {
 		for (String route : imageRoutes) {
-			InputStream is = getClass().getResourceAsStream(route);
-			byte[] data = is.readAllBytes();
-			Image image = imageService.saveImage(data, route.substring(route.lastIndexOf("/") + 1),
-					"image/" + route.substring(route.lastIndexOf(".") + 1), user);
+			Image image = uploadImage(route, user);
 			image.setPost(post);
 			post.getImages().add(image);
 		}
 		postService.save(post);
+	}
+
+	private void addAvatar(User user, String route) throws IOException {
+		user.setAvatar(uploadImage(route, user));
+		userService.save(user);
 	}
 
 	private void addLikes(User user, List<Post> posts) {
@@ -118,7 +138,7 @@ public class DatabaseInitializer {
 			post.setLikes(post.getUsersThatLiked().size());
 			postService.save(post);
 		}
-		userService.update(user);
+		userService.save(user);
 	}
 
 }

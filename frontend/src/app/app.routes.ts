@@ -3,20 +3,25 @@ import { LoginComponent } from './components/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
 import { GuestGuard } from './guards/guest.guard';
 import { ProfileComponent } from './components/profile/profile.component';
-import { PostListComponent } from './components/post-list/post-list.component';
 import { PostDetailComponent } from './components/post-detail/post-detail.component';
 import { ErrorComponent } from './components/error/error.component';
 import { CreatePostComponent } from './components/create-post/create-post.component';
+import { TopicComponent } from './components/topic/topic.component';
+import { PostPageComponent } from './components/post-page/post-page.component';
+import { RegisterComponent } from './components/register/register.component';
+import { EditProfileComponent } from './components/edit-profile/edit-profile.component';
+import { OwnerGuard } from './guards/owner.guard';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent, canActivate: [GuestGuard] },
-	{ path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-	{ path: 'posts', component: PostListComponent },
-	{ path: 'posts/topics/:topicId', component: PostListComponent },
-	{ path: 'posts/users/:userId', component: PostListComponent },
+	{ path: 'register', component: RegisterComponent, canActivate: [GuestGuard] },
+	{ path: 'posts', component: PostPageComponent },
+	{ path: 'topics/:topicId', component: TopicComponent },
+	{ path: 'users/:userId', component: ProfileComponent },
 	{ path: 'posts/:id', component: PostDetailComponent },
 	{ path: 'create-post', component: CreatePostComponent, canActivate: [AuthGuard] },
 	{ path: 'posts/:id/edit', component: CreatePostComponent, canActivate: [AuthGuard] },
+	{ path: 'users/:userId/edit', component: EditProfileComponent, canActivate: [AuthGuard, OwnerGuard] },
 
 	{ path: 'error', component: ErrorComponent },
 

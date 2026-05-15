@@ -21,14 +21,14 @@ export class AuthService {
 	loggedIn$ = this.user$.pipe(
 		map(user => !!user)
 	);
-    
-	constructor(private http: HttpClient) {}
-    
+
+	constructor(private http: HttpClient) { }
+
 	login(username: string, password: string) {
 		return this.http.post<AuthResponse>(
-		    this.baseUrl + 'login',
+			this.baseUrl + 'login',
 			{ username, password },
-			{ withCredentials: true }
+			{ headers: { 'skip-error': 'true' }, withCredentials: true }
 		).pipe(
 			switchMap(response => {
 				if (response.status === 'SUCCESS') {
@@ -57,7 +57,7 @@ export class AuthService {
 	me() {
 		return this.http.get<User>(
 			this.baseUrl + 'me',
-			{ withCredentials: true }
+			{ headers: { 'skip-error': 'true' }, withCredentials: true }
 		);
 	}
 

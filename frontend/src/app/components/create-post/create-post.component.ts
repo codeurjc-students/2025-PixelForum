@@ -9,6 +9,8 @@ import { ImageService } from '../../services/image.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { ErrorService } from '../../services/error.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
 	selector: 'app-create-post',
@@ -18,7 +20,6 @@ import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 	styleUrls: ['./create-post.component.scss']
 })
 export class CreatePostComponent implements OnInit {
-	@ViewChild('formContainer') formContainer!: ElementRef<HTMLDivElement>;
 	@ViewChild('errorMessageRef') errorMessageRef!: ElementRef<HTMLDivElement>;
 	createPostForm!: FormGroup;
 	allTopics: Topic[] = [];
@@ -37,13 +38,15 @@ export class CreatePostComponent implements OnInit {
 	isLoadingPost = false;
 	existingImageIds: string[] = []; // IDs of existing images for edit mode
 
-	private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+	private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 	constructor(
 		private fb: FormBuilder,
 		private postService: PostService,
 		private topicService: TopicService,
 		private imageService: ImageService,
+		private authService: AuthService,
+		private errorService: ErrorService,
 		private route: ActivatedRoute,
 		private router: Router,
 		private snackBar: MatSnackBar
@@ -191,7 +194,7 @@ export class CreatePostComponent implements OnInit {
 
 			// Validate size
 			if (file.size > this.MAX_FILE_SIZE) {
-				this.setError('Each image must be smaller than 10 MB');
+				this.setError('Each image must be smaller than 5 MB');
 				return;
 			}
 
@@ -314,11 +317,30 @@ export class CreatePostComponent implements OnInit {
 
 	private loadPostForEdit(): void {
 		this.isLoadingPost = true;
+
 		this.postService.getById(this.postId!).subscribe({
 			next: (post) => {
-				this.existingPost = post;
-				this.populateFormWithPost(post);
-				this.isLoadingPost = false;
+				this.authService.checkAuth().subscribe({
+					next: (user) => {
+						if (!user) {
+							this.router.navigate(['/login']);
+							return;
+						}
+
+						const isOwner = post.author?.id === user.id;
+						const isAdmin = user.roles.includes('ADMIN');
+
+						if (!isOwner && !isAdmin) {
+							this.errorService.setError(403, 'Forbidden', "You don't have permission to edit this post");
+							this.router.navigate(['/error']);
+							return;
+						}
+
+						this.existingPost = post;
+						this.populateFormWithPost(post);
+						this.isLoadingPost = false;
+					}
+				});
 			}
 		});
 	}
@@ -341,6 +363,10 @@ export class CreatePostComponent implements OnInit {
 	}
 
 	onCancel(): void {
-		this.router.navigate(['/posts']);
+		if (window.history.length > 1) {
+			window.history.back();
+		} else {
+			this.router.navigate(['/posts']);
+		}
 	}
 }

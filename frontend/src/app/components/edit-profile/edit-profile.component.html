@@ -1,0 +1,143 @@
+<div class="edit-container">
+    <div class="edit-header">
+        <h1>Edit Profile</h1>
+        <p>Update your profile information or change your password</p>
+    </div>
+
+    <mat-tab-group class="edit-tabs">
+        <!-- PROFILE INFO TAB -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon class="tab-icon">person</mat-icon>
+                Profile Info
+            </ng-template>
+
+            <div class="tab-content">
+                <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()" class="edit-form">
+                    <div class="form-section">
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Username</mat-label>
+                            <input matInput formControlName="username" type="text" [disabled]="isLoadingProfile" />
+                            <mat-error *ngIf="isProfileFieldInvalid('username')">
+                                {{ getProfileErrorMessage('username') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="form-field">
+                            <mat-label>Email</mat-label>
+                            <input matInput formControlName="email" type="email" [disabled]="isLoadingProfile" />
+                            <mat-error *ngIf="isProfileFieldInvalid('email')">
+                                {{ getProfileErrorMessage('email') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="form-field full-width">
+                            <mat-label>Bio</mat-label>
+                            <textarea matInput formControlName="bio" rows="3" [disabled]="isLoadingProfile"
+                                placeholder="Tell us about yourself..." maxlength="255"></textarea>
+                            <mat-hint align="end">
+                                {{ profileForm.get('bio')?.value?.length || 0 }}/255
+                            </mat-hint>
+                            <mat-error *ngIf="isProfileFieldInvalid('bio')">
+                                {{ getProfileErrorMessage('bio') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div *ngIf="profileErrorMessage" class="error-message">
+                        <mat-icon>error_outline</mat-icon>
+                        <span>{{ profileErrorMessage }}</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button mat-stroked-button type="button" (click)="router.navigate(['/users', userId])"
+                            class="cancel-button">
+                            Cancel
+                        </button>
+                        <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmitProfile()"
+                            class="submit-button">
+                            <span *ngIf="!isLoadingProfile">Save Changes</span>
+                            <span *ngIf="isLoadingProfile">
+                                <mat-icon class="spinner">sync</mat-icon>
+                                Saving...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </mat-tab>
+
+        <!-- PASSWORD TAB -->
+        <mat-tab id="password-tab">
+            <ng-template mat-tab-label>
+                <mat-icon class="tab-icon">lock</mat-icon>
+                Change Password
+            </ng-template>
+
+            <div class="tab-content">
+                <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="edit-form">
+                    <div class="form-section">
+                        <mat-form-field appearance="outline" class="form-field full-width">
+                            <mat-label>Current Password</mat-label>
+                            <input matInput formControlName="oldPassword" [type]="hideOldPassword ? 'password' : 'text'"
+                                [disabled]="isLoadingPassword" />
+                            <button mat-icon-button matSuffix (click)="toggleOldPasswordVisibility()" type="button"
+                                [disabled]="isLoadingPassword" class="visibility-toggle">
+                                <mat-icon>{{ hideOldPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                            <mat-error *ngIf="isPasswordFieldInvalid('oldPassword')">
+                                {{ getPasswordErrorMessage('oldPassword') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="form-field full-width">
+                            <mat-label>New Password</mat-label>
+                            <input matInput formControlName="newPassword" [type]="hideNewPassword ? 'password' : 'text'"
+                                [disabled]="isLoadingPassword" />
+                            <button mat-icon-button matSuffix (click)="toggleNewPasswordVisibility()" type="button"
+                                [disabled]="isLoadingPassword" class="visibility-toggle">
+                                <mat-icon>{{ hideNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                            <mat-error *ngIf="isPasswordFieldInvalid('newPassword')">
+                                {{ getPasswordErrorMessage('newPassword') }}
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="form-field full-width">
+                            <mat-label>Confirm New Password</mat-label>
+                            <input matInput formControlName="confirmPassword"
+                                [type]="hideConfirmPassword ? 'password' : 'text'" [disabled]="isLoadingPassword" />
+                            <button mat-icon-button matSuffix (click)="toggleConfirmPasswordVisibility()" type="button"
+                                [disabled]="isLoadingPassword" class="visibility-toggle">
+                                <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                            <mat-error *ngIf="isPasswordFieldInvalid('confirmPassword')">
+                                {{ getPasswordErrorMessage('confirmPassword') }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div *ngIf="passwordErrorMessage" class="error-message">
+                        <mat-icon>error_outline</mat-icon>
+                        <span>{{ passwordErrorMessage }}</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button mat-stroked-button type="button" (click)="router.navigate(['/users', userId])"
+                            class="cancel-button">
+                            Cancel
+                        </button>
+                        <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmitPassword()"
+                            class="submit-button">
+                            <span *ngIf="!isLoadingPassword">Change Password</span>
+                            <span *ngIf="isLoadingPassword">
+                                <mat-icon class="spinner">sync</mat-icon>
+                                Changing...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

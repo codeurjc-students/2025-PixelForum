@@ -5,9 +5,9 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import es.codeurjc.backend.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
@@ -22,14 +22,14 @@ import jakarta.servlet.http.HttpServletRequest;
 <span class="fc" id="L22">	private final JwtParser jwtParser = Jwts.parser().verifyWith(jwtSecret).build();</span>
 
 	public String tokenStringFromHeaders(HttpServletRequest req){
-<span class="nc" id="L25">		String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);</span>
-<span class="nc bnc" id="L26" title="All 2 branches missed.">		if (bearerToken == null) {</span>
-<span class="nc" id="L27">			throw new IllegalArgumentException(&quot;Missing Authorization header&quot;);</span>
+<span class="fc" id="L25">		String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">		if (bearerToken == null) {</span>
+<span class="fc" id="L27">			throw new IllegalArgumentException(&quot;Missing Authorization header&quot;);</span>
 		}
-<span class="nc bnc" id="L29" title="All 2 branches missed.">		if(!bearerToken.startsWith(&quot;Bearer &quot;)){</span>
-<span class="nc" id="L30">			throw new IllegalArgumentException(&quot;Authorization header does not start with Bearer: &quot; + bearerToken);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">		if(!bearerToken.startsWith(&quot;Bearer &quot;)){</span>
+<span class="fc" id="L30">			throw new IllegalArgumentException(&quot;Authorization header does not start with Bearer: &quot; + bearerToken);</span>
 		}
-<span class="nc" id="L32">		return bearerToken.substring(7);</span>
+<span class="fc" id="L32">		return bearerToken.substring(7);</span>
 	}
 
 	private String tokenStringFromCookies(HttpServletRequest request) {
@@ -41,8 +41,8 @@ import jakarta.servlet.http.HttpServletRequest;
 <span class="fc bfc" id="L41" title="All 2 branches covered.">		for (Cookie cookie : cookies) {</span>
 <span class="fc bfc" id="L42" title="All 2 branches covered.">			if (TokenType.ACCESS.cookieName.equals(cookie.getName())) {</span>
 <span class="fc" id="L43">				String accessToken = cookie.getValue();</span>
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">				if (accessToken == null) {</span>
-<span class="nc" id="L45">					throw new IllegalArgumentException(&quot;Cookie %s has null value&quot;.formatted(TokenType.ACCESS.cookieName));</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">				if (accessToken == null) {</span>
+<span class="fc" id="L45">					throw new IllegalArgumentException(&quot;Cookie %s has null value&quot;.formatted(TokenType.ACCESS.cookieName));</span>
 				}
 
 <span class="fc" id="L48">				return accessToken;</span>
@@ -52,9 +52,9 @@ import jakarta.servlet.http.HttpServletRequest;
 	}
 
 	public Claims validateToken(HttpServletRequest req, boolean fromCookie){
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">		var token = fromCookie?</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">		var token = fromCookie?</span>
 <span class="fc" id="L56">				tokenStringFromCookies(req):</span>
-<span class="pc" id="L57">				tokenStringFromHeaders(req);</span>
+<span class="fc" id="L57">				tokenStringFromHeaders(req);</span>
 <span class="fc" id="L58">		return validateToken(token);</span>
 	}
 
@@ -62,22 +62,22 @@ import jakarta.servlet.http.HttpServletRequest;
 <span class="fc" id="L62">		return jwtParser.parseSignedClaims(token).getPayload();</span>
 	}
 
-	public String generateAccessToken(UserDetails userDetails) {
-<span class="fc" id="L66">		return buildToken(TokenType.ACCESS, userDetails).compact();</span>
+	public String generateAccessToken(User user) {
+<span class="fc" id="L66">		return buildToken(TokenType.ACCESS, user).compact();</span>
 	}
 
-	public String generateRefreshToken(UserDetails userDetails) {
-<span class="fc" id="L70">		var token = buildToken(TokenType.REFRESH, userDetails);</span>
+	public String generateRefreshToken(User user) {
+<span class="fc" id="L70">		var token = buildToken(TokenType.REFRESH, user);</span>
 <span class="fc" id="L71">        return token.compact();</span>
 	}
 
-	private JwtBuilder buildToken(TokenType tokenType, UserDetails userDetails) {
+	private JwtBuilder buildToken(TokenType tokenType, User user) {
 <span class="fc" id="L75">		var currentDate = new Date();</span>
 <span class="fc" id="L76">		var expiryDate = Date.from(new Date().toInstant().plus(tokenType.duration));</span>
 <span class="fc" id="L77">		return Jwts.builder()</span>
-<span class="fc" id="L78">				.claim(&quot;roles&quot;, userDetails.getAuthorities())</span>
+<span class="fc" id="L78">				.claim(&quot;roles&quot;, user.getRoles())</span>
 <span class="fc" id="L79">				.claim(&quot;type&quot;, tokenType.name())</span>
-<span class="fc" id="L80">				.subject(userDetails.getUsername())</span>
+<span class="fc" id="L80">				.subject(String.valueOf(user.getId()))</span>
 <span class="fc" id="L81">				.issuedAt(currentDate)</span>
 <span class="fc" id="L82">				.expiration(expiryDate)</span>
 <span class="fc" id="L83">				.signWith(jwtSecret);</span>

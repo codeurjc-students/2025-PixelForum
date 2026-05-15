@@ -1,13 +1,22 @@
 name: SonarCloud
 on:
-    pull_request:
+    push:
+        branches:
+            - main
         paths:
             - backend/src/**
             - backend/pom.xml
             - frontend/src/**
             - frontend/angular.json
+
+    pull_request:
         branches:
             - main
+        paths:
+            - backend/src/**
+            - backend/pom.xml
+            - frontend/src/**
+            - frontend/angular.json
     workflow_dispatch:
 
 jobs:

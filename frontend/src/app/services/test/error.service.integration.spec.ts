@@ -44,25 +44,22 @@ describe('ErrorService/Interceptor - Integration Tests', () => {
     });
 
     it('should handle 404 error and redirect to error page', () => {
-        http.get('/test').subscribe({
-            error: () => { }
-        });
+        http.get('/test').subscribe({ error: () => { } });
 
         const req = httpMock.expectOne('/test');
 
-        req.flush({ error: 'Not found' }, { status: 404, statusText: 'Not Found' });
+        req.flush({ error: 'Page not found', message: 'Resource not found' }, { status: 404, statusText: 'Page not Found' });
 
         const error = errorService.getError();
 
         expect(error?.status).toBe(404);
         expect(error?.errorName).toBe('Page not found');
+        expect(error?.message).toBe('Resource not found');
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/error']);
     });
 
     it('should logout and redirect on 401', () => {
-        http.get('/test').subscribe({
-            error: () => { }
-        });
+        http.get('/test').subscribe({ error: () => { } });
 
         const req = httpMock.expectOne('/test');
 
@@ -72,10 +69,8 @@ describe('ErrorService/Interceptor - Integration Tests', () => {
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
     });
 
-    it('should ignore /me endpoint', () => {
-        http.get('/me').subscribe({
-            error: () => { }
-        });
+    it('should ignore requests with skip-error header', () => {
+        http.get('/me', { headers: { 'skip-error': 'true' } }).subscribe({ error: () => { } });
 
         const req = httpMock.expectOne('/me');
 
@@ -83,6 +78,7 @@ describe('ErrorService/Interceptor - Integration Tests', () => {
 
         expect(authServiceSpy.logout).not.toHaveBeenCalled();
         expect(routerSpy.navigate).not.toHaveBeenCalled();
+        expect(errorService.getError()).toBeNull();
     });
 
 });

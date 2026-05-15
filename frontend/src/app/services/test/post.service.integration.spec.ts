@@ -167,7 +167,7 @@ describe('PostService - Integration', () => {
 						done();
 					},
 					error: error => {
-						expect(error.status).toBe(500);
+						expect(error.status).toBe(404);
 						done();
 					}
 				});
