@@ -33,19 +33,26 @@ public class DatabaseInitializer {
 	@PostConstruct
 	public void init() throws IOException {
 
-<span class="fc" id="L36">		User admin = new User(&quot;admin&quot;, &quot;admin@host&quot;, &quot;admin0&quot;, &quot;ADMIN&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L37">		User user1 = new User(&quot;martin&quot;, &quot;martin@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L38">		User user2 = new User(&quot;robert&quot;, &quot;robert@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L39">		User user3 = new User(&quot;daniel&quot;, &quot;daniel@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
-<span class="fc" id="L40">		User user4 = new User(&quot;alvaro&quot;, &quot;alvaro@gmail.com&quot;, &quot;user&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L36">		User admin = new User(&quot;admin&quot;, &quot;admin@host&quot;, &quot;admin0&quot;, LocalDateTime.of(2023, 1, 23, 10, 43),</span>
+				&quot; This is the oficial Admin account&quot;, &quot;ADMIN&quot;, &quot;USER&quot;);
+<span class="fc" id="L38">		User user1 = new User(&quot;martin&quot;, &quot;martin@gmail.com&quot;, &quot;user&quot;, LocalDateTime.of(2023, 3, 13, 18, 12),</span>
+				&quot;Been gaming since the PS2 days. Love everything from story-driven RPGs to competitive multiplayer. Currently obsessed with souls-like games and indie titles. Competitive but chill. Down to team up or just chat about games.&quot;,
+				&quot;USER&quot;);
+<span class="fc" id="L41">		User user2 = new User(&quot;robert&quot;, &quot;robert@gmail.com&quot;, &quot;user&quot;, LocalDateTime.of(2023, 3, 20, 11, 03),</span>
+				&quot;I love playing video games!&quot;, &quot;USER&quot;);
+<span class="fc" id="L43">		User user3 = new User(&quot;daniel&quot;, &quot;daniel@gmail.com&quot;, &quot;user&quot;, LocalDateTime.of(2023, 5, 9, 15, 01),</span>
+				&quot;I'm suposed to add my bio here&quot;, &quot;USER&quot;);
+<span class="fc" id="L45">		User user4 = new User(&quot;alvaro&quot;, &quot;alvaro@gmail.com&quot;, &quot;user&quot;, LocalDateTime.of(2024, 2, 15, 23, 40),</span>
+				&quot;If you are reading this, you are spying on me&quot;, &quot;USER&quot;);
+<span class="fc" id="L47">		userService.addUser(admin);</span>
+<span class="fc" id="L48">		userService.addUser(user1);</span>
+<span class="fc" id="L49">		userService.addUser(user2);</span>
+<span class="fc" id="L50">		userService.addUser(user3);</span>
+<span class="fc" id="L51">		userService.addUser(user4);</span>
 
-<span class="fc" id="L42">		userService.save(admin);</span>
-<span class="fc" id="L43">		userService.save(user1);</span>
-<span class="fc" id="L44">		userService.save(user2);</span>
-<span class="fc" id="L45">		userService.save(user3);</span>
-<span class="fc" id="L46">		userService.save(user4);</span>
+<span class="fc" id="L53">		addAvatar(user1, &quot;/images/avatar.png&quot;);</span>
 
-<span class="fc" id="L48">		List&lt;Topic&gt; topics = List.of(</span>
+<span class="fc" id="L55">		List&lt;Topic&gt; topics = List.of(</span>
 				new Topic(&quot;GTA VI&quot;, &quot;All news about Grand Theft Auto VI&quot;),
 				new Topic(&quot;Cyberpunk&quot;, &quot;All news about Cyberpunk&quot;),
 				new Topic(&quot;The Witcher&quot;, &quot;All news about The Witcher&quot;),
@@ -56,70 +63,83 @@ public class DatabaseInitializer {
 				new Topic(&quot;Cuphead&quot;, &quot;All news about Cuphead&quot;),
 				new Topic(&quot;This is a very long topic only for testing&quot;, &quot;test&quot;));
 
-<span class="fc" id="L59">		topics.forEach(topicService::save);</span>
+<span class="fc" id="L66">		topics.forEach(topicService::save);</span>
 
-<span class="fc" id="L61">		Post post1 = new Post(&quot;GTA VI Massive leak&quot;,</span>
+<span class="fc" id="L68">		Post post1 = new Post(&quot;GTA VI Massive leak&quot;,</span>
 				&quot;A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.&quot;,
-<span class="fc" id="L63">				LocalDateTime.of(2026, 2, 20, 18, 43), new ArrayList&lt;&gt;(), user1, topics.get(0));</span>
-<span class="fc" id="L64">		postService.save(post1);</span>
-<span class="fc" id="L65">		addImages(post1, List.of(&quot;/images/gta_poster.jpeg&quot;, &quot;/images/gta_map.webp&quot;), user1);</span>
+<span class="fc" id="L70">				LocalDateTime.of(2026, 2, 20, 18, 43), new ArrayList&lt;&gt;(), user1, topics.get(0));</span>
+<span class="fc" id="L71">		postService.save(post1);</span>
+<span class="fc" id="L72">		addImages(post1, List.of(&quot;/images/gta_poster.jpeg&quot;, &quot;/images/gta_map.webp&quot;), user1);</span>
 
-<span class="fc" id="L67">		Post post2 = new Post(&quot;GTA VI official 2nd trailer&quot;,</span>
+<span class="fc" id="L74">		Post post2 = new Post(&quot;GTA VI official 2nd trailer&quot;,</span>
 				&quot;Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.&quot;,
-<span class="fc" id="L69">				LocalDateTime.of(2026, 2, 18, 19, 15), null, user2, topics.get(0));</span>
-<span class="fc" id="L70">		postService.save(post2);</span>
+<span class="fc" id="L76">				LocalDateTime.of(2026, 2, 18, 19, 15), null, user2, topics.get(0));</span>
+<span class="fc" id="L77">		postService.save(post2);</span>
 
-<span class="fc" id="L72">		Post post3 = new Post(&quot;GTA VI release date rumors&quot;,</span>
+<span class="fc" id="L79">		Post post3 = new Post(&quot;GTA VI release date rumors&quot;,</span>
 				&quot;Rumors are swirling about the potential release date for Grand Theft Auto VI, with speculation pointing towards a launch in late 2024 or early 2025. Fans are eagerly awaiting official confirmation from Rockstar Games.&quot;,
-<span class="fc" id="L74">				LocalDateTime.of(2026, 1, 12, 15, 04), null, user1, topics.get(0));</span>
-<span class="fc" id="L75">		postService.save(post3);</span>
+<span class="fc" id="L81">				LocalDateTime.of(2026, 1, 12, 15, 04), null, user1, topics.get(0));</span>
+<span class="fc" id="L82">		postService.save(post3);</span>
 
-<span class="fc" id="L77">		Post post4 = new Post(&quot;GTA VI map details&quot;,</span>
+<span class="fc" id="L84">		Post post4 = new Post(&quot;GTA VI map details&quot;,</span>
 				&quot;New details about the map of Grand Theft Auto VI have emerged, suggesting a vast and diverse open world that includes multiple cities and rural areas, offering players a rich and immersive gaming experience.&quot;,
-<span class="fc" id="L79">				LocalDateTime.of(2026, 2, 2, 8, 30), null, user1, topics.get(0));</span>
-<span class="fc" id="L80">		postService.save(post4);</span>
+<span class="fc" id="L86">				LocalDateTime.of(2026, 2, 2, 8, 30), null, user1, topics.get(0));</span>
+<span class="fc" id="L87">		postService.save(post4);</span>
 
-<span class="fc bfc" id="L82" title="All 2 branches covered.">		for (int i = 0; i &lt; 20; i++) {</span>
-<span class="fc" id="L83">			Post post = new Post();</span>
-<span class="fc" id="L84">			post.setTitle(&quot;Example post &quot; + i);</span>
-<span class="fc" id="L85">			post.setContent(</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">		for (int i = 0; i &lt; 20; i++) {</span>
+<span class="fc" id="L90">			Post post = new Post();</span>
+<span class="fc" id="L91">			post.setTitle(&quot;Example post &quot; + i);</span>
+<span class="fc" id="L92">			post.setContent(</span>
 					&quot;This is a test post to populate the database with sample data. It is only for testing purposes and does not contain any meaningful information.&quot;);
-<span class="fc" id="L87">			post.setTopic(topics.get(2));</span>
-<span class="fc" id="L88">			post.setAuthor(user2);</span>
-<span class="fc" id="L89">			post.setCreatedAt(LocalDateTime.of(2025, 12, 22, 22, 02 + i));</span>
-<span class="fc" id="L90">			post.setLikes(0);</span>
+<span class="fc" id="L94">			post.setTopic(topics.get(2));</span>
+<span class="fc" id="L95">			post.setAuthor(user2);</span>
+<span class="fc" id="L96">			post.setCreatedAt(LocalDateTime.of(2025, 12, 22, 22, 02 + i));</span>
+<span class="fc" id="L97">			post.setLikes(0);</span>
 
-<span class="fc" id="L92">			postService.save(post);</span>
+<span class="fc" id="L99">			postService.save(post);</span>
 		}
 
-<span class="fc" id="L95">		addLikes(user1, List.of(post1, post3, post4));</span>
-<span class="fc" id="L96">		addLikes(user2, List.of(post1, post2, post3, post4));</span>
-<span class="fc" id="L97">		addLikes(user3, List.of(post1, post2, post4));</span>
-<span class="fc" id="L98">		addLikes(user4, List.of(post1, post2, post3, post4));</span>
-<span class="fc" id="L99">		addLikes(admin, List.of(post1));</span>
-<span class="fc" id="L100">	}</span>
+<span class="fc" id="L102">		addLikes(user1, List.of(post1, post3, post4));</span>
+<span class="fc" id="L103">		addLikes(user2, List.of(post1, post2, post3, post4));</span>
+<span class="fc" id="L104">		addLikes(user3, List.of(post1, post2, post4));</span>
+<span class="fc" id="L105">		addLikes(user4, List.of(post1, post2, post3, post4));</span>
+<span class="fc" id="L106">		addLikes(admin, List.of(post1));</span>
+<span class="fc" id="L107">	}</span>
+
+	private Image uploadImage(String route, User user) throws IOException {
+<span class="fc" id="L110">		InputStream is = getClass().getResourceAsStream(route);</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">		if (is == null) {</span>
+<span class="nc" id="L112">			throw new IOException(&quot;Image not found: &quot; + route);</span>
+		}
+<span class="fc" id="L114">		byte[] data = is.readAllBytes();</span>
+
+<span class="fc" id="L116">		return imageService.saveImage(data, route.substring(route.lastIndexOf(&quot;/&quot;) + 1),</span>
+<span class="fc" id="L117">				&quot;image/&quot; + route.substring(route.lastIndexOf(&quot;.&quot;) + 1), user);</span>
+	}
 
 	private void addImages(Post post, List&lt;String&gt; imageRoutes, User user) throws IOException {
-<span class="fc bfc" id="L103" title="All 2 branches covered.">		for (String route : imageRoutes) {</span>
-<span class="fc" id="L104">			InputStream is = getClass().getResourceAsStream(route);</span>
-<span class="fc" id="L105">			byte[] data = is.readAllBytes();</span>
-<span class="fc" id="L106">			Image image = imageService.saveImage(data, route.substring(route.lastIndexOf(&quot;/&quot;) + 1),</span>
-<span class="fc" id="L107">					&quot;image/&quot; + route.substring(route.lastIndexOf(&quot;.&quot;) + 1), user);</span>
-<span class="fc" id="L108">			image.setPost(post);</span>
-<span class="fc" id="L109">			post.getImages().add(image);</span>
-<span class="fc" id="L110">		}</span>
-<span class="fc" id="L111">		postService.save(post);</span>
-<span class="fc" id="L112">	}</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		for (String route : imageRoutes) {</span>
+<span class="fc" id="L122">			Image image = uploadImage(route, user);</span>
+<span class="fc" id="L123">			image.setPost(post);</span>
+<span class="fc" id="L124">			post.getImages().add(image);</span>
+<span class="fc" id="L125">		}</span>
+<span class="fc" id="L126">		postService.save(post);</span>
+<span class="fc" id="L127">	}</span>
+
+	private void addAvatar(User user, String route) throws IOException {
+<span class="fc" id="L130">		user.setAvatar(uploadImage(route, user));</span>
+<span class="fc" id="L131">		userService.save(user);</span>
+<span class="fc" id="L132">	}</span>
 
 	private void addLikes(User user, List&lt;Post&gt; posts) {
-<span class="fc bfc" id="L115" title="All 2 branches covered.">		for (Post post : posts) {</span>
-<span class="fc" id="L116">			user.getLikedPosts().add(post);</span>
-<span class="fc" id="L117">			post.getUsersThatLiked().add(user);</span>
-<span class="fc" id="L118">			post.setLikes(post.getUsersThatLiked().size());</span>
-<span class="fc" id="L119">			postService.save(post);</span>
-<span class="fc" id="L120">		}</span>
-<span class="fc" id="L121">		userService.update(user);</span>
-<span class="fc" id="L122">	}</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">		for (Post post : posts) {</span>
+<span class="fc" id="L136">			user.getLikedPosts().add(post);</span>
+<span class="fc" id="L137">			post.getUsersThatLiked().add(user);</span>
+<span class="fc" id="L138">			post.setLikes(post.getUsersThatLiked().size());</span>
+<span class="fc" id="L139">			postService.save(post);</span>
+<span class="fc" id="L140">		}</span>
+<span class="fc" id="L141">		userService.save(user);</span>
+<span class="fc" id="L142">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

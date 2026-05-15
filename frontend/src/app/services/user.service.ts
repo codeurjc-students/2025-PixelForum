@@ -13,8 +13,8 @@ export class UserService {
 
     constructor(private http: HttpClient) { }
 
-    getAll(): Observable<User[]> {
-        return this.http.get<User[]>(this.baseUrl, { withCredentials: true });
+    getAll(page: number = 0, size: number = 10): Observable<PageResponse<User>> {
+        return this.http.get<PageResponse<User>>(this.baseUrl, { params: { page, size }, withCredentials: true });
     }
 
     getById(id: number): Observable<User> {

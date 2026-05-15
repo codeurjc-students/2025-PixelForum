@@ -4,67 +4,36 @@ import java.util.Collection;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
-import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.dto.user.UserMapper;
 
-@Mapper(componentModel = &quot;spring&quot;)
+@Mapper(componentModel = &quot;spring&quot;, uses = UserMapper.class)
 public interface PostMapper {
 
-    @Mapping(target = &quot;images&quot;, source = &quot;images&quot;, qualifiedByName = &quot;imagesToIds&quot;)
     @Mapping(target = &quot;hasUserLiked&quot;, ignore = true)
     PostDTO toDTO(Post post);
 
     List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; posts);
 
-    @Mapping(target = &quot;author.password&quot;, ignore = true)
-    @Mapping(target = &quot;author.avatar&quot;, ignore = true)
-    @Mapping(target = &quot;author.likedPosts&quot;, ignore = true)
-    @Mapping(target = &quot;author.likedComments&quot;, ignore = true)
-    @Mapping(target = &quot;author.roles&quot;, ignore = true)
-    @Mapping(target = &quot;images&quot;, source = &quot;images&quot;, qualifiedByName = &quot;idsToImages&quot;)
+    @Mapping(target = &quot;author&quot;, ignore = true)
     @Mapping(target = &quot;usersThatLiked&quot;, ignore = true)
     Post toDomain(PostDTO postDTO);
 
-    @Named(&quot;imagesToIds&quot;)
-    default List&lt;Long&gt; imagesToIds(List&lt;Image&gt; images) {
-<span class="pc bpc" id="L32" title="1 of 4 branches missed.">        if (images == null || images.isEmpty()) {</span>
-<span class="fc" id="L33">            return List.of();</span>
-        }
-<span class="fc" id="L35">        return images.stream()</span>
-<span class="fc" id="L36">                .map(Image::getId)</span>
-<span class="fc" id="L37">                .toList();</span>
-    }
-
-    @Named(&quot;idsToImages&quot;)
-    default List&lt;Image&gt; idsToImages(List&lt;Long&gt; ids) {
-<span class="fc bfc" id="L42" title="All 4 branches covered.">        if (ids == null || ids.isEmpty()) {</span>
-<span class="fc" id="L43">            return List.of();</span>
-        }
-<span class="fc" id="L45">        return ids.stream()</span>
-<span class="fc" id="L46">                .map(id -&gt; {</span>
-<span class="fc" id="L47">                    Image image = new Image();</span>
-<span class="fc" id="L48">                    image.setId(id);</span>
-<span class="fc" id="L49">                    return image;</span>
-                })
-<span class="fc" id="L51">                .toList();</span>
-    }
-
     default PostDTO toDTOWithLike(Post post, User currentUser) {
-<span class="fc" id="L55">        PostDTO dto = toDTO(post);</span>
-<span class="fc" id="L56">        Boolean hasLiked = false;</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (currentUser != null) {</span>
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">            hasLiked = post.getUsersThatLiked() != null &amp;&amp;</span>
-<span class="fc bfc" id="L59" title="All 2 branches covered.">                    post.getUsersThatLiked().contains(currentUser);</span>
+<span class="fc" id="L24">        PostDTO dto = toDTO(post);</span>
+<span class="fc" id="L25">        Boolean hasLiked = false;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (currentUser != null) {</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">            hasLiked = post.getUsersThatLiked() != null &amp;&amp;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">                    post.getUsersThatLiked().contains(currentUser);</span>
         }
-<span class="fc" id="L61">        return new PostDTO(</span>
-<span class="fc" id="L62">                dto.id(), dto.title(), dto.content(),</span>
-<span class="fc" id="L63">                dto.createdAt(), dto.updatedAt(),</span>
-<span class="fc" id="L64">                dto.author(), dto.topic(),</span>
-<span class="fc" id="L65">                dto.likes(),</span>
+<span class="fc" id="L30">        return new PostDTO(</span>
+<span class="fc" id="L31">                dto.id(), dto.title(), dto.content(),</span>
+<span class="fc" id="L32">                dto.createdAt(), dto.updatedAt(),</span>
+<span class="fc" id="L33">                dto.author(), dto.topic(),</span>
+<span class="fc" id="L34">                dto.likes(),</span>
                 hasLiked,
-<span class="fc" id="L67">                dto.images());</span>
+<span class="fc" id="L36">                dto.images());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

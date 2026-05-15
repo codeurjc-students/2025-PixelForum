@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.dto.user</a> &gt; <span class="el_source">UserMapperImpl.java</span></div><h1>UserMapperImpl.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.dto.user;
 
-import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,84 +11,146 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-04-09T20:18:15+0200&quot;,
+    date = &quot;2026-05-15T17:11:27+0200&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
-<span class="fc" id="L17">public class UserMapperImpl implements UserMapper {</span>
+<span class="fc" id="L18">public class UserMapperImpl implements UserMapper {</span>
 
     @Override
     public UserDTO toDTO(User user) {
-<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( user == null ) {</span>
-<span class="nc" id="L22">            return null;</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if ( user == null ) {</span>
+<span class="nc" id="L23">            return null;</span>
         }
 
-<span class="fc" id="L25">        Long id = null;</span>
-<span class="fc" id="L26">        String username = null;</span>
-<span class="fc" id="L27">        String email = null;</span>
-<span class="fc" id="L28">        String password = null;</span>
-<span class="fc" id="L29">        List&lt;Long&gt; likedComments = null;</span>
-<span class="fc" id="L30">        List&lt;String&gt; roles = null;</span>
-<span class="fc" id="L31">        Image avatar = null;</span>
+<span class="fc" id="L26">        Long id = null;</span>
+<span class="fc" id="L27">        String username = null;</span>
+<span class="fc" id="L28">        String email = null;</span>
+<span class="fc" id="L29">        LocalDateTime createdAt = null;</span>
+<span class="fc" id="L30">        String bio = null;</span>
+<span class="fc" id="L31">        Long avatar = null;</span>
+<span class="fc" id="L32">        List&lt;Long&gt; likedPosts = null;</span>
+<span class="fc" id="L33">        List&lt;String&gt; roles = null;</span>
 
-<span class="fc" id="L33">        id = user.getId();</span>
-<span class="fc" id="L34">        username = user.getUsername();</span>
-<span class="fc" id="L35">        email = user.getEmail();</span>
-<span class="fc" id="L36">        password = user.getPassword();</span>
-<span class="fc" id="L37">        List&lt;Long&gt; list = user.getLikedComments();</span>
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if ( list != null ) {</span>
-<span class="fc" id="L39">            likedComments = new ArrayList&lt;Long&gt;( list );</span>
+<span class="fc" id="L35">        id = user.getId();</span>
+<span class="fc" id="L36">        username = user.getUsername();</span>
+<span class="fc" id="L37">        email = user.getEmail();</span>
+<span class="fc" id="L38">        createdAt = user.getCreatedAt();</span>
+<span class="fc" id="L39">        bio = user.getBio();</span>
+<span class="fc" id="L40">        avatar = mapImage( user.getAvatar() );</span>
+<span class="fc" id="L41">        likedPosts = postListToLongList( user.getLikedPosts() );</span>
+<span class="fc" id="L42">        List&lt;String&gt; list1 = user.getRoles();</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if ( list1 != null ) {</span>
+<span class="fc" id="L44">            roles = new ArrayList&lt;String&gt;( list1 );</span>
         }
-<span class="fc" id="L41">        List&lt;String&gt; list1 = user.getRoles();</span>
-<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if ( list1 != null ) {</span>
-<span class="fc" id="L43">            roles = new ArrayList&lt;String&gt;( list1 );</span>
-        }
-<span class="fc" id="L45">        avatar = user.getAvatar();</span>
 
-<span class="fc" id="L47">        UserDTO userDTO = new UserDTO( id, username, email, password, likedComments, roles, avatar );</span>
+<span class="fc" id="L47">        UserDTO userDTO = new UserDTO( id, username, email, createdAt, bio, avatar, likedPosts, roles );</span>
 
 <span class="fc" id="L49">        return userDTO;</span>
     }
 
     @Override
-    public List&lt;UserDTO&gt; toDTOs(Collection&lt;User&gt; users) {
-<span class="nc bnc" id="L54" title="All 2 branches missed.">        if ( users == null ) {</span>
-<span class="nc" id="L55">            return null;</span>
+    public BasicUserDTO toBasicDTO(User user) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if ( user == null ) {</span>
+<span class="fc" id="L55">            return null;</span>
         }
 
-<span class="nc" id="L58">        List&lt;UserDTO&gt; list = new ArrayList&lt;UserDTO&gt;( users.size() );</span>
-<span class="nc bnc" id="L59" title="All 2 branches missed.">        for ( User user : users ) {</span>
-<span class="nc" id="L60">            list.add( toDTO( user ) );</span>
-<span class="nc" id="L61">        }</span>
+<span class="fc" id="L58">        Long id = null;</span>
+<span class="fc" id="L59">        String username = null;</span>
+<span class="fc" id="L60">        LocalDateTime createdAt = null;</span>
+<span class="fc" id="L61">        String bio = null;</span>
+<span class="fc" id="L62">        Long avatar = null;</span>
 
-<span class="nc" id="L63">        return list;</span>
+<span class="fc" id="L64">        id = user.getId();</span>
+<span class="fc" id="L65">        username = user.getUsername();</span>
+<span class="fc" id="L66">        createdAt = user.getCreatedAt();</span>
+<span class="fc" id="L67">        bio = user.getBio();</span>
+<span class="fc" id="L68">        avatar = mapImage( user.getAvatar() );</span>
+
+<span class="fc" id="L70">        BasicUserDTO basicUserDTO = new BasicUserDTO( id, username, createdAt, bio, avatar );</span>
+
+<span class="fc" id="L72">        return basicUserDTO;</span>
+    }
+
+    @Override
+    public List&lt;UserDTO&gt; toDTOs(Collection&lt;User&gt; users) {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if ( users == null ) {</span>
+<span class="nc" id="L78">            return null;</span>
+        }
+
+<span class="nc" id="L81">        List&lt;UserDTO&gt; list = new ArrayList&lt;UserDTO&gt;( users.size() );</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for ( User user : users ) {</span>
+<span class="nc" id="L83">            list.add( toDTO( user ) );</span>
+<span class="nc" id="L84">        }</span>
+
+<span class="nc" id="L86">        return list;</span>
     }
 
     @Override
     public User toDomain(UserDTO userDTO) {
-<span class="nc bnc" id="L68" title="All 2 branches missed.">        if ( userDTO == null ) {</span>
-<span class="nc" id="L69">            return null;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if ( userDTO == null ) {</span>
+<span class="nc" id="L92">            return null;</span>
         }
 
-<span class="nc" id="L72">        User user = new User();</span>
+<span class="nc" id="L95">        User user = new User();</span>
 
-<span class="nc bnc" id="L74" title="All 2 branches missed.">        if ( userDTO.id() != null ) {</span>
-<span class="nc" id="L75">            user.setId( userDTO.id() );</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if ( userDTO.id() != null ) {</span>
+<span class="nc" id="L98">            user.setId( userDTO.id() );</span>
         }
-<span class="nc" id="L77">        user.setUsername( userDTO.username() );</span>
-<span class="nc" id="L78">        user.setEmail( userDTO.email() );</span>
-<span class="nc" id="L79">        user.setPassword( userDTO.password() );</span>
-<span class="nc" id="L80">        user.setAvatar( userDTO.avatar() );</span>
-<span class="nc" id="L81">        List&lt;Long&gt; list = userDTO.likedComments();</span>
-<span class="nc bnc" id="L82" title="All 2 branches missed.">        if ( list != null ) {</span>
-<span class="nc" id="L83">            user.setLikedComments( new ArrayList&lt;Long&gt;( list ) );</span>
-        }
-<span class="nc" id="L85">        List&lt;String&gt; list1 = userDTO.roles();</span>
-<span class="nc bnc" id="L86" title="All 2 branches missed.">        if ( list1 != null ) {</span>
-<span class="nc" id="L87">            user.setRoles( new ArrayList&lt;String&gt;( list1 ) );</span>
+<span class="nc" id="L100">        user.setUsername( userDTO.username() );</span>
+<span class="nc" id="L101">        user.setEmail( userDTO.email() );</span>
+<span class="nc" id="L102">        user.setCreatedAt( userDTO.createdAt() );</span>
+<span class="nc" id="L103">        user.setBio( userDTO.bio() );</span>
+<span class="nc" id="L104">        user.setAvatar( mapImage( userDTO.avatar() ) );</span>
+<span class="nc" id="L105">        user.setLikedPosts( longListToPostList( userDTO.likedPosts() ) );</span>
+<span class="nc" id="L106">        List&lt;String&gt; list1 = userDTO.roles();</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if ( list1 != null ) {</span>
+<span class="nc" id="L108">            user.setRoles( new ArrayList&lt;String&gt;( list1 ) );</span>
         }
 
-<span class="nc" id="L90">        return user;</span>
+<span class="nc" id="L111">        return user;</span>
+    }
+
+    @Override
+    public User toDomain(CreateUserDTO userDTO) {
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if ( userDTO == null ) {</span>
+<span class="nc" id="L117">            return null;</span>
+        }
+
+<span class="fc" id="L120">        User user = new User();</span>
+
+<span class="fc" id="L122">        user.setUsername( userDTO.username() );</span>
+<span class="fc" id="L123">        user.setEmail( userDTO.email() );</span>
+<span class="fc" id="L124">        user.setPassword( userDTO.password() );</span>
+<span class="fc" id="L125">        user.setBio( userDTO.bio() );</span>
+
+<span class="fc" id="L127">        return user;</span>
+    }
+
+    protected List&lt;Long&gt; postListToLongList(List&lt;Post&gt; list) {
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L132">            return null;</span>
+        }
+
+<span class="fc" id="L135">        List&lt;Long&gt; list1 = new ArrayList&lt;Long&gt;( list.size() );</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        for ( Post post : list ) {</span>
+<span class="fc" id="L137">            list1.add( mapPost( post ) );</span>
+<span class="fc" id="L138">        }</span>
+
+<span class="fc" id="L140">        return list1;</span>
+    }
+
+    protected List&lt;Post&gt; longListToPostList(List&lt;Long&gt; list) {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if ( list == null ) {</span>
+<span class="nc" id="L145">            return null;</span>
+        }
+
+<span class="nc" id="L148">        List&lt;Post&gt; list1 = new ArrayList&lt;Post&gt;( list.size() );</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        for ( Long long1 : list ) {</span>
+<span class="nc" id="L150">            list1.add( mapPost( long1 ) );</span>
+<span class="nc" id="L151">        }</span>
+
+<span class="nc" id="L153">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

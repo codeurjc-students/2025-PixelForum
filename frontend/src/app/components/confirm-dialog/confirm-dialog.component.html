@@ -28,7 +28,7 @@
 			</button>
 
 			<!-- Primary Action (Confirm - Primary) -->
-			<button class="btn" [ngClass]="'btn-' + (data.color || 'primary')" (click)="onConfirm()">
+			<button class="btn" [ngClass]="'btn-' + (data.color || 'primary')" (click)="onConfirm()" id="confirm-button">
 				{{ data.confirmText || 'Confirm' }}
 			</button>
 		</div>

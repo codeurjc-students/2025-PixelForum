@@ -117,7 +117,7 @@ class ImageControllerE2ETest {
                 .when()
                 .get("/99999")
                 .then()
-                .statusCode(500);
+                .statusCode(404);
     }
 
     // ------------------- DELETE -------------------

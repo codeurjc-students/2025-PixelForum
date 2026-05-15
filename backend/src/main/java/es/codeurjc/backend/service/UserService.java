@@ -63,8 +63,7 @@ public class UserService {
 	}
 
 	public Page<BasicUserDTO> getUsers(Pageable pageable) {
-		return userRepository.findAll(pageable)
-				.map(mapper::toBasicDTO);
+		return userRepository.findAll(pageable).map(mapper::toBasicDTO);
 	}
 
 	public UserDTO getUserDetails(Long id, User currentUser) {

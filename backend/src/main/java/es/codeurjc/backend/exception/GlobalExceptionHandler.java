@@ -83,7 +83,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex, HttpServletRequest request) {
-        System.out.println(ex.getClass().getName());
 
         return buildErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,

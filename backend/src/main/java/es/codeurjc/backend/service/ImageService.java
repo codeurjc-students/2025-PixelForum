@@ -5,6 +5,8 @@ import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.ImageRepository;
 import jakarta.persistence.EntityNotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,8 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private static final long MAX_FILE_SIZE = 5242880; // 5 MB
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/gif", "image/webp");
+    private static final String IMAGE_NOT_FOUND = "Image not found";
+    private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
     public ImageService(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
@@ -30,8 +34,7 @@ public class ImageService {
 
     public byte[] getImage(Long id, Integer width, Integer height, int quality) {
         Image image = imageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Image not found"));
-
+                .orElseThrow(() -> new EntityNotFoundException(IMAGE_NOT_FOUND));
         // If no resizing is requested, return original data
         if (width == null && height == null) {
             return image.getImageData();
@@ -40,10 +43,7 @@ public class ImageService {
         try {
             return resizeImage(image.getImageData(), width, height, quality);
         } catch (IOException e) {
-            System.err.println("Error resizing imagen ID: " + id);
-            System.err.println("Content-Type: " + image.getContentType());
-            System.err.println("Image Size: " + image.getImageData().length);
-            e.printStackTrace();
+            logger.error("Error resizing image. ID: {}, Content-Type: {}, Image Size: {} bytes", id, image.getContentType(), image.getImageData().length, e);
             // If resizing fails, return original image as fallback
             return image.getImageData();
         }
@@ -123,7 +123,7 @@ public class ImageService {
     }
 
     public Image getImageById(Long id) {
-        return imageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Image not found"));
+        return imageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(IMAGE_NOT_FOUND));
     }
 
     public Image saveImage(byte[] data, String filename, String contentType, User user) {
@@ -162,7 +162,7 @@ public class ImageService {
     }
 
     public void deleteImage(Long id, User user) {
-        Image image = imageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Image not found"));
+        Image image = imageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(IMAGE_NOT_FOUND));
         if (image.getOwner().getId() != user.getId() && !user.getRoles().contains("ADMIN")) {
             throw new AccessDeniedException("You can only delete your own images");
         }

@@ -205,8 +205,9 @@ class PostUISystemTest {
     }
 
     @Test
-    @DisplayName("Edit an existing post without authorization should fail")
+    @DisplayName("User should not access edit page of another user's post")
     void editPostUnauthorizedTest() {
+        // GIVEN
         // Create post as admin
         login("admin", "admin0");
         String postUrl = createPost("Admin Post For Unauthorized Test");
@@ -214,7 +215,7 @@ class PostUISystemTest {
         // Extract postId
         String postId = postUrl.substring(postUrl.lastIndexOf("/") + 1);
 
-        // Logout
+        // Logout admin
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
         driver.manage().deleteAllCookies();
         driver.navigate().refresh();
@@ -222,24 +223,12 @@ class PostUISystemTest {
         // Login as another user
         login("martin", "user");
 
-        // Go directly to edit page
+        // WHEN
         driver.get("https://localhost:" + port + "/posts/" + postId + "/edit");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("save-post-button")));
 
-        // Try to edit
-        WebElement titleInput = driver.findElement(By.id("title"));
-        titleInput.clear();
-        titleInput.sendKeys("Attempted Edit");
-        driver.findElement(By.id("save-post-button")).click();
-
-        // Wait for error page
+        // THEN
         wait.until(ExpectedConditions.urlContains("/error"));
-        assertTrue(driver.getCurrentUrl().contains("/error"));
-
-        // Verify post content is unchanged
-        driver.get("https://localhost:" + port + "/posts/" + postId);
-        WebElement postTitle = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("post-title")));
-        assertEquals("Admin Post For Unauthorized Test", postTitle.getText(), "The post title should not have changed");
+        assertTrue(driver.getCurrentUrl().contains("/error"), "Unauthorized user should be redirected to error page");
     }
 
     @Test
@@ -263,7 +252,7 @@ class PostUISystemTest {
 
         driver.get(postUrl);
         WebElement error = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
-        assertEquals("500", error.getText(), "The post should be deleted and not accessible");
+        assertEquals("404", error.getText(), "The post should be deleted and not accessible");
     }
 
     @Test
@@ -292,7 +281,6 @@ class PostUISystemTest {
     }
 
     private int getLikes() {
-        return Integer.parseInt(
-                driver.findElement(By.cssSelector(".like-btn .count")).getText());
+        return Integer.parseInt(driver.findElement(By.cssSelector(".like-btn .count")).getText());
     }
 }
