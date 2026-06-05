@@ -2,7 +2,9 @@ package es.codeurjc.backend.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -40,7 +42,10 @@ public class Post {
     private int likes;
 
     @ManyToMany(mappedBy = "likedPosts")
-    private List<User> usersThatLiked = new ArrayList<>();
+    private Set<User> usersThatLiked = new HashSet<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public Post() {
     }
@@ -132,12 +137,20 @@ public class Post {
         this.likes = likes;
     }
 
-    public List<User> getUsersThatLiked() {
+    public Set<User> getUsersThatLiked() {
         return usersThatLiked;
     }
 
-    public void setUsersThatLiked(List<User> usersThatLiked) {
+    public void setUsersThatLiked(Set<User> usersThatLiked) {
         this.usersThatLiked = usersThatLiked;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
 }

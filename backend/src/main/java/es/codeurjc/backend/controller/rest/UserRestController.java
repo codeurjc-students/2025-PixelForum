@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.codeurjc.backend.dto.comment.CommentDTO;
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.user.BasicUserDTO;
 import es.codeurjc.backend.dto.user.ChangePasswordDTO;
@@ -121,5 +122,15 @@ public class UserRestController {
 
         Page<PostDTO> likedPosts = userService.getLikedPosts(id, currentUser, pageable);
         return ResponseEntity.ok(likedPosts);
+    }
+
+    @GetMapping("/{id}/liked-comments")
+    public ResponseEntity<Page<CommentDTO>> getLikedComments(@PathVariable Long id, Principal principal,
+            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        User currentUser = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+
+        Page<CommentDTO> likedComments = userService.getLikedComments(id, currentUser, pageable);
+        return ResponseEntity.ok(likedComments);
     }
 }

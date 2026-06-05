@@ -1,7 +1,6 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,16 +8,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
 public class PostService {
@@ -29,11 +29,13 @@ public class PostService {
 	private final PostMapper mapper;
 	private final PostRepository postRepository;
 	private final ImageRepository imageRepository;
+	private final CommentRepository commentRepository;
 
-	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository) {
+	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository, CommentRepository commentRepository) {
 		this.mapper = mapper;
 		this.postRepository = postRepository;
 		this.imageRepository = imageRepository;
+		this.commentRepository = commentRepository;
 	}
 
 	public PostDTO getPost(Long id, User user) {
@@ -193,9 +195,8 @@ public class PostService {
 		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only delete your own posts");
 		}
-		for (User userLikes : new ArrayList<>(post.getUsersThatLiked())) {
-			userLikes.getLikedPosts().remove(post);
-		}
+		postRepository.deleteLikesByPostIds(List.of(id));
+		commentRepository.deleteLikesByCommentIds(post.getComments().stream().map(comment -> comment.getId()).toList());
 		postRepository.delete(post);
 	}
 
@@ -204,8 +205,7 @@ public class PostService {
 		Post post = postRepository.findById(postId)
 				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
 
-		List<Post> likedPosts = user.getLikedPosts();
-		boolean hasLiked = likedPosts.contains(post);
+		boolean hasLiked = user.getLikedPosts().contains(post);
 		if (hasLiked) {
 			user.getLikedPosts().remove(post);
 			post.getUsersThatLiked().remove(user);

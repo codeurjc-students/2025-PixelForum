@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.backend.dto.topic.TopicDTO;
 import es.codeurjc.backend.dto.topic.TopicMapper;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.repository.TopicRepository;
-import jakarta.transaction.Transactional;
 
 @Service
 public class TopicService {

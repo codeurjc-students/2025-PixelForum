@@ -1,20 +1,16 @@
 package es.codeurjc.backend.dto.comment;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import es.codeurjc.backend.model.Comment;
-import es.codeurjc.backend.model.Post;
-import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.dto.user.BasicUserDTO;
 
 public record CommentDTO (
     Long id,
     String content,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    User author,
-    Post post,
-    Comment commentId,
+    BasicUserDTO author,
+    CommentDTO parentComment,
     Integer likes,
-    List<Long> usersThatLiked) {
+    Boolean hasUserLiked) {
 }

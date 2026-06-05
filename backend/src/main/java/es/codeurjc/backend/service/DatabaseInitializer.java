@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
@@ -20,13 +21,15 @@ public class DatabaseInitializer {
 	private final PostService postService;
 	private final UserService userService;
 	private final TopicService topicService;
+	private final CommentService commentService;
 	private final ImageService imageService;
 
 	public DatabaseInitializer(PostService postService, UserService userService, TopicService topicService,
-			ImageService imageService) {
+			CommentService commentService, ImageService imageService) {
 		this.postService = postService;
 		this.userService = userService;
 		this.topicService = topicService;
+		this.commentService = commentService;
 		this.imageService = imageService;
 	}
 
@@ -99,11 +102,37 @@ public class DatabaseInitializer {
 			postService.save(post);
 		}
 
-		addLikes(user1, List.of(post1, post3, post4));
-		addLikes(user2, List.of(post1, post2, post3, post4));
-		addLikes(user3, List.of(post1, post2, post4));
-		addLikes(user4, List.of(post1, post2, post3, post4));
-		addLikes(admin, List.of(post1));
+		Comment comment1 = new Comment("I can't wait to play GTA VI!", LocalDateTime.of(2026, 2, 23, 10, 15),
+				user2, post1);
+		commentService.save(comment1);
+		Comment comment2 = new Comment("Yeah, I'm excited too!", LocalDateTime.of(2026, 2, 23, 12, 30),
+				user1, post1);
+		commentService.save(comment2);
+		Comment comment3 = new Comment("I hope the release date rumors are true!",
+				LocalDateTime.of(2026, 2, 21, 19, 45),
+				user3, post1);
+		commentService.save(comment3);
+		Comment comment4 = new Comment("The map details sound incredible!", LocalDateTime.of(2026, 2, 3, 14, 20),
+				user2, post4);
+		commentService.save(comment4);
+
+		for (int i = 0; i < 20; i++) {
+			Comment comment = new Comment("This is a test comment " + i, LocalDateTime.of(2026, 2, 22, 10, 00 + i),
+					user2, post1);
+			commentService.save(comment);
+		}
+
+		addCommentLikes(user1, List.of(comment1, comment3, comment4));
+		addCommentLikes(user2, List.of(comment1, comment2, comment3, comment4));
+		addCommentLikes(user3, List.of(comment1, comment2, comment3));
+		addCommentLikes(user4, List.of(comment1, comment2, comment3, comment4));
+		addCommentLikes(admin, List.of(comment1));
+
+		addPostLikes(user1, List.of(post1, post2, post3, post4));
+		addPostLikes(user2, List.of(post1, post2, post3, post4));
+		addPostLikes(user3, List.of(post1, post2, post4));
+		addPostLikes(user4, List.of(post1, post2, post3, post4));
+		addPostLikes(admin, List.of(post1));
 	}
 
 	private Image uploadImage(String route, User user) throws IOException {
@@ -131,7 +160,7 @@ public class DatabaseInitializer {
 		userService.save(user);
 	}
 
-	private void addLikes(User user, List<Post> posts) {
+	private void addPostLikes(User user, List<Post> posts) {
 		for (Post post : posts) {
 			user.getLikedPosts().add(post);
 			post.getUsersThatLiked().add(user);
@@ -139,6 +168,15 @@ public class DatabaseInitializer {
 			postService.save(post);
 		}
 		userService.save(user);
+	}
+
+	private void addCommentLikes(User user, List<Comment> comments) {
+		for (Comment comment : comments) {
+			user.getLikedComments().add(comment);
+			comment.getUsersThatLiked().add(user);
+			comment.setLikes(comment.getUsersThatLiked().size());
+			commentService.save(comment);
+		}
 	}
 
 }

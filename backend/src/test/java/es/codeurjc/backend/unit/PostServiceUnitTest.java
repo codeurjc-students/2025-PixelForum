@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +20,12 @@ import org.springframework.security.access.AccessDeniedException;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.service.PostService;
@@ -35,9 +38,10 @@ import org.springframework.test.context.ActiveProfiles;
 class PostServiceUnitTest {
 
 	private PostService postService;
+	private PostMapper mapper;
 	private PostRepository postRepository;
 	private ImageRepository imageRepository;
-	private PostMapper mapper;
+	private CommentRepository commentRepository;
 
 	private Post post;
 	private PostDTO postDTO;
@@ -45,11 +49,12 @@ class PostServiceUnitTest {
 
 	@BeforeEach
 	void init() {
+		mapper = mock(PostMapper.class);
 		postRepository = mock(PostRepository.class);
 		imageRepository = mock(ImageRepository.class);
-		mapper = mock(PostMapper.class);
+		commentRepository = mock(CommentRepository.class);
 
-		postService = new PostService(mapper, postRepository, imageRepository);
+		postService = new PostService(mapper, postRepository, imageRepository, commentRepository);
 
 		user = new User();
 		user.setId(1L);
@@ -523,33 +528,21 @@ class PostServiceUnitTest {
 	}
 
 	@Test
-	@DisplayName("deletePost should delete when author")
-	void deletePostSuccessTest() {
-		// GIVEN
-		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-
-		// WHEN
-		postService.deletePost(1L, user);
-
-		// THEN
-		verify(postRepository).delete(post);
-	}
-
-	@Test
-	@DisplayName("deletePost should remove post from liked posts")
+	@DisplayName("deletePost should succed and remove likes from comments and post")
 	void deletePostShouldRemoveLikesTest() {
 		// GIVEN
-		User liker = new User();
-		liker.setLikedPosts(new ArrayList<>(List.of(post)));
-		post.setUsersThatLiked(new ArrayList<>(List.of(liker)));
+		Comment comment = new Comment();
+		comment.setId(10L);
 
+		post.setComments(List.of(comment));
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
 		// WHEN
 		postService.deletePost(1L, user);
 
 		// THEN
-		assertFalse(liker.getLikedPosts().contains(post));
+		verify(commentRepository).deleteLikesByCommentIds(List.of(10L));
+		verify(postRepository).deleteLikesByPostIds(List.of(1L));
 		verify(postRepository).delete(post);
 	}
 
@@ -602,8 +595,8 @@ class PostServiceUnitTest {
 	@DisplayName("toggleLike should add like when user has not liked the post")
 	void toggleLikeAddLikeTest() {
 		// GIVEN
-		post.setUsersThatLiked(new ArrayList<>());
-		user.setLikedPosts(new ArrayList<>());
+		post.setUsersThatLiked(new HashSet<>());
+		user.setLikedPosts(new HashSet<>());
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
@@ -623,8 +616,8 @@ class PostServiceUnitTest {
 	@DisplayName("toggleLike should remove like when user has already liked the post")
 	void toggleLikeRemoveLikeTest() {
 		// GIVEN
-		post.setUsersThatLiked(new ArrayList<>(List.of(user)));
-		user.setLikedPosts(new ArrayList<>(List.of(post)));
+		post.setUsersThatLiked(new HashSet<>(List.of(user)));
+		user.setLikedPosts(new HashSet<>(List.of(post)));
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);

@@ -2,10 +2,12 @@ package es.codeurjc.backend.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import es.codeurjc.backend.dto.comment.CommentDTO;
+import es.codeurjc.backend.dto.comment.CommentMapper;
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.dto.user.BasicUserDTO;
@@ -27,6 +31,7 @@ import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
 import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
@@ -47,6 +52,7 @@ class UserServiceUnitTest {
     private PostRepository postRepository;
     private PostMapper postMapper;
     private CommentRepository commentRepository;
+    private CommentMapper commentMapper;
     private ImageRepository imageRepository;
     private PasswordEncoder passwordEncoder;
     private UserMapper userMapper;
@@ -57,6 +63,8 @@ class UserServiceUnitTest {
     private Image image;
     private Post post;
     private PostDTO postDTO;
+    private Comment comment;
+    private CommentDTO commentDTO;
 
     @BeforeEach
     void init() {
@@ -64,12 +72,13 @@ class UserServiceUnitTest {
         postRepository = mock(PostRepository.class);
         postMapper = mock(PostMapper.class);
         commentRepository = mock(CommentRepository.class);
+        commentMapper = mock(CommentMapper.class);
         imageRepository = mock(ImageRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         userMapper = mock(UserMapper.class);
 
         userService = new UserService(userMapper, userRepository, postRepository, postMapper, commentRepository,
-                imageRepository, passwordEncoder);
+                commentMapper, imageRepository, passwordEncoder);
 
         user = new User();
         user.setId(1L);
@@ -102,10 +111,18 @@ class UserServiceUnitTest {
         post = new Post();
         post.setId(1L);
         post.setAuthor(user);
-        post.setUsersThatLiked(new ArrayList<>());
+        post.setUsersThatLiked(new HashSet<>());
 
         postDTO = new PostDTO(1L, "Test Post", "Content", LocalDateTime.now(), LocalDateTime.now(),
                 new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, List.of());
+
+        comment = new Comment();
+        comment.setId(1L);
+        comment.setAuthor(user);
+        comment.setUsersThatLiked(new HashSet<>());
+
+        commentDTO = new CommentDTO(1L, "Test comment", LocalDateTime.now(), LocalDateTime.now(),
+                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false);
     }
 
     // =============== getUser ===============
@@ -672,7 +689,7 @@ class UserServiceUnitTest {
     @DisplayName("deleteUser should delete user when user is owner")
     void deleteUserSuccessTest() {
         // GIVEN
-        user.setLikedPosts(new ArrayList<>());
+        user.setLikedPosts(new HashSet<>());
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
 
@@ -688,44 +705,61 @@ class UserServiceUnitTest {
     }
 
     @Test
-    @DisplayName("deleteUser should remove user likes from posts")
-    void deleteUserRemoveLikesTest() {
+    @DisplayName("deleteUser should delete likes from user posts")
+    void deleteUserDeleteLikesFromPostsTest() {
         // GIVEN
-        Post likedPost = new Post();
-        likedPost.setId(2L);
-        likedPost.setUsersThatLiked(new ArrayList<>(List.of(user)));
-        likedPost.setLikes(1);
-        user.setLikedPosts(new ArrayList<>(List.of(likedPost)));
+        Post post1 = new Post();
+        post1.setId(10L);
+
+        Post post2 = new Post();
+        post2.setId(20L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(postRepository.findByAuthor(user)).thenReturn(List.of());
+        when(postRepository.findByAuthor(user)).thenReturn(List.of(post1, post2));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of());
 
         // WHEN
         userService.deleteUser(1L, user);
 
         // THEN
-        assertTrue(user.getLikedPosts().isEmpty());
-        assertTrue(likedPost.getUsersThatLiked().isEmpty());
-        verify(userRepository).delete(user);
+        verify(postRepository).deleteLikesByPostIds(List.of(10L, 20L));
     }
 
     @Test
-    @DisplayName("deleteUser should remove likes on user posts")
-    void deleteUserRemoveLikesOnPostsTest() {
+    @DisplayName("deleteUser should delete likes from user comments")
+    void deleteUserDeleteLikesFromCommentsTest() {
         // GIVEN
-        post.getUsersThatLiked().add(otherUser);
-        otherUser.setLikedPosts(new ArrayList<>(List.of(post)));
-        user.setLikedPosts(new ArrayList<>());
+        Comment comment = new Comment();
+        comment.setId(30L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
+        when(postRepository.findByAuthor(user)).thenReturn(List.of());
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of(comment));
 
         // WHEN
         userService.deleteUser(1L, user);
 
         // THEN
-        assertTrue(post.getUsersThatLiked().isEmpty());
-        verify(postRepository).deleteByAuthor(user);
+        verify(commentRepository).deleteLikesByCommentIds(List.of(30L));
+    }
+
+    @Test
+    @DisplayName("deleteUser should delete likes from comments inside user posts")
+    void deleteUserDeleteLikesFromCommentsInPostsTest() {
+        // GIVEN
+        Comment comment = new Comment();
+        comment.setId(100L);
+        post.setComments(List.of(comment));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of());
+
+        // WHEN
+        userService.deleteUser(1L, user);
+
+        // THEN
+        verify(commentRepository).deleteLikesByCommentIds(List.of(100L));
     }
 
     @Test
@@ -733,7 +767,7 @@ class UserServiceUnitTest {
     void deleteUserWithAvatarTest() {
         // GIVEN
         user.setAvatar(image);
-        user.setLikedPosts(new ArrayList<>());
+        user.setLikedPosts(new HashSet<>());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
@@ -751,7 +785,7 @@ class UserServiceUnitTest {
     @DisplayName("deleteUser should allow admin to delete any user")
     void deleteUserAdminTest() {
         // GIVEN
-        user.setLikedPosts(new ArrayList<>());
+        user.setLikedPosts(new HashSet<>());
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
 
@@ -1092,5 +1126,93 @@ class UserServiceUnitTest {
         assertThrows(EntityNotFoundException.class, () -> {
             userService.getLikedPosts(999L, admin, pageable);
         });
+    }
+
+    // =============== getLikedComments ===============
+
+    @Test
+    @DisplayName("getLikedComments should return liked comments for user")
+    void getLikedCommentsSuccessTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), pageable, 1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByUsersThatLikedContains(user, pageable)).thenReturn(commentPage);
+        when(commentMapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getLikedComments(1L, user, pageable);
+
+        // THEN
+        assertEquals(1, result.getContent().size());
+        verify(userRepository).findById(1L);
+        verify(commentRepository).findByUsersThatLikedContains(user, pageable);
+        verify(commentMapper).toDTOWithLike(comment, user);
+    }
+
+    @Test
+    @DisplayName("getLikedComments should return empty page when user has no liked comments")
+    void getLikedCommentsEmptyTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByUsersThatLikedContains(user, pageable)).thenReturn(emptyPage);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getLikedComments(1L, user, pageable);
+
+        // THEN
+        assertTrue(result.isEmpty());
+        verify(commentRepository).findByUsersThatLikedContains(user, pageable);
+        verify(commentMapper, never()).toDTOWithLike(any(), any());
+    }
+
+    @Test
+    @DisplayName("getLikedComments should allow admin to view any user liked comments")
+    void getLikedCommentsAdminTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), pageable, 1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByUsersThatLikedContains(user, pageable)).thenReturn(commentPage);
+        when(commentMapper.toDTOWithLike(comment, admin)).thenReturn(commentDTO);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getLikedComments(1L, admin, pageable);
+
+        // THEN
+        assertEquals(1, result.getContent().size());
+        verify(userRepository).findById(1L);
+        verify(commentRepository).findByUsersThatLikedContains(user, pageable);
+        verify(commentMapper).toDTOWithLike(comment, admin);
+    }
+
+    @Test
+    @DisplayName("getLikedComments should throw AccessDeniedException when user is not owner or admin")
+    void getLikedCommentsAccessDeniedTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // WHEN & THEN
+        assertThrows(AccessDeniedException.class, () -> userService.getLikedComments(1L, otherUser, pageable));
+        verify(userRepository, never()).findById(anyLong());
+        verify(commentRepository, never()).findByUsersThatLikedContains(any(), any());
+    }
+
+    @Test
+    @DisplayName("getLikedComments should throw EntityNotFoundException when user not found")
+    void getLikedCommentsNotFoundTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // WHEN & THEN
+        assertThrows(EntityNotFoundException.class, () -> userService.getLikedComments(999L, admin, pageable));
+        verify(commentRepository, never()).findByUsersThatLikedContains(any(), any());
     }
 }
