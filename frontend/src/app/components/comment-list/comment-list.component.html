@@ -1,0 +1,70 @@
+<div class="comment-list-container">
+
+	<!-- New Comment Form (post-detail only) -->
+	<ng-container *ngIf="showForm">
+		<div class="new-comment-form" *ngIf="isLoggedIn">
+			<textarea class="comment-textarea" [(ngModel)]="newCommentContent" placeholder="Write a comment..." rows="3"
+				maxlength="2000" (keydown.ctrl.enter)="submitComment()"></textarea>
+			<div class="form-footer">
+				<span class="char-count">{{ newCommentContent.length }}/2000</span>
+				<button class="submit-btn" (click)="submitComment()"
+					[disabled]="!newCommentContent.trim() || isSubmitting">
+					<svg viewBox="0 0 24 24" class="btn-icon" *ngIf="!isSubmitting">
+						<path d="M22 2 11 13" />
+						<path d="m22 2-7 20-4-9-9-4 20-7z" />
+					</svg>
+					<span class="spinner" *ngIf="isSubmitting"></span>
+					{{ isSubmitting ? 'Posting...' : 'Post comment' }}
+				</button>
+			</div>
+		</div>
+		<div class="login-notice" *ngIf="!isLoggedIn" routerLink="/login">
+			<svg viewBox="0 0 24 24" class="notice-icon">
+				<path
+					d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" />
+			</svg>
+			<p>Log in to leave a comment</p>
+		</div>
+	</ng-container>
+
+	<!-- Loading State -->
+	<div *ngIf="isLoading" class="state-container">
+		<div class="loading-spinner">
+			<div class="spinner"></div>
+			<p>Loading comments...</p>
+		</div>
+	</div>
+
+	<!-- Comments Feed -->
+	<div *ngIf="!isLoading" class="comments-feed">
+		<div *ngIf="comments.length === 0" class="empty-state">
+			<svg viewBox="0 0 24 24" class="empty-icon">
+				<path
+					d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" />
+			</svg>
+			<p>{{ emptyMessage }}</p>
+		</div>
+
+		<app-comment *ngFor="let comment of comments" [comment]="comment" [postId]="postId ?? comment.post"
+			[readonly]="mode !== 'post'" (commentDeleted)="onCommentDeleted($event)"
+			(commentUpdated)="onCommentUpdated($event)" (commentUnliked)="onCommentUnliked($event)">
+		</app-comment>
+	</div>
+
+	<!-- Load More -->
+	<div *ngIf="hasMorePages" class="load-more-container">
+		<button class="btn" (click)="loadMoreComments()" [disabled]="isLoadingMore" type="button">
+			<span *ngIf="!isLoadingMore">Load more comments</span>
+			<span *ngIf="isLoadingMore">
+				<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+				Loading...
+			</span>
+		</button>
+	</div>
+
+	<!-- Pagination Info -->
+	<div *ngIf="!isLoading && totalElements > 0" class="pagination-info">
+		<small class="text-muted">Showing {{ comments.length }} of {{ totalElements }} comments</small>
+	</div>
+
+</div>

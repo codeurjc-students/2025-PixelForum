@@ -133,4 +133,16 @@ public class UserRestController {
         Page<CommentDTO> likedComments = userService.getLikedComments(id, currentUser, pageable);
         return ResponseEntity.ok(likedComments);
     }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<Page<CommentDTO>> getUserComments(@PathVariable Long id,
+            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            Principal principal) {
+        User currentUser = null;
+        if (principal != null) {
+            currentUser = userService.findByUsername(principal.getName()).orElse(null);
+        }
+        Page<CommentDTO> comments = userService.getUserComments(id, currentUser, pageable);
+        return ResponseEntity.ok(comments);
+    }
 }

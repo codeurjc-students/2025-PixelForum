@@ -33,6 +33,7 @@ public interface CommentMapper {
                 dto.author(),
                 dto.parentComment(),
                 dto.likes(),
-                hasLiked);
+                hasLiked,
+                dto.post());
     }
 }

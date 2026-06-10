@@ -16,5 +16,6 @@ public record PostDTO (
     Topic topic,
     Integer likes,
     Boolean hasUserLiked,
+    Integer commentsCount,
     List<Long> images) {
 }

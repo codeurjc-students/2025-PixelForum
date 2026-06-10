@@ -273,4 +273,11 @@ public class UserService {
 				.map(comment -> commentMapper.toDTOWithLike(comment, currentUser));
 	}
 
+	public Page<CommentDTO> getUserComments(Long id, User currentUser, Pageable pageable) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		return commentRepository.findByAuthor(user, pageable)
+				.map(comment -> commentMapper.toDTOWithLike(comment, currentUser));
+	}
+
 }

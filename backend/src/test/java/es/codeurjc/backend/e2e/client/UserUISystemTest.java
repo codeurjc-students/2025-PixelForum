@@ -136,7 +136,7 @@ class UserUISystemTest {
         // THEN - Likes tab should be visible
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".tabs-header")));
         WebElement likesTabs = driver.findElements(By.cssSelector(".tab-btn")).stream()
-                .filter(tab -> tab.getText().contains("Likes")).findFirst().orElse(null);
+                .filter(tab -> tab.getText().contains("Liked Posts")).findFirst().orElse(null);
 
         assertNotNull(likesTabs, "Likes tab should be visible for own profile");
     }

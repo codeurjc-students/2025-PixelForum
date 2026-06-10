@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -114,7 +115,7 @@ class UserServiceUnitTest {
         post.setUsersThatLiked(new HashSet<>());
 
         postDTO = new PostDTO(1L, "Test Post", "Content", LocalDateTime.now(), LocalDateTime.now(),
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, List.of());
+                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1, List.of());
 
         comment = new Comment();
         comment.setId(1L);
@@ -122,7 +123,7 @@ class UserServiceUnitTest {
         comment.setUsersThatLiked(new HashSet<>());
 
         commentDTO = new CommentDTO(1L, "Test comment", LocalDateTime.now(), LocalDateTime.now(),
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false);
+                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1L);
     }
 
     // =============== getUser ===============
@@ -763,6 +764,29 @@ class UserServiceUnitTest {
     }
 
     @Test
+    @DisplayName("deleteUser should remove likes from both own comments and comments in posts")
+    void deleteUserMixedCommentLikesTest() {
+        // GIVEN
+        Comment postComment = new Comment();
+        postComment.setId(10L);
+
+        Comment ownComment = new Comment();
+        ownComment.setId(20L);
+
+        post.setComments(List.of(postComment));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of(ownComment));
+
+        // WHEN
+        userService.deleteUser(1L, user);
+
+        // THEN
+        verify(commentRepository)
+                .deleteLikesByCommentIds(argThat(ids -> ids.contains(10L) && ids.contains(20L) && ids.size() == 2));
+    }
+
+    @Test
     @DisplayName("deleteUser should delete user avatar if exists")
     void deleteUserWithAvatarTest() {
         // GIVEN
@@ -935,6 +959,7 @@ class UserServiceUnitTest {
         // THEN
         assertNull(result);
         verify(imageRepository).delete(image);
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -1214,5 +1239,59 @@ class UserServiceUnitTest {
         // WHEN & THEN
         assertThrows(EntityNotFoundException.class, () -> userService.getLikedComments(999L, admin, pageable));
         verify(commentRepository, never()).findByUsersThatLikedContains(any(), any());
+    }
+
+    // =============== getUserComments ===============
+
+    @Test
+    @DisplayName("getUserComments should return user comments")
+    void getUserCommentsSuccessTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), pageable, 1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByAuthor(user, pageable)).thenReturn(commentPage);
+        when(commentMapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getUserComments(1L, user, pageable);
+
+        // THEN
+        assertEquals(1, result.getContent().size());
+        verify(userRepository).findById(1L);
+        verify(commentRepository).findByAuthor(user, pageable);
+        verify(commentMapper).toDTOWithLike(comment, user);
+    }
+
+    @Test
+    @DisplayName("getUserComments should throw EntityNotFoundException when user not found")
+    void getUserCommentsNotFoundTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // WHEN & THEN
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserComments(999L, user, pageable));
+        verify(commentRepository, never()).findByAuthor(any(), any());
+    }
+
+    @Test
+    @DisplayName("getUserComments should return empty page when user has no comments")
+    void getUserCommentsEmptyTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByAuthor(user, pageable)).thenReturn(emptyPage);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getUserComments(1L, user, pageable);
+
+        // THEN
+        assertTrue(result.isEmpty());
+        verify(commentRepository).findByAuthor(user, pageable);
+        verify(commentMapper, never()).toDTOWithLike(any(), any());
     }
 }

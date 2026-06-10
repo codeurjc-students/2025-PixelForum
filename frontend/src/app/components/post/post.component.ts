@@ -120,7 +120,7 @@ export class PostComponent implements OnInit {
 
 	goToComments(): void {
 		if (this.post.id && this.mode === 'list') {
-			this.router.navigate(['/posts', this.post.id], { fragment: 'comments' });
+			this.router.navigate(['/posts', this.post.id], { state: { scrollToComments: true } });
 		}
 	}
 

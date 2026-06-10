@@ -12,5 +12,6 @@ public record CommentDTO (
     BasicUserDTO author,
     CommentDTO parentComment,
     Integer likes,
-    Boolean hasUserLiked) {
+    Boolean hasUserLiked,
+    Long post) {
 }
