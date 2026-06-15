@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.codeurjc.backend.dto.comment.CommentDTO;
+import es.codeurjc.backend.dto.comment.CommentMapper;
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.dto.user.BasicUserDTO;
@@ -20,6 +24,7 @@ import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
 import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
@@ -34,230 +39,246 @@ public class UserService {
 
 	private static final String USER_NOT_FOUND = &quot;User not found&quot;;
 	private static final String ADMIN = &quot;ADMIN&quot;;
-<span class="fc" id="L37">	private static final Set&lt;String&gt; ALLOWED_AVATAR_TYPES = Set.of(&quot;image/jpeg&quot;, &quot;image/png&quot;);</span>
+<span class="fc" id="L42">	private static final Set&lt;String&gt; ALLOWED_AVATAR_TYPES = Set.of(&quot;image/jpeg&quot;, &quot;image/png&quot;);</span>
 
 	private final UserMapper mapper;
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final PostMapper postMapper;
 	private final CommentRepository commentRepository;
+	private final CommentMapper commentMapper;
 	private final ImageRepository imageRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository,
-			PostMapper postMapper, CommentRepository commentRepository, ImageRepository imageRepository,
-<span class="fc" id="L49">			PasswordEncoder passwordEncoder) {</span>
-<span class="fc" id="L50">		this.mapper = mapper;</span>
-<span class="fc" id="L51">		this.userRepository = userRepository;</span>
-<span class="fc" id="L52">		this.postRepository = postRepository;</span>
-<span class="fc" id="L53">		this.postMapper = postMapper;</span>
-<span class="fc" id="L54">		this.commentRepository = commentRepository;</span>
-<span class="fc" id="L55">		this.imageRepository = imageRepository;</span>
-<span class="fc" id="L56">		this.passwordEncoder = passwordEncoder;</span>
-<span class="fc" id="L57">	}</span>
+			PostMapper postMapper, CommentRepository commentRepository, CommentMapper commentMapper,
+<span class="fc" id="L55">			ImageRepository imageRepository, PasswordEncoder passwordEncoder) {</span>
+<span class="fc" id="L56">		this.mapper = mapper;</span>
+<span class="fc" id="L57">		this.userRepository = userRepository;</span>
+<span class="fc" id="L58">		this.postRepository = postRepository;</span>
+<span class="fc" id="L59">		this.postMapper = postMapper;</span>
+<span class="fc" id="L60">		this.commentRepository = commentRepository;</span>
+<span class="fc" id="L61">		this.commentMapper = commentMapper;</span>
+<span class="fc" id="L62">		this.imageRepository = imageRepository;</span>
+<span class="fc" id="L63">		this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L64">	}</span>
 
 	public BasicUserDTO getUser(Long id) {
-<span class="fc" id="L60">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L61">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
-<span class="fc" id="L62">		return mapper.toBasicDTO(user);</span>
+<span class="fc" id="L67">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L68">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L69">		return mapper.toBasicDTO(user);</span>
 	}
 
 	public Page&lt;BasicUserDTO&gt; getUsers(Pageable pageable) {
-<span class="fc" id="L66">		return userRepository.findAll(pageable).map(mapper::toBasicDTO);</span>
+<span class="fc" id="L73">		return userRepository.findAll(pageable).map(mapper::toBasicDTO);</span>
 	}
 
 	public UserDTO getUserDetails(Long id, User currentUser) {
-<span class="fc bfc" id="L70" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L71">			throw new AccessDeniedException(&quot;You can only view your own secret details&quot;);</span>
+<span class="fc bfc" id="L77" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L78">			throw new AccessDeniedException(&quot;You can only view your own secret details&quot;);</span>
 		}
-<span class="fc" id="L73">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L74">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
-<span class="fc" id="L75">		return mapper.toDTO(user);</span>
+<span class="fc" id="L80">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L81">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L82">		return mapper.toDTO(user);</span>
 	}
 
 	public Optional&lt;User&gt; findByUsername(String username) {
-<span class="fc" id="L79">		return userRepository.findByUsername(username);</span>
+<span class="fc" id="L86">		return userRepository.findByUsername(username);</span>
 	}
 
 	public User addUser(User user) {
-<span class="fc" id="L83">		String password = user.getPassword();</span>
-<span class="fc" id="L84">		String encodedPassword = passwordEncoder.encode(password);</span>
-<span class="fc" id="L85">		user.setPassword(encodedPassword);</span>
-<span class="fc bfc" id="L86" title="All 2 branches covered.">		if (user.getUsername().equals(&quot;admin&quot;)) {</span>
-<span class="fc" id="L87">			user.setRoles(List.of(&quot;USER&quot;, ADMIN));</span>
+<span class="fc" id="L90">		String password = user.getPassword();</span>
+<span class="fc" id="L91">		String encodedPassword = passwordEncoder.encode(password);</span>
+<span class="fc" id="L92">		user.setPassword(encodedPassword);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">		if (user.getUsername().equals(&quot;admin&quot;)) {</span>
+<span class="fc" id="L94">			user.setRoles(List.of(&quot;USER&quot;, ADMIN));</span>
 		} else {
-<span class="fc" id="L89">			user.setRoles(List.of(&quot;USER&quot;));</span>
+<span class="fc" id="L96">			user.setRoles(List.of(&quot;USER&quot;));</span>
 		}
-<span class="fc" id="L91">		return userRepository.save(user);</span>
+<span class="fc" id="L98">		return userRepository.save(user);</span>
 	}
 
 	public User save(User user) {
-<span class="fc" id="L95">		return userRepository.save(user);</span>
+<span class="fc" id="L102">		return userRepository.save(user);</span>
 	}
 
 	public UserDTO createUser(CreateUserDTO userDTO) {
-<span class="fc bfc" id="L99" title="All 2 branches covered.">		if (userRepository.findByUsername(userDTO.username()).isPresent()) {</span>
-<span class="fc" id="L100">			throw new IllegalArgumentException(&quot;Username already taken&quot;);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">		if (userRepository.findByUsername(userDTO.username()).isPresent()) {</span>
+<span class="fc" id="L107">			throw new IllegalArgumentException(&quot;Username already taken&quot;);</span>
 		}
-<span class="fc bfc" id="L102" title="All 2 branches covered.">		if (userRepository.findByEmail(userDTO.email()).isPresent()) {</span>
-<span class="fc" id="L103">			throw new IllegalArgumentException(&quot;Email already taken&quot;);</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">		if (userRepository.findByEmail(userDTO.email()).isPresent()) {</span>
+<span class="fc" id="L110">			throw new IllegalArgumentException(&quot;Email already taken&quot;);</span>
 		}
-<span class="fc" id="L105">		User user = mapper.toDomain(userDTO);</span>
+<span class="fc" id="L112">		User user = mapper.toDomain(userDTO);</span>
 
-<span class="fc" id="L107">		user.setPassword(passwordEncoder.encode(user.getPassword()));</span>
-<span class="fc" id="L108">		user.setCreatedAt(LocalDateTime.now());</span>
-<span class="fc" id="L109">		user.setRoles(List.of(&quot;USER&quot;));</span>
+<span class="fc" id="L114">		user.setPassword(passwordEncoder.encode(user.getPassword()));</span>
+<span class="fc" id="L115">		user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));</span>
+<span class="fc" id="L116">		user.setRoles(List.of(&quot;USER&quot;));</span>
 
-<span class="fc" id="L111">		return mapper.toDTO(userRepository.save(user));</span>
+<span class="fc" id="L118">		return mapper.toDTO(userRepository.save(user));</span>
 	}
 
 	@Transactional
 	public UserDTO updateUser(Long id, CreateUserDTO userDTO, User currentUser) {
-<span class="fc bfc" id="L116" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L117">			throw new AccessDeniedException(&quot;You can only edit your own profile&quot;);</span>
+<span class="fc bfc" id="L123" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L124">			throw new AccessDeniedException(&quot;You can only edit your own profile&quot;);</span>
 		}
-<span class="fc" id="L119">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L120">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L126">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L127">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
 
 		// USERNAME
-<span class="fc bfc" id="L123" title="All 4 branches covered.">		if (userDTO.username() != null &amp;&amp; !user.getUsername().equals(userDTO.username())) {</span>
-<span class="fc bfc" id="L124" title="All 2 branches covered.">			if (userRepository.findByUsername(userDTO.username()).isPresent()) {</span>
-<span class="fc" id="L125">				throw new IllegalArgumentException(&quot;Username already taken&quot;);</span>
+<span class="fc bfc" id="L130" title="All 4 branches covered.">		if (userDTO.username() != null &amp;&amp; !user.getUsername().equals(userDTO.username())) {</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">			if (userRepository.findByUsername(userDTO.username()).isPresent()) {</span>
+<span class="fc" id="L132">				throw new IllegalArgumentException(&quot;Username already taken&quot;);</span>
 			}
-<span class="fc" id="L127">			user.setUsername(userDTO.username());</span>
+<span class="fc" id="L134">			user.setUsername(userDTO.username());</span>
 		}
 
 		// EMAIL
-<span class="fc bfc" id="L131" title="All 4 branches covered.">		if (userDTO.email() != null &amp;&amp; !user.getEmail().equals(userDTO.email())) {</span>
-<span class="fc bfc" id="L132" title="All 2 branches covered.">			if (userRepository.findByEmail(userDTO.email()).isPresent()) {</span>
-<span class="fc" id="L133">				throw new IllegalArgumentException(&quot;Email already taken&quot;);</span>
+<span class="fc bfc" id="L138" title="All 4 branches covered.">		if (userDTO.email() != null &amp;&amp; !user.getEmail().equals(userDTO.email())) {</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">			if (userRepository.findByEmail(userDTO.email()).isPresent()) {</span>
+<span class="fc" id="L140">				throw new IllegalArgumentException(&quot;Email already taken&quot;);</span>
 			}
-<span class="fc" id="L135">			user.setEmail(userDTO.email());</span>
+<span class="fc" id="L142">			user.setEmail(userDTO.email());</span>
 		}
 
 		// BIO
-<span class="fc bfc" id="L139" title="All 2 branches covered.">		if (userDTO.bio() != null) {</span>
-<span class="fc" id="L140">			user.setBio(userDTO.bio());</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">		if (userDTO.bio() != null) {</span>
+<span class="fc" id="L147">			user.setBio(userDTO.bio());</span>
 		}
 
-<span class="fc" id="L143">		return mapper.toDTO(userRepository.save(user));</span>
+<span class="fc" id="L150">		return mapper.toDTO(userRepository.save(user));</span>
 	}
 
 	@Transactional
 	public void changePassword(Long id, ChangePasswordDTO dto, User currentUser) {
-<span class="fc bfc" id="L148" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L149">			throw new AccessDeniedException(&quot;You can only change your own password&quot;);</span>
+<span class="fc bfc" id="L155" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L156">			throw new AccessDeniedException(&quot;You can only change your own password&quot;);</span>
 		}
-<span class="fc" id="L151">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L152">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L158">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L159">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
 
-<span class="fc bfc" id="L154" title="All 2 branches covered.">		if (!passwordEncoder.matches(dto.oldPassword(), user.getPassword())) {</span>
-<span class="fc" id="L155">			throw new IllegalArgumentException(&quot;Invalid current password&quot;);</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">		if (!passwordEncoder.matches(dto.oldPassword(), user.getPassword())) {</span>
+<span class="fc" id="L162">			throw new IllegalArgumentException(&quot;Invalid current password&quot;);</span>
 		}
 
-<span class="fc" id="L158">		user.setPassword(passwordEncoder.encode(dto.newPassword()));</span>
-<span class="fc" id="L159">	}</span>
+<span class="fc" id="L165">		user.setPassword(passwordEncoder.encode(dto.newPassword()));</span>
+<span class="fc" id="L166">	}</span>
 
 	@Transactional
 	public void deleteUser(Long id, User currentUser) {
-<span class="fc bfc" id="L163" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L164">			throw new AccessDeniedException(&quot;You can only delete your own account&quot;);</span>
+<span class="fc bfc" id="L170" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L171">			throw new AccessDeniedException(&quot;You can only delete your own account&quot;);</span>
 		}
-<span class="fc" id="L166">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L167">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L173">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L174">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
 
-<span class="fc" id="L169">		commentRepository.deleteByAuthor(user);</span>
+<span class="fc" id="L176">		removeLikes(user);</span>
+<span class="fc" id="L177">		commentRepository.deleteByAuthor(user);</span>
+<span class="fc" id="L178">		postRepository.deleteByAuthor(user);</span>
 
-		// Remove likes made by this user
-<span class="fc bfc" id="L172" title="All 2 branches covered.">		for (Post likedPost : new ArrayList&lt;&gt;(user.getLikedPosts())) {</span>
-<span class="fc" id="L173">			likedPost.getUsersThatLiked().remove(user);</span>
-<span class="fc" id="L174">			likedPost.setLikes(likedPost.getUsersThatLiked().size());</span>
-<span class="fc" id="L175">		}</span>
-<span class="fc" id="L176">		user.getLikedPosts().clear();</span>
-
-		// Remove likes on posts authored by this user
-<span class="fc" id="L179">		List&lt;Post&gt; posts = postRepository.findByAuthor(user);</span>
-<span class="fc bfc" id="L180" title="All 2 branches covered.">		for (Post post : posts) {</span>
-<span class="fc bfc" id="L181" title="All 2 branches covered.">			for (User u : post.getUsersThatLiked()) {</span>
-<span class="fc" id="L182">				u.getLikedPosts().remove(post);</span>
-<span class="fc" id="L183">			}</span>
-<span class="fc" id="L184">			post.getUsersThatLiked().clear();</span>
-<span class="fc" id="L185">		}</span>
-<span class="fc" id="L186">		postRepository.deleteByAuthor(user);</span>
-
-<span class="fc bfc" id="L188" title="All 2 branches covered.">		if (user.getAvatar() != null) {</span>
-<span class="fc" id="L189">			Image avatar = user.getAvatar();</span>
-<span class="fc" id="L190">			user.setAvatar(null);</span>
-<span class="fc" id="L191">			imageRepository.delete(avatar);</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">		if (user.getAvatar() != null) {</span>
+<span class="fc" id="L181">			Image avatar = user.getAvatar();</span>
+<span class="fc" id="L182">			user.setAvatar(null);</span>
+<span class="fc" id="L183">			imageRepository.delete(avatar);</span>
 		}
 
-<span class="fc" id="L194">		userRepository.delete(user);</span>
-<span class="fc" id="L195">	}</span>
+<span class="fc" id="L186">		userRepository.delete(user);</span>
+<span class="fc" id="L187">	}</span>
+
+	private void removeLikes(User user) {
+<span class="fc" id="L190">		List&lt;Post&gt; posts = postRepository.findByAuthor(user);</span>
+<span class="fc" id="L191">		List&lt;Long&gt; postIds = posts.stream().map(Post::getId).toList();</span>
+<span class="fc" id="L192">		postRepository.deleteLikesByPostIds(postIds);</span>
+
+<span class="fc" id="L194">		List&lt;Comment&gt; comments = commentRepository.findByAuthor(user);</span>
+<span class="fc" id="L195">		Set&lt;Long&gt; commentIds = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L196">		commentIds.addAll(posts.stream().flatMap(p -&gt; p.getComments().stream()).map(Comment::getId).toList());</span>
+<span class="fc" id="L197">		commentIds.addAll(comments.stream().map(Comment::getId).toList());</span>
+<span class="fc" id="L198">		commentRepository.deleteLikesByCommentIds(new ArrayList&lt;&gt;(commentIds));</span>
+<span class="fc" id="L199">	}</span>
 
 	@Transactional
 	public UserDTO setProfileImage(Long id, Long imageId, User currentUser) {
-<span class="fc bfc" id="L199" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L200">			throw new AccessDeniedException(&quot;You can only set your own profile image&quot;);</span>
+<span class="fc bfc" id="L203" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L204">			throw new AccessDeniedException(&quot;You can only set your own profile image&quot;);</span>
 		}
-<span class="fc" id="L202">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L203">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L206">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L207">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
 
-<span class="fc" id="L205">		Image image = imageRepository.findById(imageId)</span>
-<span class="fc" id="L206">				.orElseThrow(() -&gt; new EntityNotFoundException(&quot;Image not found&quot;));</span>
+<span class="fc" id="L209">		Image image = imageRepository.findById(imageId)</span>
+<span class="fc" id="L210">				.orElseThrow(() -&gt; new EntityNotFoundException(&quot;Image not found&quot;));</span>
 
 		// Validate ownership of the image
-<span class="fc bfc" id="L209" title="All 4 branches covered.">		if (image.getOwner().getId() != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L210">			throw new AccessDeniedException(&quot;You can only set your own images as profile picture&quot;);</span>
+<span class="fc bfc" id="L213" title="All 4 branches covered.">		if (image.getOwner().getId() != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L214">			throw new AccessDeniedException(&quot;You can only set your own images as profile picture&quot;);</span>
 		}
 
-<span class="fc bfc" id="L213" title="All 2 branches covered.">		if (image.getPost() != null) {</span>
-<span class="fc" id="L214">			throw new IllegalArgumentException(&quot;Image is associated with a post and cannot be used as profile picture&quot;);</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">		if (image.getPost() != null) {</span>
+<span class="fc" id="L218">			throw new IllegalArgumentException(&quot;Image is associated with a post and cannot be used as profile picture&quot;);</span>
 		}
 
 		// Validate image type
-<span class="fc bfc" id="L218" title="All 2 branches covered.">		if (!ALLOWED_AVATAR_TYPES.contains(image.getContentType())) {</span>
-<span class="fc" id="L219">			imageRepository.delete(image);</span>
-<span class="fc" id="L220">			return null;</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">		if (!ALLOWED_AVATAR_TYPES.contains(image.getContentType())) {</span>
+<span class="fc" id="L223">			imageRepository.delete(image);</span>
+<span class="fc" id="L224">			return null;</span>
 		}
 
 		// Remove old avatar if exists
-<span class="fc bfc" id="L224" title="All 2 branches covered.">		if (user.getAvatar() != null) {</span>
-<span class="fc" id="L225">			Image oldAvatar = user.getAvatar();</span>
-<span class="fc" id="L226">			user.setAvatar(null);</span>
-<span class="fc" id="L227">			imageRepository.delete(oldAvatar);</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">		if (user.getAvatar() != null) {</span>
+<span class="fc" id="L229">			Image oldAvatar = user.getAvatar();</span>
+<span class="fc" id="L230">			user.setAvatar(null);</span>
+<span class="fc" id="L231">			imageRepository.delete(oldAvatar);</span>
 		}
 
 		// Set new avatar
-<span class="fc" id="L231">		user.setAvatar(image);</span>
-<span class="fc" id="L232">		image.setOwner(user);</span>
-<span class="fc" id="L233">		userRepository.save(user);</span>
-<span class="fc" id="L234">		return mapper.toDTO(user);</span>
+<span class="fc" id="L235">		user.setAvatar(image);</span>
+<span class="fc" id="L236">		image.setOwner(user);</span>
+<span class="fc" id="L237">		userRepository.save(user);</span>
+<span class="fc" id="L238">		return mapper.toDTO(user);</span>
 	}
 
 	@Transactional
 	public void removeProfileImage(Long id, User currentUser) {
-<span class="fc bfc" id="L239" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L240">			throw new AccessDeniedException(&quot;You can only remove your own profile image&quot;);</span>
+<span class="fc bfc" id="L243" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L244">			throw new AccessDeniedException(&quot;You can only remove your own profile image&quot;);</span>
 		}
-<span class="fc" id="L242">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L243">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L246">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L247">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
 
-<span class="fc bfc" id="L245" title="All 2 branches covered.">		if (user.getAvatar() != null) {</span>
-<span class="fc" id="L246">			Image avatar = user.getAvatar();</span>
-<span class="fc" id="L247">			user.setAvatar(null);</span>
-<span class="fc" id="L248">			imageRepository.delete(avatar);</span>
-<span class="fc" id="L249">			userRepository.save(user);</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">		if (user.getAvatar() != null) {</span>
+<span class="fc" id="L250">			Image avatar = user.getAvatar();</span>
+<span class="fc" id="L251">			user.setAvatar(null);</span>
+<span class="fc" id="L252">			imageRepository.delete(avatar);</span>
+<span class="fc" id="L253">			userRepository.save(user);</span>
 		}
-<span class="fc" id="L251">	}</span>
+<span class="fc" id="L255">	}</span>
 
 	public Page&lt;PostDTO&gt; getLikedPosts(Long id, User currentUser, Pageable pageable) {
-<span class="fc bfc" id="L254" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L255">			throw new AccessDeniedException(&quot;You can only view your own liked posts&quot;);</span>
+<span class="fc bfc" id="L258" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L259">			throw new AccessDeniedException(&quot;You can only view your own liked posts&quot;);</span>
 		}
-<span class="fc" id="L257">		User user = userRepository.findById(id)</span>
-<span class="fc" id="L258">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
-<span class="fc" id="L259">		return postRepository.findByUsersThatLikedContains(user, pageable)</span>
-<span class="fc" id="L260">				.map(post -&gt; postMapper.toDTOWithLike(post, currentUser));</span>
+<span class="fc" id="L261">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L262">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L263">		return postRepository.findByUsersThatLikedContains(user, pageable)</span>
+<span class="fc" id="L264">				.map(post -&gt; postMapper.toDTOWithLike(post, currentUser));</span>
+	}
+
+	public Page&lt;CommentDTO&gt; getLikedComments(Long id, User currentUser, Pageable pageable) {
+<span class="fc bfc" id="L268" title="All 4 branches covered.">		if (id != currentUser.getId() &amp;&amp; !currentUser.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L269">			throw new AccessDeniedException(&quot;You can only view your own liked comments&quot;);</span>
+		}
+<span class="fc" id="L271">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L272">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L273">		return commentRepository.findByUsersThatLikedContains(user, pageable)</span>
+<span class="fc" id="L274">				.map(comment -&gt; commentMapper.toDTOWithLike(comment, currentUser));</span>
+	}
+
+	public Page&lt;CommentDTO&gt; getUserComments(Long id, User currentUser, Pageable pageable) {
+<span class="fc" id="L278">		User user = userRepository.findById(id)</span>
+<span class="fc" id="L279">				.orElseThrow(() -&gt; new EntityNotFoundException(USER_NOT_FOUND));</span>
+<span class="fc" id="L280">		return commentRepository.findByAuthor(user, pageable)</span>
+<span class="fc" id="L281">				.map(comment -&gt; commentMapper.toDTOWithLike(comment, currentUser));</span>
 	}
 
 }

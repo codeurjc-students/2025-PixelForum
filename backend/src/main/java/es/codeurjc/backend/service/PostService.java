@@ -1,6 +1,7 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
@@ -31,7 +33,8 @@ public class PostService {
 	private final ImageRepository imageRepository;
 	private final CommentRepository commentRepository;
 
-	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository, CommentRepository commentRepository) {
+	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository,
+			CommentRepository commentRepository) {
 		this.mapper = mapper;
 		this.postRepository = postRepository;
 		this.imageRepository = imageRepository;
@@ -66,8 +69,8 @@ public class PostService {
 
 	public PostDTO createPost(PostDTO postDTO, User user) {
 		Post post = mapper.toDomain(postDTO);
-		post.setCreatedAt(LocalDateTime.now());
-		post.setUpdatedAt(LocalDateTime.now());
+		post.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		post.setLikes(0);
 		post.setAuthor(user);
 
@@ -101,7 +104,7 @@ public class PostService {
 		post.setTitle(postDTO.title());
 		post.setContent(postDTO.content());
 		post.setTopic(postDTO.topic());
-		post.setUpdatedAt(LocalDateTime.now());
+		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
 		Post updatedPost = postRepository.save(post);
 		return toDTO(updatedPost, user);
@@ -144,8 +147,7 @@ public class PostService {
 	}
 
 	private void validateOwnership(Image img, Post post, User user) {
-		if (img.getOwner().getId() != user.getId() && user.getId() != post.getAuthor().getId()
-				&& !user.getRoles().contains(ADMIN)) {
+		if (img.getOwner().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only add your own images to the post");
 		}
 		if (img.getPost() != null && img.getPost().getId() != post.getId()) {
@@ -196,7 +198,7 @@ public class PostService {
 			throw new AccessDeniedException("You can only delete your own posts");
 		}
 		postRepository.deleteLikesByPostIds(List.of(id));
-		commentRepository.deleteLikesByCommentIds(post.getComments().stream().map(comment -> comment.getId()).toList());
+		commentRepository.deleteLikesByCommentIds(post.getComments().stream().map(Comment::getId).toList());
 		postRepository.delete(post);
 	}
 

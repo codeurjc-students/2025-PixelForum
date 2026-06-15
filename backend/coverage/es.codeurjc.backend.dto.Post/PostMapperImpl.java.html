@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-05-15T17:11:26+0200&quot;,
+    date = &quot;2026-06-15T13:18:55+0200&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
@@ -51,74 +51,75 @@ import org.springframework.stereotype.Component;
 <span class="fc" id="L51">        images = imageListToLongList( post.getImages() );</span>
 
 <span class="fc" id="L53">        Boolean hasUserLiked = null;</span>
+<span class="fc" id="L54">        Integer commentsCount = post.getComments().size();</span>
 
-<span class="fc" id="L55">        PostDTO postDTO = new PostDTO( id, title, content, createdAt, updatedAt, author, topic, likes, hasUserLiked, images );</span>
+<span class="fc" id="L56">        PostDTO postDTO = new PostDTO( id, title, content, createdAt, updatedAt, author, topic, likes, hasUserLiked, commentsCount, images );</span>
 
-<span class="fc" id="L57">        return postDTO;</span>
+<span class="fc" id="L58">        return postDTO;</span>
     }
 
     @Override
     public List&lt;PostDTO&gt; toDTOs(Collection&lt;Post&gt; posts) {
-<span class="nc bnc" id="L62" title="All 2 branches missed.">        if ( posts == null ) {</span>
-<span class="nc" id="L63">            return null;</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if ( posts == null ) {</span>
+<span class="nc" id="L64">            return null;</span>
         }
 
-<span class="nc" id="L66">        List&lt;PostDTO&gt; list = new ArrayList&lt;PostDTO&gt;( posts.size() );</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        for ( Post post : posts ) {</span>
-<span class="nc" id="L68">            list.add( toDTO( post ) );</span>
-<span class="nc" id="L69">        }</span>
+<span class="nc" id="L67">        List&lt;PostDTO&gt; list = new ArrayList&lt;PostDTO&gt;( posts.size() );</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        for ( Post post : posts ) {</span>
+<span class="nc" id="L69">            list.add( toDTO( post ) );</span>
+<span class="nc" id="L70">        }</span>
 
-<span class="nc" id="L71">        return list;</span>
+<span class="nc" id="L72">        return list;</span>
     }
 
     @Override
     public Post toDomain(PostDTO postDTO) {
-<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if ( postDTO == null ) {</span>
-<span class="nc" id="L77">            return null;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if ( postDTO == null ) {</span>
+<span class="nc" id="L78">            return null;</span>
         }
 
-<span class="fc" id="L80">        Post post = new Post();</span>
+<span class="fc" id="L81">        Post post = new Post();</span>
 
-<span class="fc bfc" id="L82" title="All 2 branches covered.">        if ( postDTO.id() != null ) {</span>
-<span class="fc" id="L83">            post.setId( postDTO.id() );</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if ( postDTO.id() != null ) {</span>
+<span class="fc" id="L84">            post.setId( postDTO.id() );</span>
         }
-<span class="fc" id="L85">        post.setTitle( postDTO.title() );</span>
-<span class="fc" id="L86">        post.setContent( postDTO.content() );</span>
-<span class="fc" id="L87">        post.setCreatedAt( postDTO.createdAt() );</span>
-<span class="fc" id="L88">        post.setUpdatedAt( postDTO.updatedAt() );</span>
-<span class="fc" id="L89">        post.setImages( longListToImageList( postDTO.images() ) );</span>
-<span class="fc" id="L90">        post.setTopic( postDTO.topic() );</span>
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if ( postDTO.likes() != null ) {</span>
-<span class="fc" id="L92">            post.setLikes( postDTO.likes() );</span>
+<span class="fc" id="L86">        post.setTitle( postDTO.title() );</span>
+<span class="fc" id="L87">        post.setContent( postDTO.content() );</span>
+<span class="fc" id="L88">        post.setCreatedAt( postDTO.createdAt() );</span>
+<span class="fc" id="L89">        post.setUpdatedAt( postDTO.updatedAt() );</span>
+<span class="fc" id="L90">        post.setImages( longListToImageList( postDTO.images() ) );</span>
+<span class="fc" id="L91">        post.setTopic( postDTO.topic() );</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if ( postDTO.likes() != null ) {</span>
+<span class="fc" id="L93">            post.setLikes( postDTO.likes() );</span>
         }
 
-<span class="fc" id="L95">        return post;</span>
+<span class="fc" id="L96">        return post;</span>
     }
 
     protected List&lt;Long&gt; imageListToLongList(List&lt;Image&gt; list) {
-<span class="fc bfc" id="L99" title="All 2 branches covered.">        if ( list == null ) {</span>
-<span class="fc" id="L100">            return null;</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if ( list == null ) {</span>
+<span class="fc" id="L101">            return null;</span>
         }
 
-<span class="fc" id="L103">        List&lt;Long&gt; list1 = new ArrayList&lt;Long&gt;( list.size() );</span>
-<span class="fc bfc" id="L104" title="All 2 branches covered.">        for ( Image image : list ) {</span>
-<span class="fc" id="L105">            list1.add( userMapper.mapImage( image ) );</span>
-<span class="fc" id="L106">        }</span>
+<span class="fc" id="L104">        List&lt;Long&gt; list1 = new ArrayList&lt;Long&gt;( list.size() );</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        for ( Image image : list ) {</span>
+<span class="fc" id="L106">            list1.add( userMapper.mapImage( image ) );</span>
+<span class="fc" id="L107">        }</span>
 
-<span class="fc" id="L108">        return list1;</span>
+<span class="fc" id="L109">        return list1;</span>
     }
 
     protected List&lt;Image&gt; longListToImageList(List&lt;Long&gt; list) {
-<span class="fc bfc" id="L112" title="All 2 branches covered.">        if ( list == null ) {</span>
-<span class="fc" id="L113">            return null;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if ( list == null ) {</span>
+<span class="fc" id="L114">            return null;</span>
         }
 
-<span class="fc" id="L116">        List&lt;Image&gt; list1 = new ArrayList&lt;Image&gt;( list.size() );</span>
-<span class="fc bfc" id="L117" title="All 2 branches covered.">        for ( Long long1 : list ) {</span>
-<span class="fc" id="L118">            list1.add( userMapper.mapImage( long1 ) );</span>
-<span class="fc" id="L119">        }</span>
+<span class="fc" id="L117">        List&lt;Image&gt; list1 = new ArrayList&lt;Image&gt;( list.size() );</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        for ( Long long1 : list ) {</span>
+<span class="fc" id="L119">            list1.add( userMapper.mapImage( long1 ) );</span>
+<span class="fc" id="L120">        }</span>
 
-<span class="fc" id="L121">        return list1;</span>
+<span class="fc" id="L122">        return list1;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

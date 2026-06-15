@@ -417,6 +417,24 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("updatePost should detect content change")
+	void updatePostDetectContentChangeTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn(post.getTitle());
+		when(postDTO.content()).thenReturn("NEW CONTENT");
+		when(postDTO.topic()).thenReturn(null);
+
+		when(postRepository.save(post)).thenReturn(post);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		verify(postRepository).save(post);
+	}
+
+	@Test
 	@DisplayName("updatePost should throw AccessDeniedException when not author")
 	void updatePostAccessDeniedTest() {
 		// GIVEN
@@ -442,6 +460,57 @@ class PostServiceUnitTest {
 		assertThrows(EntityNotFoundException.class, () -> {
 			postService.updatePost(1L, postDTO, user);
 		});
+	}
+
+	@Test
+	@DisplayName("updatePost should allow admin to add foreign images to post")
+	void updatePostAdminAddsForeignImageTest() {
+		// GIVEN
+		User admin = new User();
+		admin.setId(10L);
+		admin.setRoles(List.of("ADMIN"));
+
+		User imageOwner = new User();
+		imageOwner.setId(99L);
+
+		Image img = new Image();
+		img.setId(3L);
+		img.setOwner(imageOwner);
+
+		post.setImages(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn("New title");
+		when(postDTO.images()).thenReturn(List.of(3L));
+		when(imageRepository.findAllById(List.of(3L))).thenReturn(List.of(img));
+		when(postRepository.save(any())).thenReturn(post);
+		when(mapper.toDTOWithLike(any(), any())).thenReturn(postDTO);
+
+		// WHEN & THEN
+		assertDoesNotThrow(() -> postService.updatePost(1L, postDTO, admin));
+	}
+
+	@Test
+	@DisplayName("updatePost should allow removing image that belongs to same post")
+	void updatePostRemoveImageSamePostTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+		img.setPost(post);
+
+		post.setImages(new ArrayList<>(List.of(img)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn("New title");
+		when(postDTO.images()).thenReturn(List.of());
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(imageRepository.findAllById(List.of())).thenReturn(List.of());
+		when(postRepository.save(post)).thenReturn(post);
+		when(mapper.toDTOWithLike(any(), any())).thenReturn(postDTO);
+
+		// WHEN & THEN
+		assertDoesNotThrow(() -> postService.updatePost(1L, postDTO, user));
 	}
 
 	@Test
@@ -489,7 +558,7 @@ class PostServiceUnitTest {
 	}
 
 	@Test
-	@DisplayName("updatePost should remove images")
+	@DisplayName("updatePost should remove images when empty list provided")
 	void updatePostRemoveImagesTest() {
 		// GIVEN
 		Image img = new Image();
@@ -509,6 +578,32 @@ class PostServiceUnitTest {
 		// THEN
 		assertTrue(post.getImages().isEmpty());
 		verify(imageRepository).deleteAllById(List.of(1L));
+	}
+
+	@Test
+	@DisplayName("updatePost should remove images when null provided")
+	void updatePostRemoveImagesNullDtoTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+
+		post.setImages(new ArrayList<>(List.of(img)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(null);
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(postRepository.save(post)).thenReturn(post);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		PostDTO result = postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals(postDTO, result);
+		assertTrue(post.getImages().isEmpty());
+		verify(imageRepository).deleteAllById(List.of(1L));
+		verify(postRepository).save(post);
 	}
 
 	@Test

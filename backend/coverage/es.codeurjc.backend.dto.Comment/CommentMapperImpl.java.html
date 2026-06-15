@@ -1,97 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommentMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.dto.comment</a> &gt; <span class="el_source">CommentMapperImpl.java</span></div><h1>CommentMapperImpl.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.dto.comment;
 
+import es.codeurjc.backend.dto.user.BasicUserDTO;
+import es.codeurjc.backend.dto.user.UserMapper;
 import es.codeurjc.backend.model.Comment;
-import es.codeurjc.backend.model.Post;
-import es.codeurjc.backend.model.User;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-05-15T17:11:27+0200&quot;,
+    date = &quot;2026-06-15T13:18:58+0200&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.6 (Oracle Corporation)&quot;
 )
 @Component
-<span class="fc" id="L19">public class CommentMapperImpl implements CommentMapper {</span>
+<span class="fc" id="L20">public class CommentMapperImpl implements CommentMapper {</span>
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public CommentDTO toDTO(Comment comment) {
-<span class="nc bnc" id="L23" title="All 2 branches missed.">        if ( comment == null ) {</span>
-<span class="nc" id="L24">            return null;</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if ( comment == null ) {</span>
+<span class="fc" id="L28">            return null;</span>
         }
 
-<span class="nc" id="L27">        Long id = null;</span>
-<span class="nc" id="L28">        String content = null;</span>
-<span class="nc" id="L29">        LocalDateTime createdAt = null;</span>
-<span class="nc" id="L30">        LocalDateTime updatedAt = null;</span>
-<span class="nc" id="L31">        User author = null;</span>
-<span class="nc" id="L32">        Post post = null;</span>
-<span class="nc" id="L33">        Comment commentId = null;</span>
-<span class="nc" id="L34">        Integer likes = null;</span>
-<span class="nc" id="L35">        List&lt;Long&gt; usersThatLiked = null;</span>
+<span class="fc" id="L31">        Long id = null;</span>
+<span class="fc" id="L32">        String content = null;</span>
+<span class="fc" id="L33">        LocalDateTime createdAt = null;</span>
+<span class="fc" id="L34">        LocalDateTime updatedAt = null;</span>
+<span class="fc" id="L35">        BasicUserDTO author = null;</span>
+<span class="fc" id="L36">        CommentDTO parentComment = null;</span>
+<span class="fc" id="L37">        Integer likes = null;</span>
+<span class="fc" id="L38">        Long post = null;</span>
 
-<span class="nc" id="L37">        id = comment.getId();</span>
-<span class="nc" id="L38">        content = comment.getContent();</span>
-<span class="nc" id="L39">        createdAt = comment.getCreatedAt();</span>
-<span class="nc" id="L40">        updatedAt = comment.getUpdatedAt();</span>
-<span class="nc" id="L41">        author = comment.getAuthor();</span>
-<span class="nc" id="L42">        post = comment.getPost();</span>
-<span class="nc" id="L43">        commentId = comment.getCommentId();</span>
-<span class="nc" id="L44">        likes = comment.getLikes();</span>
-<span class="nc" id="L45">        List&lt;Long&gt; list = comment.getUsersThatLiked();</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">        if ( list != null ) {</span>
-<span class="nc" id="L47">            usersThatLiked = new ArrayList&lt;Long&gt;( list );</span>
-        }
+<span class="fc" id="L40">        id = comment.getId();</span>
+<span class="fc" id="L41">        content = comment.getContent();</span>
+<span class="fc" id="L42">        createdAt = comment.getCreatedAt();</span>
+<span class="fc" id="L43">        updatedAt = comment.getUpdatedAt();</span>
+<span class="fc" id="L44">        author = userMapper.toBasicDTO( comment.getAuthor() );</span>
+<span class="fc" id="L45">        parentComment = toDTO( comment.getParentComment() );</span>
+<span class="fc" id="L46">        likes = comment.getLikes();</span>
+<span class="fc" id="L47">        post = userMapper.mapPost( comment.getPost() );</span>
 
-<span class="nc" id="L50">        CommentDTO commentDTO = new CommentDTO( id, content, createdAt, updatedAt, author, post, commentId, likes, usersThatLiked );</span>
+<span class="fc" id="L49">        Boolean hasUserLiked = null;</span>
 
-<span class="nc" id="L52">        return commentDTO;</span>
+<span class="fc" id="L51">        CommentDTO commentDTO = new CommentDTO( id, content, createdAt, updatedAt, author, parentComment, likes, hasUserLiked, post );</span>
+
+<span class="fc" id="L53">        return commentDTO;</span>
     }
 
     @Override
     public List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments) {
-<span class="nc bnc" id="L57" title="All 2 branches missed.">        if ( comments == null ) {</span>
-<span class="nc" id="L58">            return null;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if ( comments == null ) {</span>
+<span class="nc" id="L59">            return null;</span>
         }
 
-<span class="nc" id="L61">        List&lt;CommentDTO&gt; list = new ArrayList&lt;CommentDTO&gt;( comments.size() );</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">        for ( Comment comment : comments ) {</span>
-<span class="nc" id="L63">            list.add( toDTO( comment ) );</span>
-<span class="nc" id="L64">        }</span>
+<span class="nc" id="L62">        List&lt;CommentDTO&gt; list = new ArrayList&lt;CommentDTO&gt;( comments.size() );</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        for ( Comment comment : comments ) {</span>
+<span class="nc" id="L64">            list.add( toDTO( comment ) );</span>
+<span class="nc" id="L65">        }</span>
 
-<span class="nc" id="L66">        return list;</span>
+<span class="nc" id="L67">        return list;</span>
     }
 
     @Override
     public Comment toDomain(CommentDTO commentDTO) {
-<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( commentDTO == null ) {</span>
-<span class="nc" id="L72">            return null;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if ( commentDTO == null ) {</span>
+<span class="fc" id="L73">            return null;</span>
         }
 
-<span class="nc" id="L75">        Comment comment = new Comment();</span>
+<span class="fc" id="L76">        Comment comment = new Comment();</span>
 
-<span class="nc bnc" id="L77" title="All 2 branches missed.">        if ( commentDTO.id() != null ) {</span>
-<span class="nc" id="L78">            comment.setId( commentDTO.id() );</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if ( commentDTO.id() != null ) {</span>
+<span class="nc" id="L79">            comment.setId( commentDTO.id() );</span>
         }
-<span class="nc" id="L80">        comment.setContent( commentDTO.content() );</span>
-<span class="nc" id="L81">        comment.setCreatedAt( commentDTO.createdAt() );</span>
-<span class="nc" id="L82">        comment.setUpdatedAt( commentDTO.updatedAt() );</span>
-<span class="nc" id="L83">        comment.setAuthor( commentDTO.author() );</span>
-<span class="nc" id="L84">        comment.setPost( commentDTO.post() );</span>
-<span class="nc" id="L85">        comment.setCommentId( commentDTO.commentId() );</span>
-<span class="nc bnc" id="L86" title="All 2 branches missed.">        if ( commentDTO.likes() != null ) {</span>
-<span class="nc" id="L87">            comment.setLikes( commentDTO.likes() );</span>
-        }
-<span class="nc" id="L89">        List&lt;Long&gt; list = commentDTO.usersThatLiked();</span>
-<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( list != null ) {</span>
-<span class="nc" id="L91">            comment.setUsersThatLiked( new ArrayList&lt;Long&gt;( list ) );</span>
+<span class="fc" id="L81">        comment.setContent( commentDTO.content() );</span>
+<span class="fc" id="L82">        comment.setCreatedAt( commentDTO.createdAt() );</span>
+<span class="fc" id="L83">        comment.setUpdatedAt( commentDTO.updatedAt() );</span>
+<span class="fc" id="L84">        comment.setParentComment( toDomain( commentDTO.parentComment() ) );</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if ( commentDTO.likes() != null ) {</span>
+<span class="fc" id="L86">            comment.setLikes( commentDTO.likes() );</span>
         }
 
-<span class="nc" id="L94">        return comment;</span>
+<span class="fc" id="L89">        return comment;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,8 @@ import jakarta.persistence.EntityNotFoundException;
 @Tag("unit")
 @DisplayName("UserService Unitary tests")
 class UserServiceUnitTest {
+
+    private static final LocalDateTime FIXED_TIME = LocalDateTime.of(2026, Month.MAY, 1, 10, 0);
 
     private UserService userService;
 
@@ -87,7 +90,7 @@ class UserServiceUnitTest {
         user.setEmail("test@example.com");
         user.setPassword("encodedPassword");
         user.setRoles(List.of("USER"));
-        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(FIXED_TIME);
 
         admin = new User();
         admin.setId(2L);
@@ -114,16 +117,16 @@ class UserServiceUnitTest {
         post.setAuthor(user);
         post.setUsersThatLiked(new HashSet<>());
 
-        postDTO = new PostDTO(1L, "Test Post", "Content", LocalDateTime.now(), LocalDateTime.now(),
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1, List.of());
+        postDTO = new PostDTO(1L, "Test Post", "Content", FIXED_TIME, FIXED_TIME,
+                new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1, List.of());
 
         comment = new Comment();
         comment.setId(1L);
         comment.setAuthor(user);
         comment.setUsersThatLiked(new HashSet<>());
 
-        commentDTO = new CommentDTO(1L, "Test comment", LocalDateTime.now(), LocalDateTime.now(),
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1L);
+        commentDTO = new CommentDTO(1L, "Test comment", FIXED_TIME, FIXED_TIME,
+                new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
     }
 
     // =============== getUser ===============
@@ -132,7 +135,7 @@ class UserServiceUnitTest {
     @DisplayName("getUser should return user when exists")
     void getUserSuccessTest() {
         // GIVEN
-        BasicUserDTO basicUserDTO = new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null);
+        BasicUserDTO basicUserDTO = new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toBasicDTO(user)).thenReturn(basicUserDTO);
 
@@ -167,8 +170,8 @@ class UserServiceUnitTest {
         List<User> users = List.of(user, admin);
         Page<User> userPage = new PageImpl<>(users, pageable, 2);
         List<BasicUserDTO> dtos = List.of(
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null),
-                new BasicUserDTO(2L, "admin", LocalDateTime.now(), "Admin bio", null));
+                new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null),
+                new BasicUserDTO(2L, "admin", FIXED_TIME, "Admin bio", null));
 
         when(userRepository.findAll(pageable)).thenReturn(userPage);
         when(userMapper.toBasicDTO(user)).thenReturn(dtos.get(0));
@@ -206,7 +209,7 @@ class UserServiceUnitTest {
     @DisplayName("getUserDetails should return user details when user is the owner")
     void getUserDetailsOwnerTest() {
         // GIVEN
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toDTO(user)).thenReturn(userDTO);
@@ -224,7 +227,7 @@ class UserServiceUnitTest {
     @DisplayName("getUserDetails should allow admin to view any user details")
     void getUserDetailsAdminTest() {
         // GIVEN
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toDTO(user)).thenReturn(userDTO);
@@ -364,7 +367,7 @@ class UserServiceUnitTest {
         createdUser.setPassword("encodedPassword");
         createdUser.setRoles(List.of("USER"));
 
-        UserDTO resultDTO = new UserDTO(3L, "newuser", "new@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO resultDTO = new UserDTO(3L, "newuser", "new@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
@@ -425,7 +428,7 @@ class UserServiceUnitTest {
     void updateUserChangeUsernameTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("newusername", null, null, null);
-        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", LocalDateTime.now(), "Bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", FIXED_TIME, "Bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -448,7 +451,7 @@ class UserServiceUnitTest {
     void updateUserChangeEmailTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO(null, "newemail@example.com", null, null);
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "newemail@example.com", LocalDateTime.now(), "Bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "newemail@example.com", FIXED_TIME, "Bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -471,7 +474,7 @@ class UserServiceUnitTest {
     void updateUserChangeBioTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO(null, null, null, "New bio");
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "New bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "New bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -491,7 +494,7 @@ class UserServiceUnitTest {
     void updateUserAdminTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("newusername", null, null, null);
-        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", LocalDateTime.now(), "Bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", FIXED_TIME, "Bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -555,7 +558,7 @@ class UserServiceUnitTest {
     void updateUserSameUsernameTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("testuser", null, null, null);
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -575,7 +578,7 @@ class UserServiceUnitTest {
     void updateUserSameEmailTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("testuser", "test@example.com", null, null);
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -730,12 +733,12 @@ class UserServiceUnitTest {
     @DisplayName("deleteUser should delete likes from user comments")
     void deleteUserDeleteLikesFromCommentsTest() {
         // GIVEN
-        Comment comment = new Comment();
-        comment.setId(30L);
+        Comment deleteComment = new Comment();
+        deleteComment.setId(30L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
-        when(commentRepository.findByAuthor(user)).thenReturn(List.of(comment));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of(deleteComment));
 
         // WHEN
         userService.deleteUser(1L, user);
@@ -748,9 +751,9 @@ class UserServiceUnitTest {
     @DisplayName("deleteUser should delete likes from comments inside user posts")
     void deleteUserDeleteLikesFromCommentsInPostsTest() {
         // GIVEN
-        Comment comment = new Comment();
-        comment.setId(100L);
-        post.setComments(List.of(comment));
+        Comment deleteComment = new Comment();
+        deleteComment.setId(100L);
+        post.setComments(List.of(deleteComment));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
@@ -849,7 +852,7 @@ class UserServiceUnitTest {
     void setProfileImageSuccessTest() {
         // GIVEN
         image.setPost(null);
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -876,7 +879,7 @@ class UserServiceUnitTest {
         user.setAvatar(oldAvatar);
         image.setPost(null);
 
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -912,7 +915,7 @@ class UserServiceUnitTest {
         // GIVEN
         image.setOwner(user);
         image.setPost(null);
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));

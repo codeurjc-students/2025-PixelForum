@@ -36,7 +36,7 @@ public class ImageService {
 <span class="fc" id="L36">        Image image = imageRepository.findById(id)</span>
 <span class="fc" id="L37">                .orElseThrow(() -&gt; new EntityNotFoundException(IMAGE_NOT_FOUND));</span>
         // If no resizing is requested, return original data
-<span class="pc bpc" id="L39" title="1 of 4 branches missed.">        if (width == null &amp;&amp; height == null) {</span>
+<span class="fc bfc" id="L39" title="All 4 branches covered.">        if (width == null &amp;&amp; height == null) {</span>
 <span class="fc" id="L40">            return image.getImageData();</span>
         }
 
@@ -58,8 +58,8 @@ public class ImageService {
         }
 
         // If only one dimension is provided, calculate the other to maintain aspect ratio
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        int width = targetWidth != null ? targetWidth : targetHeight;</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        int height = targetHeight != null ? targetHeight : targetWidth;</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        int width = targetWidth != null ? targetWidth : targetHeight;</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        int height = targetHeight != null ? targetHeight : targetWidth;</span>
 
         // Crop and resize
 <span class="fc" id="L65">        BufferedImage resized = scaleAndCrop(originalImage, width, height);</span>

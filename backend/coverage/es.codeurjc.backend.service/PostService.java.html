@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">PostService.java</span></div><h1>PostService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,16 +9,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
 public class PostService {
@@ -29,192 +31,192 @@ public class PostService {
 	private final PostMapper mapper;
 	private final PostRepository postRepository;
 	private final ImageRepository imageRepository;
+	private final CommentRepository commentRepository;
 
-<span class="fc" id="L33">	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository) {</span>
-<span class="fc" id="L34">		this.mapper = mapper;</span>
-<span class="fc" id="L35">		this.postRepository = postRepository;</span>
-<span class="fc" id="L36">		this.imageRepository = imageRepository;</span>
-<span class="fc" id="L37">	}</span>
+	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository,
+<span class="fc" id="L37">			CommentRepository commentRepository) {</span>
+<span class="fc" id="L38">		this.mapper = mapper;</span>
+<span class="fc" id="L39">		this.postRepository = postRepository;</span>
+<span class="fc" id="L40">		this.imageRepository = imageRepository;</span>
+<span class="fc" id="L41">		this.commentRepository = commentRepository;</span>
+<span class="fc" id="L42">	}</span>
 
 	public PostDTO getPost(Long id, User user) {
-<span class="fc" id="L40">		return toDTO(postRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND)), user);</span>
+<span class="fc" id="L45">		return toDTO(postRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND)), user);</span>
 	}
 
 	public Page&lt;PostDTO&gt; searchAndFilterPosts(String title, String authorUsername, String topic, Pageable pageable,
 			User user) {
-<span class="fc" id="L45">		Page&lt;Post&gt; postsPage = postRepository.findByFilters(title, authorUsername, topic, pageable);</span>
-<span class="fc" id="L46">		return postsPage.map(post -&gt; toDTO(post, user));</span>
+<span class="fc" id="L50">		Page&lt;Post&gt; postsPage = postRepository.findByFilters(title, authorUsername, topic, pageable);</span>
+<span class="fc" id="L51">		return postsPage.map(post -&gt; toDTO(post, user));</span>
 	}
 
 	public boolean exist(Long id) {
-<span class="fc" id="L50">		return postRepository.existsById(id);</span>
+<span class="fc" id="L55">		return postRepository.existsById(id);</span>
 	}
 
 	public List&lt;Post&gt; findAll() {
-<span class="fc" id="L54">		return postRepository.findAll();</span>
+<span class="fc" id="L59">		return postRepository.findAll();</span>
 	}
 
 	public Post save(Post post) {
-<span class="fc" id="L58">		return postRepository.save(post);</span>
+<span class="fc" id="L63">		return postRepository.save(post);</span>
 	}
 
 	private PostDTO toDTO(Post post, User user) {
-<span class="fc" id="L62">		return mapper.toDTOWithLike(post, user);</span>
+<span class="fc" id="L67">		return mapper.toDTOWithLike(post, user);</span>
 	}
 
 	public PostDTO createPost(PostDTO postDTO, User user) {
-<span class="fc" id="L66">		Post post = mapper.toDomain(postDTO);</span>
-<span class="fc" id="L67">		post.setCreatedAt(LocalDateTime.now());</span>
-<span class="fc" id="L68">		post.setUpdatedAt(LocalDateTime.now());</span>
-<span class="fc" id="L69">		post.setLikes(0);</span>
-<span class="fc" id="L70">		post.setAuthor(user);</span>
+<span class="fc" id="L71">		Post post = mapper.toDomain(postDTO);</span>
+<span class="fc" id="L72">		post.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));</span>
+<span class="fc" id="L73">		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));</span>
+<span class="fc" id="L74">		post.setLikes(0);</span>
+<span class="fc" id="L75">		post.setAuthor(user);</span>
 
-<span class="fc bfc" id="L72" title="All 4 branches covered.">		if (postDTO.images() != null &amp;&amp; !postDTO.images().isEmpty()) {</span>
-<span class="fc" id="L73">			List&lt;Image&gt; images = imageRepository.findAllById(postDTO.images());</span>
-<span class="fc bfc" id="L74" title="All 2 branches covered.">			if (images.size() != postDTO.images().size()) {</span>
-<span class="fc" id="L75">				throw new IllegalArgumentException(&quot;Some images not found&quot;);</span>
+<span class="fc bfc" id="L77" title="All 4 branches covered.">		if (postDTO.images() != null &amp;&amp; !postDTO.images().isEmpty()) {</span>
+<span class="fc" id="L78">			List&lt;Image&gt; images = imageRepository.findAllById(postDTO.images());</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">			if (images.size() != postDTO.images().size()) {</span>
+<span class="fc" id="L80">				throw new IllegalArgumentException(&quot;Some images not found&quot;);</span>
 			}
-<span class="fc" id="L77">			checkImagesOwnership(images, user, null);</span>
-<span class="fc" id="L78">			post.setImages(images);</span>
-<span class="fc" id="L79">			images.forEach(img -&gt; img.setPost(post));</span>
+<span class="fc" id="L82">			checkImagesOwnership(images, user, null);</span>
+<span class="fc" id="L83">			post.setImages(images);</span>
+<span class="fc" id="L84">			images.forEach(img -&gt; img.setPost(post));</span>
 		}
-<span class="fc" id="L81">		Post savedPost = postRepository.save(post);</span>
-<span class="fc" id="L82">		return toDTO(savedPost, user);</span>
+<span class="fc" id="L86">		Post savedPost = postRepository.save(post);</span>
+<span class="fc" id="L87">		return toDTO(savedPost, user);</span>
 	}
 
 	@Transactional
 	public PostDTO updatePost(Long id, PostDTO postDTO, User user) {
-<span class="fc" id="L87">		Post post = postRepository.findById(id)</span>
-<span class="fc" id="L88">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
+<span class="fc" id="L92">		Post post = postRepository.findById(id)</span>
+<span class="fc" id="L93">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
 
-<span class="fc bfc" id="L90" title="All 4 branches covered.">		if (post.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L91">			throw new AccessDeniedException(&quot;You can only edit your own posts&quot;);</span>
+<span class="fc bfc" id="L95" title="All 4 branches covered.">		if (post.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L96">			throw new AccessDeniedException(&quot;You can only edit your own posts&quot;);</span>
 		}
 
-<span class="fc bfc" id="L94" title="All 2 branches covered.">		if (!hasChanges(post, postDTO)) {</span>
-<span class="fc" id="L95">			return toDTO(post, user);</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		if (!hasChanges(post, postDTO)) {</span>
+<span class="fc" id="L100">			return toDTO(post, user);</span>
 		}
 
-<span class="fc" id="L98">		manageImages(post, postDTO, user);</span>
-<span class="fc" id="L99">		post.setTitle(postDTO.title());</span>
-<span class="fc" id="L100">		post.setContent(postDTO.content());</span>
-<span class="fc" id="L101">		post.setTopic(postDTO.topic());</span>
-<span class="fc" id="L102">		post.setUpdatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L103">		manageImages(post, postDTO, user);</span>
+<span class="fc" id="L104">		post.setTitle(postDTO.title());</span>
+<span class="fc" id="L105">		post.setContent(postDTO.content());</span>
+<span class="fc" id="L106">		post.setTopic(postDTO.topic());</span>
+<span class="fc" id="L107">		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));</span>
 
-<span class="fc" id="L104">		Post updatedPost = postRepository.save(post);</span>
-<span class="fc" id="L105">		return toDTO(updatedPost, user);</span>
+<span class="fc" id="L109">		Post updatedPost = postRepository.save(post);</span>
+<span class="fc" id="L110">		return toDTO(updatedPost, user);</span>
 	}
 
 	private boolean hasChanges(Post post, PostDTO dto) {
-<span class="fc bfc" id="L109" title="All 2 branches covered.">		if (!Objects.equals(post.getTitle(), dto.title()))</span>
-<span class="fc" id="L110">			return true;</span>
-<span class="pc bpc" id="L111" title="1 of 2 branches missed.">		if (!Objects.equals(post.getContent(), dto.content()))</span>
-<span class="nc" id="L112">			return true;</span>
-
-<span class="fc" id="L114">		List&lt;Long&gt; currentImageIds = post.getImages().stream().map(Image::getId).toList();</span>
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">		List&lt;Long&gt; newImagesIds = dto.images() != null ? dto.images() : List.of();</span>
-<span class="fc bfc" id="L116" title="All 2 branches covered.">		if (!Objects.equals(currentImageIds, newImagesIds))</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">		if (!Objects.equals(post.getTitle(), dto.title()))</span>
+<span class="fc" id="L115">			return true;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">		if (!Objects.equals(post.getContent(), dto.content()))</span>
 <span class="fc" id="L117">			return true;</span>
 
-<span class="fc bfc" id="L119" title="All 2 branches covered.">		return (!Objects.equals(</span>
-<span class="fc bfc" id="L120" title="All 2 branches covered.">				post.getTopic() != null ? post.getTopic().getId() : null,</span>
-<span class="fc bfc" id="L121" title="All 2 branches covered.">				dto.topic() != null ? dto.topic().getId() : null));</span>
+<span class="fc" id="L119">		List&lt;Long&gt; currentImageIds = post.getImages().stream().map(Image::getId).toList();</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">		List&lt;Long&gt; newImagesIds = dto.images() != null ? dto.images() : List.of();</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		if (!Objects.equals(currentImageIds, newImagesIds))</span>
+<span class="fc" id="L122">			return true;</span>
+
+<span class="fc bfc" id="L124" title="All 2 branches covered.">		return (!Objects.equals(</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">				post.getTopic() != null ? post.getTopic().getId() : null,</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">				dto.topic() != null ? dto.topic().getId() : null));</span>
 	}
 
 	public void checkImagesOwnership(List&lt;Image&gt; images, User user, Post post) {
-<span class="fc bfc" id="L125" title="All 2 branches covered.">		for (Image img : images) {</span>
-<span class="fc bfc" id="L126" title="All 2 branches covered.">			if (post == null) {</span>
-<span class="fc" id="L127">				validateOwnership(img, user);</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">		for (Image img : images) {</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">			if (post == null) {</span>
+<span class="fc" id="L132">				validateOwnership(img, user);</span>
 			} else {
-<span class="fc" id="L129">				validateOwnership(img, post, user);</span>
+<span class="fc" id="L134">				validateOwnership(img, post, user);</span>
 			}
-<span class="fc" id="L131">		}</span>
-<span class="fc" id="L132">	}</span>
+<span class="fc" id="L136">		}</span>
+<span class="fc" id="L137">	}</span>
 
 	private void validateOwnership(Image img, User user) {
-<span class="fc bfc" id="L135" title="All 4 branches covered.">		if (img.getOwner().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L136">			throw new AccessDeniedException(&quot;You can only add your own images to the post&quot;);</span>
+<span class="fc bfc" id="L140" title="All 4 branches covered.">		if (img.getOwner().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L141">			throw new AccessDeniedException(&quot;You can only add your own images to the post&quot;);</span>
 		}
-<span class="fc bfc" id="L138" title="All 2 branches covered.">		if (img.getPost() != null) {</span>
-<span class="fc" id="L139">			throw new IllegalArgumentException(</span>
-<span class="fc" id="L140">					&quot;Image with id &quot; + img.getId() + &quot; is already associated with another post&quot;);</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">		if (img.getPost() != null) {</span>
+<span class="fc" id="L144">			throw new IllegalArgumentException(</span>
+<span class="fc" id="L145">					&quot;Image with id &quot; + img.getId() + &quot; is already associated with another post&quot;);</span>
 		}
-<span class="fc" id="L142">	}</span>
+<span class="fc" id="L147">	}</span>
 
 	private void validateOwnership(Image img, Post post, User user) {
-<span class="pc bpc" id="L145" title="1 of 4 branches missed.">		if (img.getOwner().getId() != user.getId() &amp;&amp; user.getId() != post.getAuthor().getId()</span>
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">				&amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
-<span class="nc" id="L147">			throw new AccessDeniedException(&quot;You can only add your own images to the post&quot;);</span>
+<span class="pc bpc" id="L150" title="1 of 4 branches missed.">		if (img.getOwner().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
+<span class="nc" id="L151">			throw new AccessDeniedException(&quot;You can only add your own images to the post&quot;);</span>
 		}
-<span class="fc bfc" id="L149" title="All 4 branches covered.">		if (img.getPost() != null &amp;&amp; img.getPost().getId() != post.getId()) {</span>
-<span class="fc" id="L150">			throw new IllegalArgumentException(</span>
-<span class="fc" id="L151">					&quot;Image with id &quot; + img.getId() + &quot; is already associated with another post&quot;);</span>
+<span class="fc bfc" id="L153" title="All 4 branches covered.">		if (img.getPost() != null &amp;&amp; img.getPost().getId() != post.getId()) {</span>
+<span class="fc" id="L154">			throw new IllegalArgumentException(</span>
+<span class="fc" id="L155">					&quot;Image with id &quot; + img.getId() + &quot; is already associated with another post&quot;);</span>
 		}
-<span class="fc" id="L153">	}</span>
+<span class="fc" id="L157">	}</span>
 
 	public void manageImages(Post post, PostDTO postDTO, User user) {
-<span class="fc bfc" id="L156" title="All 2 branches covered.">		List&lt;Long&gt; newImageIds = postDTO.images() != null ? postDTO.images() : List.of();</span>
-<span class="fc" id="L157">		List&lt;Long&gt; currentImageIds = post.getImages().stream().map(Image::getId).toList();</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		List&lt;Long&gt; newImageIds = postDTO.images() != null ? postDTO.images() : List.of();</span>
+<span class="fc" id="L161">		List&lt;Long&gt; currentImageIds = post.getImages().stream().map(Image::getId).toList();</span>
 
-<span class="fc" id="L159">		List&lt;Long&gt; imagesToDelete = currentImageIds.stream()</span>
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">				.filter(newId -&gt; !newImageIds.contains(newId))</span>
-<span class="fc" id="L161">				.toList();</span>
-<span class="fc" id="L162">		List&lt;Long&gt; imagesToAdd = newImageIds.stream()</span>
-<span class="pc bpc" id="L163" title="1 of 2 branches missed.">				.filter(newId -&gt; !currentImageIds.contains(newId))</span>
-<span class="fc" id="L164">				.toList();</span>
+<span class="fc" id="L163">		List&lt;Long&gt; imagesToDelete = currentImageIds.stream()</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">				.filter(newId -&gt; !newImageIds.contains(newId))</span>
+<span class="fc" id="L165">				.toList();</span>
+<span class="fc" id="L166">		List&lt;Long&gt; imagesToAdd = newImageIds.stream()</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">				.filter(newId -&gt; !currentImageIds.contains(newId))</span>
+<span class="fc" id="L168">				.toList();</span>
 
-<span class="fc" id="L166">		List&lt;Image&gt; removeImages = imageRepository.findAllById(imagesToDelete);</span>
-<span class="fc" id="L167">		List&lt;Image&gt; newImages = imageRepository.findAllById(imagesToAdd);</span>
+<span class="fc" id="L170">		List&lt;Image&gt; removeImages = imageRepository.findAllById(imagesToDelete);</span>
+<span class="fc" id="L171">		List&lt;Image&gt; newImages = imageRepository.findAllById(imagesToAdd);</span>
 
-<span class="fc bfc" id="L169" title="All 2 branches covered.">		if (newImages.size() != imagesToAdd.size()) {</span>
-<span class="fc" id="L170">			throw new IllegalArgumentException(&quot;Some images not found&quot;);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">		if (newImages.size() != imagesToAdd.size()) {</span>
+<span class="fc" id="L174">			throw new IllegalArgumentException(&quot;Some images not found&quot;);</span>
 		}
-<span class="fc" id="L172">		checkImagesOwnership(removeImages, user, post);</span>
-<span class="fc" id="L173">		checkImagesOwnership(newImages, user, post);</span>
+<span class="fc" id="L176">		checkImagesOwnership(removeImages, user, post);</span>
+<span class="fc" id="L177">		checkImagesOwnership(newImages, user, post);</span>
 
-<span class="fc bfc" id="L175" title="All 2 branches covered.">		if (!imagesToDelete.isEmpty()) {</span>
-<span class="fc" id="L176">			post.getImages().removeAll(removeImages);</span>
-<span class="fc" id="L177">			imageRepository.deleteAllById(imagesToDelete);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">		if (!imagesToDelete.isEmpty()) {</span>
+<span class="fc" id="L180">			post.getImages().removeAll(removeImages);</span>
+<span class="fc" id="L181">			imageRepository.deleteAllById(imagesToDelete);</span>
 		}
 
-<span class="fc bfc" id="L180" title="All 2 branches covered.">		if (!imagesToAdd.isEmpty()) {</span>
-<span class="fc" id="L181">			post.getImages().addAll(newImages);</span>
-<span class="fc bfc" id="L182" title="All 2 branches covered.">			for (Image img : newImages) {</span>
-<span class="fc" id="L183">				img.setPost(post);</span>
-<span class="fc" id="L184">				img.setOwner(post.getAuthor());</span>
-<span class="fc" id="L185">			}</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">		if (!imagesToAdd.isEmpty()) {</span>
+<span class="fc" id="L185">			post.getImages().addAll(newImages);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">			for (Image img : newImages) {</span>
+<span class="fc" id="L187">				img.setPost(post);</span>
+<span class="fc" id="L188">				img.setOwner(post.getAuthor());</span>
+<span class="fc" id="L189">			}</span>
 		}
-<span class="fc" id="L187">	}</span>
+<span class="fc" id="L191">	}</span>
 
 	@Transactional
 	public void deletePost(Long id, User user) {
-<span class="fc" id="L191">		Post post = postRepository.findById(id)</span>
-<span class="fc" id="L192">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
-<span class="fc bfc" id="L193" title="All 4 branches covered.">		if (post.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
-<span class="fc" id="L194">			throw new AccessDeniedException(&quot;You can only delete your own posts&quot;);</span>
+<span class="fc" id="L195">		Post post = postRepository.findById(id)</span>
+<span class="fc" id="L196">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
+<span class="fc bfc" id="L197" title="All 4 branches covered.">		if (post.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(ADMIN)) {</span>
+<span class="fc" id="L198">			throw new AccessDeniedException(&quot;You can only delete your own posts&quot;);</span>
 		}
-<span class="fc bfc" id="L196" title="All 2 branches covered.">		for (User userLikes : new ArrayList&lt;&gt;(post.getUsersThatLiked())) {</span>
-<span class="fc" id="L197">			userLikes.getLikedPosts().remove(post);</span>
-<span class="fc" id="L198">		}</span>
-<span class="fc" id="L199">		postRepository.delete(post);</span>
-<span class="fc" id="L200">	}</span>
+<span class="fc" id="L200">		postRepository.deleteLikesByPostIds(List.of(id));</span>
+<span class="fc" id="L201">		commentRepository.deleteLikesByCommentIds(post.getComments().stream().map(Comment::getId).toList());</span>
+<span class="fc" id="L202">		postRepository.delete(post);</span>
+<span class="fc" id="L203">	}</span>
 
 	@Transactional
 	public PostDTO toggleLike(Long postId, User user) {
-<span class="fc" id="L204">		Post post = postRepository.findById(postId)</span>
-<span class="fc" id="L205">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
+<span class="fc" id="L207">		Post post = postRepository.findById(postId)</span>
+<span class="fc" id="L208">				.orElseThrow(() -&gt; new EntityNotFoundException(POST_NOT_FOUND));</span>
 
-<span class="fc" id="L207">		List&lt;Post&gt; likedPosts = user.getLikedPosts();</span>
-<span class="fc" id="L208">		boolean hasLiked = likedPosts.contains(post);</span>
-<span class="fc bfc" id="L209" title="All 2 branches covered.">		if (hasLiked) {</span>
-<span class="fc" id="L210">			user.getLikedPosts().remove(post);</span>
-<span class="fc" id="L211">			post.getUsersThatLiked().remove(user);</span>
+<span class="fc" id="L210">		boolean hasLiked = user.getLikedPosts().contains(post);</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">		if (hasLiked) {</span>
+<span class="fc" id="L212">			user.getLikedPosts().remove(post);</span>
+<span class="fc" id="L213">			post.getUsersThatLiked().remove(user);</span>
 		} else {
-<span class="fc" id="L213">			user.getLikedPosts().add(post);</span>
-<span class="fc" id="L214">			post.getUsersThatLiked().add(user);</span>
+<span class="fc" id="L215">			user.getLikedPosts().add(post);</span>
+<span class="fc" id="L216">			post.getUsersThatLiked().add(user);</span>
 		}
-<span class="fc" id="L216">		post.setLikes(post.getUsersThatLiked().size());</span>
-<span class="fc" id="L217">		return toDTO(post, user);</span>
+<span class="fc" id="L218">		post.setLikes(post.getUsersThatLiked().size());</span>
+<span class="fc" id="L219">		return toDTO(post, user);</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

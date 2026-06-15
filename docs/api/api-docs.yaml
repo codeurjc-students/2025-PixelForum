@@ -6,6 +6,81 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
+  /api/v1/posts/{postId}/comments/{commentId}:
+    get:
+      tags:
+      - comment-rest-controller
+      operationId: getComment
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+    put:
+      tags:
+      - comment-rest-controller
+      operationId: updateComment
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+    delete:
+      tags:
+      - comment-rest-controller
+      operationId: deleteComment
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
   /api/v1/posts/{id}:
     get:
       tags:
@@ -187,11 +262,84 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PostDTO"
+  /api/v1/posts/{postId}/comments:
+    get:
+      tags:
+      - comment-rest-controller
+      operationId: getPostComments
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageCommentDTO"
+    post:
+      tags:
+      - comment-rest-controller
+      operationId: createComment
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+  /api/v1/posts/{postId}/comments/{commentId}/like:
+    post:
+      tags:
+      - comment-rest-controller
+      operationId: toggleLike
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
   /api/v1/posts/{id}/like:
     post:
       tags:
       - post-rest-controller
-      operationId: toggleLike
+      operationId: toggleLike_1
       parameters:
       - name: id
         in: path
@@ -380,6 +528,30 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagePostDTO"
+  /api/v1/users/{id}/liked-comments:
+    get:
+      tags:
+      - user-rest-controller
+      operationId: getLikedComments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageCommentDTO"
   /api/v1/users/{id}/details:
     get:
       tags:
@@ -399,6 +571,30 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
+  /api/v1/users/{id}/comments:
+    get:
+      tags:
+      - user-rest-controller
+      operationId: getUserComments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageCommentDTO"
   /api/v1/topics/{id}:
     get:
       tags:
@@ -515,6 +711,32 @@ components:
         avatar:
           type: integer
           format: int64
+    CommentDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        author:
+          $ref: "#/components/schemas/BasicUserDTO"
+        parentComment:
+          $ref: "#/components/schemas/CommentDTO"
+        likes:
+          type: integer
+          format: int32
+        hasUserLiked:
+          type: boolean
+        post:
+          type: integer
+          format: int64
     PostDTO:
       type: object
       properties:
@@ -540,6 +762,9 @@ components:
           format: int32
         hasUserLiked:
           type: boolean
+        commentsCount:
+          type: integer
+          format: int32
         images:
           type: array
           items:
@@ -689,9 +914,9 @@ components:
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PagePostDTO:
       type: object
@@ -709,6 +934,38 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PostDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageCommentDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentDTO"
         number:
           type: integer
           format: int32

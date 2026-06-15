@@ -1,6 +1,7 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +112,7 @@ public class UserService {
 		User user = mapper.toDomain(userDTO);
 
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setCreatedAt(LocalDateTime.now());
+		user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		user.setRoles(List.of("USER"));
 
 		return mapper.toDTO(userRepository.save(user));

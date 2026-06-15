@@ -39,6 +39,11 @@ public class CommentRestController {
         this.userService = userService;
     }
 
+    private User getCurrentUser(Principal principal) {
+        return userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+    }
+
     @GetMapping
     public ResponseEntity<Page<CommentDTO>> getPostComments(@PathVariable Long postId,
             @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -65,8 +70,7 @@ public class CommentRestController {
     @PostMapping
     public ResponseEntity<CommentDTO> createComment(@PathVariable Long postId, @RequestBody CommentDTO commentDTO,
             Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        User currentUser = getCurrentUser(principal);
         CommentDTO createdCommentDTO = commentService.createComment(postId, commentDTO, currentUser);
 
         URI location = fromCurrentRequest()
@@ -80,8 +84,7 @@ public class CommentRestController {
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentDTO> updateComment(@PathVariable Long postId, @PathVariable Long commentId,
             @RequestBody CommentDTO commentDTO, Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        User currentUser = getCurrentUser(principal);
         CommentDTO updatedCommentDTO = commentService.updateComment(commentId, commentDTO, currentUser);
         return ResponseEntity.ok(updatedCommentDTO);
     }
@@ -89,8 +92,7 @@ public class CommentRestController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long postId, @PathVariable Long commentId,
             Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        User currentUser = getCurrentUser(principal);
         commentService.deleteComment(commentId, currentUser);
         return ResponseEntity.noContent().build();
     }
@@ -98,8 +100,7 @@ public class CommentRestController {
     @PostMapping("/{commentId}/like")
     public ResponseEntity<CommentDTO> toggleLike(@PathVariable Long postId, @PathVariable Long commentId,
             Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        User currentUser = getCurrentUser(principal);
         CommentDTO likedCommentDTO = commentService.toggleLike(commentId, currentUser);
         return ResponseEntity.ok(likedCommentDTO);
     }

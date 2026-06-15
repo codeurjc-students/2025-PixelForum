@@ -1,78 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.service</a> &gt; <span class="el_source">CommentService.java</span></div><h1>CommentService.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.service;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.backend.dto.comment.CommentDTO;
 import es.codeurjc.backend.dto.comment.CommentMapper;
 import es.codeurjc.backend.model.Comment;
+import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
-import jakarta.transaction.Transactional;
+import es.codeurjc.backend.repository.PostRepository;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class CommentService {
 
 	private final CommentMapper mapper;
 	private final CommentRepository commentRepository;
+	private final PostRepository postRepository;
 
-<span class="fc" id="L21">	public CommentService(CommentMapper mapper, CommentRepository commentRepository) {</span>
-<span class="fc" id="L22">		this.mapper = mapper;</span>
-<span class="fc" id="L23">		this.commentRepository = commentRepository;</span>
-<span class="fc" id="L24">	}</span>
-	
-	public Optional&lt;Comment&gt; findById(long id) {
-<span class="nc" id="L27">		return commentRepository.findById(id);</span>
+<span class="fc" id="L30">	public CommentService(CommentMapper mapper, CommentRepository commentRepository, PostRepository postRepository) {</span>
+<span class="fc" id="L31">		this.mapper = mapper;</span>
+<span class="fc" id="L32">		this.commentRepository = commentRepository;</span>
+<span class="fc" id="L33">		this.postRepository = postRepository;</span>
+<span class="fc" id="L34">	}</span>
+
+	public Comment findById(Long id) {
+<span class="fc" id="L37">		return commentRepository.findById(id).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Comment not found&quot;));</span>
 	}
 
-	public boolean exist(long id) {
-<span class="nc" id="L31">		return commentRepository.existsById(id);</span>
+	public Comment save(Comment comment) {
+<span class="fc" id="L41">		return commentRepository.save(comment);</span>
 	}
 
-	public List&lt;Comment&gt; findAll() {
-<span class="nc" id="L35">		return commentRepository.findAll();</span>
+	private CommentDTO toDTO(Comment comment, User currentUser) {
+<span class="fc" id="L45">		 return mapper.toDTOWithLike(comment, currentUser);</span>
 	}
 
-	public Comment save(Comment comment){
-<span class="nc" id="L39">		return commentRepository.save(comment);</span>
+	public CommentDTO getComment(Long id, User currentUser) {
+<span class="fc" id="L49">		return toDTO(findById(id), currentUser);</span>
 	}
 
-    @Transactional 
-    public void deleteById(Long id) {
-<span class="nc" id="L44">        Optional&lt;Comment&gt; commentOptional = commentRepository.findById(id);</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (commentOptional.isPresent()) {</span>
-<span class="nc" id="L46">            Comment comment = commentOptional.get();</span>
-<span class="nc" id="L47">			commentRepository.delete(comment);</span>
-        }
-<span class="nc" id="L49">    }</span>
-
-	private CommentDTO toDTO (Comment comment) {
-<span class="nc" id="L52">        return mapper.toDTO(comment);</span>
-    }
-
-    private Comment toDomain (CommentDTO commentDTO) {
-<span class="nc" id="L56">        return mapper.toDomain(commentDTO);</span>
-    }
-
-    private List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments){
-<span class="nc" id="L60">        return mapper.toDTOs(comments);</span>
-    }
-
-	public Collection&lt;CommentDTO&gt; getcomments() {
-<span class="nc" id="L64">		return toDTOs(commentRepository.findAll());</span>
+	public Page&lt;CommentDTO&gt; getPostComments(Long postId, Pageable pageable, User currentUser) {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">		if (!postRepository.existsById(postId)) {</span>
+<span class="fc" id="L54">			throw new EntityNotFoundException(&quot;Post not found&quot;);</span>
+		}
+<span class="fc" id="L56">		Page&lt;Comment&gt; commentsPage = commentRepository.findByPostIdAndParentCommentIsNull(postId, pageable);</span>
+<span class="fc" id="L57">		return commentsPage.map(comment -&gt; toDTO(comment, currentUser));</span>
 	}
 
-	public CommentDTO getcomment(long id) {
-<span class="nc" id="L68">		return toDTO(commentRepository.findById(id).orElseThrow());</span>
+	public CommentDTO createComment(Long postId, CommentDTO commentDTO, User user) {
+<span class="fc" id="L61">		Post post = postRepository.findById(postId).orElseThrow(() -&gt; new EntityNotFoundException(&quot;Post not found&quot;));</span>
+
+<span class="fc" id="L63">		Comment comment = mapper.toDomain(commentDTO);</span>
+<span class="fc" id="L64">		comment.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));</span>
+<span class="fc" id="L65">		comment.setUpdatedAt(null);</span>
+<span class="fc" id="L66">		comment.setLikes(0);</span>
+<span class="fc" id="L67">		comment.setAuthor(user);</span>
+<span class="fc" id="L68">		comment.setPost(post);</span>
+
+<span class="fc" id="L70">		Comment savedComment = commentRepository.save(comment);</span>
+<span class="fc" id="L71">		return toDTO(savedComment, user);</span>
 	}
 
-	public CommentDTO createcomment(CommentDTO commentDTO) {
-<span class="nc" id="L72">		Comment comment = toDomain(commentDTO);</span>
-<span class="nc" id="L73"> 		this.save(comment);</span>
-<span class="nc" id="L74"> 		return toDTO(comment);</span>
+	@Transactional
+	public CommentDTO updateComment(Long commentId, CommentDTO commentDTO, User user) {
+<span class="fc" id="L76">		Comment comment = findById(commentId);</span>
+
+<span class="fc bfc" id="L78" title="All 4 branches covered.">		if (comment.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L79">			throw new AccessDeniedException(&quot;You can only edit your own comments&quot;);</span>
+		}
+
+<span class="fc bfc" id="L82" title="All 2 branches covered.">		if (Objects.equals(comment.getContent(), commentDTO.content())) {</span>
+<span class="fc" id="L83">			return toDTO(comment, user);</span>
+		}
+
+<span class="fc" id="L86">		comment.setContent(commentDTO.content());</span>
+<span class="fc" id="L87">		comment.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));</span>
+
+<span class="fc" id="L89">		Comment updatedComment = commentRepository.save(comment);</span>
+<span class="fc" id="L90">		return toDTO(updatedComment, user);</span>
 	}
 
+	@Transactional
+	public void deleteComment(Long commentId, User user) {
+<span class="fc" id="L95">		Comment comment = findById(commentId);</span>
+<span class="fc bfc" id="L96" title="All 4 branches covered.">		if (comment.getAuthor().getId() != user.getId() &amp;&amp; !user.getRoles().contains(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L97">			throw new AccessDeniedException(&quot;You can only delete your own comments&quot;);</span>
+		}
+<span class="fc" id="L99">		commentRepository.deleteLikesByCommentIds(List.of(commentId));</span>
+<span class="fc" id="L100">		commentRepository.delete(comment);</span>
+<span class="fc" id="L101">	}</span>
+
+	@Transactional
+	public CommentDTO toggleLike(Long commentId, User user) {
+<span class="fc" id="L105">		Comment comment = findById(commentId);</span>
+
+<span class="fc" id="L107">		boolean hasLiked = user.getLikedComments().contains(comment);</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">		if (hasLiked) {</span>
+<span class="fc" id="L109">			user.getLikedComments().remove(comment);</span>
+<span class="fc" id="L110">			comment.getUsersThatLiked().remove(user);</span>
+		} else {
+<span class="fc" id="L112">			user.getLikedComments().add(comment);</span>
+<span class="fc" id="L113">			comment.getUsersThatLiked().add(user);</span>
+		}
+<span class="fc" id="L115">		comment.setLikes(comment.getUsersThatLiked().size());</span>
+<span class="fc" id="L116">		return toDTO(comment, user);</span>
+	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

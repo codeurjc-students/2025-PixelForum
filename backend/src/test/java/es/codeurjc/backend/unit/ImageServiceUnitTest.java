@@ -101,6 +101,40 @@ class ImageServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("getImage should resize when only width is provided")
+	void getImageResizeOnlyWidthTest() throws Exception {
+		// GIVEN
+		BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "png", baos);
+		image.setImageData(baos.toByteArray());
+
+		// WHEN
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// THEN
+		byte[] result = imageService.getImage(1L, 100, null, 80);
+		assertNotNull(result);
+	}
+
+	@Test
+	@DisplayName("getImage should resize when only height is provided")
+	void getImageResizeOnlyHeightTest() throws Exception {
+		// GIVEN
+		BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "png", baos);
+		image.setImageData(baos.toByteArray());
+
+		// WHEN
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// THEN
+		byte[] result = imageService.getImage(1L, null, 100, 80);
+		assertNotNull(result);
+	}
+
+	@Test
 	@DisplayName("getImage should return original image when resize fails")
 	void getImageResizeFallbackTest() {
 		// GIVEN
@@ -258,7 +292,7 @@ class ImageServiceUnitTest {
 	}
 
 	@Test
-	@DisplayName("uploadImage should throw RuntimeException when IO fails")
+	@DisplayName("uploadImage should throw IllegalStateException when IO fails")
 	void uploadImageIOExceptionTest() throws IOException {
 		// GIVEN
 		MultipartFile file = mock(MultipartFile.class);
@@ -269,7 +303,7 @@ class ImageServiceUnitTest {
 		when(file.getBytes()).thenThrow(new IOException());
 
 		// WHEN & THEN
-		assertThrows(RuntimeException.class, () -> {
+		assertThrows(IllegalStateException.class, () -> {
 			imageService.uploadImage(file, user);
 		});
 	}

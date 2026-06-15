@@ -84,7 +84,7 @@ import jakarta.servlet.http.HttpServletRequest;
     @ExceptionHandler(Exception.class)
     public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleGeneric(Exception ex, HttpServletRequest request) {
 
-<span class="fc" id="L87">        return buildErrorResponse(</span>
+<span class="nc" id="L87">        return buildErrorResponse(</span>
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 &quot;Internal server error&quot;,
                 &quot;Unexpected server error, please try again later&quot;,

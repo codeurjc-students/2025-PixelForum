@@ -1,6 +1,7 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +61,7 @@ public class CommentService {
 		Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
 
 		Comment comment = mapper.toDomain(commentDTO);
-		comment.setCreatedAt(LocalDateTime.now());
+		comment.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		comment.setUpdatedAt(null);
 		comment.setLikes(0);
 		comment.setAuthor(user);
@@ -83,7 +84,7 @@ public class CommentService {
 		}
 
 		comment.setContent(commentDTO.content());
-		comment.setUpdatedAt(LocalDateTime.now());
+		comment.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
 		Comment updatedComment = commentRepository.save(comment);
 		return toDTO(updatedComment, user);

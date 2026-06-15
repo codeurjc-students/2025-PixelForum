@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,8 @@ import jakarta.persistence.EntityNotFoundException;
 @Tag("unit")
 @DisplayName("CommentService Unitary tests")
 class CommentServiceUnitTest {
+
+	private static final LocalDateTime FIXED_TIME = LocalDateTime.of(2026, Month.MAY, 1, 10, 0);
 
 	private CommentService commentService;
 
@@ -85,8 +88,8 @@ class CommentServiceUnitTest {
 		comment.setLikes(0);
 		comment.setUsersThatLiked(new HashSet<>());
 
-		commentDTO = new CommentDTO(1L, "Test comment", LocalDateTime.now(), LocalDateTime.now(),
-				new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1L);
+		commentDTO = new CommentDTO(1L, "Test comment", FIXED_TIME, FIXED_TIME,
+				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
 	}
 
 	// =============== findById ===============
@@ -273,8 +276,8 @@ class CommentServiceUnitTest {
 	@DisplayName("updateComment should update content when author edits")
 	void updateCommentSuccessTest() {
 		// GIVEN
-		CommentDTO updatedDTO = new CommentDTO(1L, "Updated content", LocalDateTime.now(), LocalDateTime.now(),
-				new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1L);
+		CommentDTO updatedDTO = new CommentDTO(1L, "Updated content", FIXED_TIME, FIXED_TIME,
+				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
 
 		when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 		when(commentRepository.save(comment)).thenReturn(comment);
@@ -295,8 +298,8 @@ class CommentServiceUnitTest {
 	@DisplayName("updateComment should allow admin to update any comment")
 	void updateCommentAdminTest() {
 		// GIVEN
-		CommentDTO updatedDTO = new CommentDTO(1L, "Updated by admin", LocalDateTime.now(), LocalDateTime.now(),
-				new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1L);
+		CommentDTO updatedDTO = new CommentDTO(1L, "Updated by admin", FIXED_TIME, FIXED_TIME,
+				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
 
 		when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 		when(commentRepository.save(comment)).thenReturn(comment);
@@ -314,8 +317,8 @@ class CommentServiceUnitTest {
 	@DisplayName("updateComment should return same DTO without saving when content is unchanged")
 	void updateCommentNoChangesTest() {
 		// GIVEN
-		CommentDTO sameContentDTO = new CommentDTO(1L, "Test comment", LocalDateTime.now(), LocalDateTime.now(),
-				new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, 1L);
+		CommentDTO sameContentDTO = new CommentDTO(1L, "Test comment", FIXED_TIME, FIXED_TIME,
+				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
 
 		when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 		when(mapper.toDTOWithLike(comment, user)).thenReturn(sameContentDTO);

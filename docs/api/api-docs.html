@@ -890,6 +890,42 @@ ul.nav-tabs {
     }
   }
 };
+    defs["CommentDTO"] = {
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "content" : {
+      "type" : "string"
+    },
+    "createdAt" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "updatedAt" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "author" : {
+      "$ref" : "#/components/schemas/BasicUserDTO"
+    },
+    "parentComment" : {
+      "$ref" : "#/components/schemas/CommentDTO"
+    },
+    "likes" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "hasUserLiked" : {
+      "type" : "boolean"
+    },
+    "post" : {
+      "type" : "integer",
+      "format" : "int64"
+    }
+  }
+};
     defs["CreateUserDTO"] = {
   "properties" : {
     "username" : {
@@ -934,6 +970,51 @@ ul.nav-tabs {
       "type" : "array",
       "items" : {
         "$ref" : "#/components/schemas/BasicUserDTO"
+      }
+    },
+    "number" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "sort" : {
+      "$ref" : "#/components/schemas/SortObject"
+    },
+    "numberOfElements" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "first" : {
+      "type" : "boolean"
+    },
+    "last" : {
+      "type" : "boolean"
+    },
+    "pageable" : {
+      "$ref" : "#/components/schemas/PageableObject"
+    },
+    "empty" : {
+      "type" : "boolean"
+    }
+  }
+};
+    defs["PageCommentDTO"] = {
+  "properties" : {
+    "totalElements" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "totalPages" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "size" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
+    "content" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/CommentDTO"
       }
     },
     "number" : {
@@ -1084,6 +1165,10 @@ ul.nav-tabs {
     "hasUserLiked" : {
       "type" : "boolean"
     },
+    "commentsCount" : {
+      "type" : "integer",
+      "format" : "int32"
+    },
     "images" : {
       "type" : "array",
       "items" : {
@@ -1098,10 +1183,10 @@ ul.nav-tabs {
     "empty" : {
       "type" : "boolean"
     },
-    "sorted" : {
+    "unsorted" : {
       "type" : "boolean"
     },
-    "unsorted" : {
+    "sorted" : {
       "type" : "boolean"
     }
   }
@@ -1177,6 +1262,25 @@ ul.nav-tabs {
             -->
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
+                  <li class="nav-header" data-group="CommentRestController"><a href="#api-CommentRestController">API Methods - CommentRestController</a></li>
+                    <li data-group="CommentRestController" data-name="createComment" class="">
+                      <a href="#api-CommentRestController-createComment">createComment</a>
+                    </li>
+                    <li data-group="CommentRestController" data-name="deleteComment" class="">
+                      <a href="#api-CommentRestController-deleteComment">deleteComment</a>
+                    </li>
+                    <li data-group="CommentRestController" data-name="getComment" class="">
+                      <a href="#api-CommentRestController-getComment">getComment</a>
+                    </li>
+                    <li data-group="CommentRestController" data-name="getPostComments" class="">
+                      <a href="#api-CommentRestController-getPostComments">getPostComments</a>
+                    </li>
+                    <li data-group="CommentRestController" data-name="toggleLike" class="">
+                      <a href="#api-CommentRestController-toggleLike">toggleLike</a>
+                    </li>
+                    <li data-group="CommentRestController" data-name="updateComment" class="">
+                      <a href="#api-CommentRestController-updateComment">updateComment</a>
+                    </li>
                   <li class="nav-header" data-group="ImageRestController"><a href="#api-ImageRestController">API Methods - ImageRestController</a></li>
                     <li data-group="ImageRestController" data-name="deleteImage" class="">
                       <a href="#api-ImageRestController-deleteImage">deleteImage</a>
@@ -1213,8 +1317,8 @@ ul.nav-tabs {
                     <li data-group="PostRestController" data-name="getPostById" class="">
                       <a href="#api-PostRestController-getPostById">getPostById</a>
                     </li>
-                    <li data-group="PostRestController" data-name="toggleLike" class="">
-                      <a href="#api-PostRestController-toggleLike">toggleLike</a>
+                    <li data-group="PostRestController" data-name="toggleLike1" class="">
+                      <a href="#api-PostRestController-toggleLike1">toggleLike1</a>
                     </li>
                     <li data-group="PostRestController" data-name="updatePost" class="">
                       <a href="#api-PostRestController-updatePost">updatePost</a>
@@ -1236,11 +1340,17 @@ ul.nav-tabs {
                     <li data-group="UserRestController" data-name="deleteUser" class="">
                       <a href="#api-UserRestController-deleteUser">deleteUser</a>
                     </li>
+                    <li data-group="UserRestController" data-name="getLikedComments" class="">
+                      <a href="#api-UserRestController-getLikedComments">getLikedComments</a>
+                    </li>
                     <li data-group="UserRestController" data-name="getLikedPosts" class="">
                       <a href="#api-UserRestController-getLikedPosts">getLikedPosts</a>
                     </li>
                     <li data-group="UserRestController" data-name="getUser" class="">
                       <a href="#api-UserRestController-getUser">getUser</a>
+                    </li>
+                    <li data-group="UserRestController" data-name="getUserComments" class="">
+                      <a href="#api-UserRestController-getUserComments">getUserComments</a>
                     </li>
                     <li data-group="UserRestController" data-name="getUserDetails" class="">
                       <a href="#api-UserRestController-getUserDetails">getUserDetails</a>
@@ -1278,6 +1388,2509 @@ ul.nav-tabs {
           </div>
         </div>
         <div id="sections">
+                <section id="api-CommentRestController">
+                  <h1>CommentRestController</h1>
+                    <div id="api-CommentRestController-createComment">
+                      <article id="api-CommentRestController-createComment-0" data-group="User" data-name="createComment" data-version="0">
+                        <div class="pull-left">
+                          <h1>createComment</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/posts/{postId}/comments</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-CommentRestController-createComment-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-java">Java</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-createComment-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-createComment-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-python">Python</a></li>
+                          <li class=""><a href="#examples-CommentRestController-createComment-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-CommentRestController-createComment-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ -H "Content-Type: application/json" \
+ "http://localhost:8080/api/v1/posts/{postId}/comments" \
+ -d '{
+  &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+  &quot;post&quot; : 5,
+  &quot;author&quot; : {
+    &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+    &quot;bio&quot; : &quot;bio&quot;,
+    &quot;id&quot; : 6,
+    &quot;avatar&quot; : 1,
+    &quot;username&quot; : &quot;username&quot;
+  },
+  &quot;hasUserLiked&quot; : true,
+  &quot;id&quot; : 0,
+  &quot;content&quot; : &quot;content&quot;,
+  &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+  &quot;likes&quot; : 5
+}'
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-CommentRestController-createComment-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.CommentRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        CommentDTO commentDTO = ; // CommentDTO | 
+
+        try {
+            CommentDTO result = apiInstance.createComment(postId, commentDTO);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#createComment");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-createComment-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long postId = new Long(); // Long | 
+final CommentDTO commentDTO = new CommentDTO(); // CommentDTO | 
+
+try {
+    final result = await api_instance.createComment(postId, commentDTO);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->createComment: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-createComment-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.CommentRestControllerApi;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        CommentDTO commentDTO = ; // CommentDTO | 
+
+        try {
+            CommentDTO result = apiInstance.createComment(postId, commentDTO);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#createComment");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-CommentRestController-createComment-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+CommentRestControllerApi *apiInstance = [[CommentRestControllerApi alloc] init];
+Long *postId = 789; //  (default to null)
+CommentDTO *commentDTO = ; // 
+
+[apiInstance createCommentWith:postId
+    commentDTO:commentDTO
+              completionHandler: ^(CommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.CommentRestControllerApi()
+var postId = 789; // {Long} 
+var commentDTO = ; // {CommentDTO} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.createComment(postId, commentDTO, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-CommentRestController-createComment-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class createCommentExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new CommentRestControllerApi();
+            var postId = 789;  // Long |  (default to null)
+            var commentDTO = new CommentDTO(); // CommentDTO | 
+
+            try {
+                CommentDTO result = apiInstance.createComment(postId, commentDTO);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling CommentRestControllerApi.createComment: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\CommentRestControllerApi();
+$postId = 789; // Long | 
+$commentDTO = ; // CommentDTO | 
+
+try {
+    $result = $api_instance->createComment($postId, $commentDTO);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling CommentRestControllerApi->createComment: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::CommentRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::CommentRestControllerApi->new();
+my $postId = 789; # Long | 
+my $commentDTO = WWW::OPenAPIClient::Object::CommentDTO->new(); # CommentDTO | 
+
+eval {
+    my $result = $api_instance->createComment(postId => $postId, commentDTO => $commentDTO);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling CommentRestControllerApi->createComment: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.CommentRestControllerApi()
+postId = 789 # Long |  (default to null)
+commentDTO =  # CommentDTO | 
+
+try:
+    api_response = api_instance.create_comment(postId, commentDTO)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling CommentRestControllerApi->createComment: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-createComment-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate CommentRestControllerApi;
+
+pub fn main() {
+    let postId = 789; // Long
+    let commentDTO = ; // CommentDTO
+
+    let mut context = CommentRestControllerApi::Context::default();
+    let result = client.createComment(postId, commentDTO, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">postId*</td>
+<td>
+
+
+    <div id="d2e199_createComment_postId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">commentDTO <span style="color:red;">*</span></td>
+<td>
+<p class="marked"></p>
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/CommentDTO"
+      }
+    }
+  },
+  "required" : true
+};
+
+  var schema = findNode('schema',schemaWrapper).schema;
+  if (!schema) {
+    schema = schemaWrapper.schema;
+  }
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else if (schema.items != null && schema.items.$ref != null) {
+    schema.items = defsParser.$refs.get(schema.items.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_createComment_commentDTO');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_createComment_commentDTO"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-CommentRestController-createComment-title-200"></h3>
+                            <p id="examples-CommentRestController-createComment-description-200" class="marked"></p>
+                            <script>
+                              var responseCommentRestController200_description = `OK`;
+                              var responseCommentRestController200_description_break = responseCommentRestController200_description.indexOf('\n');
+                              if (responseCommentRestController200_description_break == -1) {
+                                $("#examples-CommentRestController-createComment-title-200").text("Status: 200 - " + responseCommentRestController200_description);
+                              } else {
+                                $("#examples-CommentRestController-createComment-title-200").text("Status: 200 - " + responseCommentRestController200_description.substring(0, responseCommentRestController200_description_break));
+                                $("#examples-CommentRestController-createComment-description-200").html(responseCommentRestController200_description.substring(responseCommentRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-CommentRestController-createComment-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-CommentRestController-createComment-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-CommentRestController-createComment-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-CommentRestController-createComment-200-schema">
+                                <div id="responses-CommentRestController-createComment-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/CommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-CommentRestController-createComment-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-CommentRestController-createComment-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-CommentRestController-createComment-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-CommentRestController-deleteComment">
+                      <article id="api-CommentRestController-deleteComment-0" data-group="User" data-name="deleteComment" data-version="0">
+                        <div class="pull-left">
+                          <h1>deleteComment</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/api/v1/posts/{postId}/comments/{commentId}</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-CommentRestController-deleteComment-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-java">Java</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-deleteComment-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-deleteComment-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-python">Python</a></li>
+                          <li class=""><a href="#examples-CommentRestController-deleteComment-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-CommentRestController-deleteComment-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE \
+ "http://localhost:8080/api/v1/posts/{postId}/comments/{commentId}"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.CommentRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+
+        try {
+            apiInstance.deleteComment(postId, commentId);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#deleteComment");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long postId = new Long(); // Long | 
+final Long commentId = new Long(); // Long | 
+
+try {
+    final result = await api_instance.deleteComment(postId, commentId);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->deleteComment: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.CommentRestControllerApi;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+
+        try {
+            apiInstance.deleteComment(postId, commentId);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#deleteComment");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+CommentRestControllerApi *apiInstance = [[CommentRestControllerApi alloc] init];
+Long *postId = 789; //  (default to null)
+Long *commentId = 789; //  (default to null)
+
+[apiInstance deleteCommentWith:postId
+    commentId:commentId
+              completionHandler: ^(NSError* error) {
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.CommentRestControllerApi()
+var postId = 789; // {Long} 
+var commentId = 789; // {Long} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully.');
+  }
+};
+api.deleteComment(postId, commentId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-CommentRestController-deleteComment-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class deleteCommentExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new CommentRestControllerApi();
+            var postId = 789;  // Long |  (default to null)
+            var commentId = 789;  // Long |  (default to null)
+
+            try {
+                apiInstance.deleteComment(postId, commentId);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling CommentRestControllerApi.deleteComment: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\CommentRestControllerApi();
+$postId = 789; // Long | 
+$commentId = 789; // Long | 
+
+try {
+    $api_instance->deleteComment($postId, $commentId);
+} catch (Exception $e) {
+    echo 'Exception when calling CommentRestControllerApi->deleteComment: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::CommentRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::CommentRestControllerApi->new();
+my $postId = 789; # Long | 
+my $commentId = 789; # Long | 
+
+eval {
+    $api_instance->deleteComment(postId => $postId, commentId => $commentId);
+};
+if ($@) {
+    warn "Exception when calling CommentRestControllerApi->deleteComment: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.CommentRestControllerApi()
+postId = 789 # Long |  (default to null)
+commentId = 789 # Long |  (default to null)
+
+try:
+    api_instance.delete_comment(postId, commentId)
+except ApiException as e:
+    print("Exception when calling CommentRestControllerApi->deleteComment: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-deleteComment-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate CommentRestControllerApi;
+
+pub fn main() {
+    let postId = 789; // Long
+    let commentId = 789; // Long
+
+    let mut context = CommentRestControllerApi::Context::default();
+    let result = client.deleteComment(postId, commentId, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">postId*</td>
+<td>
+
+
+    <div id="d2e199_deleteComment_postId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">commentId*</td>
+<td>
+
+
+    <div id="d2e199_deleteComment_commentId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-CommentRestController-deleteComment-title-200"></h3>
+                            <p id="examples-CommentRestController-deleteComment-description-200" class="marked"></p>
+                            <script>
+                              var responseCommentRestController200_description = `OK`;
+                              var responseCommentRestController200_description_break = responseCommentRestController200_description.indexOf('\n');
+                              if (responseCommentRestController200_description_break == -1) {
+                                $("#examples-CommentRestController-deleteComment-title-200").text("Status: 200 - " + responseCommentRestController200_description);
+                              } else {
+                                $("#examples-CommentRestController-deleteComment-title-200").text("Status: 200 - " + responseCommentRestController200_description.substring(0, responseCommentRestController200_description_break));
+                                $("#examples-CommentRestController-deleteComment-description-200").html(responseCommentRestController200_description.substring(responseCommentRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-CommentRestController-deleteComment-200" class="nav nav-tabs nav-tabs-examples" >
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-CommentRestController-deleteComment-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-CommentRestController-deleteComment-200-schema">
+                                <div id="responses-CommentRestController-deleteComment-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK"
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-CommentRestController-deleteComment-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-CommentRestController-deleteComment-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-CommentRestController-deleteComment-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-CommentRestController-getComment">
+                      <article id="api-CommentRestController-getComment-0" data-group="User" data-name="getComment" data-version="0">
+                        <div class="pull-left">
+                          <h1>getComment</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/posts/{postId}/comments/{commentId}</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-CommentRestController-getComment-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-java">Java</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-getComment-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-getComment-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-python">Python</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getComment-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-CommentRestController-getComment-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/posts/{postId}/comments/{commentId}"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-CommentRestController-getComment-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.CommentRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+
+        try {
+            CommentDTO result = apiInstance.getComment(postId, commentId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#getComment");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-getComment-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long postId = new Long(); // Long | 
+final Long commentId = new Long(); // Long | 
+
+try {
+    final result = await api_instance.getComment(postId, commentId);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->getComment: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-getComment-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.CommentRestControllerApi;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+
+        try {
+            CommentDTO result = apiInstance.getComment(postId, commentId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#getComment");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-CommentRestController-getComment-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+CommentRestControllerApi *apiInstance = [[CommentRestControllerApi alloc] init];
+Long *postId = 789; //  (default to null)
+Long *commentId = 789; //  (default to null)
+
+[apiInstance getCommentWith:postId
+    commentId:commentId
+              completionHandler: ^(CommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.CommentRestControllerApi()
+var postId = 789; // {Long} 
+var commentId = 789; // {Long} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getComment(postId, commentId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-CommentRestController-getComment-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getCommentExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new CommentRestControllerApi();
+            var postId = 789;  // Long |  (default to null)
+            var commentId = 789;  // Long |  (default to null)
+
+            try {
+                CommentDTO result = apiInstance.getComment(postId, commentId);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling CommentRestControllerApi.getComment: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\CommentRestControllerApi();
+$postId = 789; // Long | 
+$commentId = 789; // Long | 
+
+try {
+    $result = $api_instance->getComment($postId, $commentId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling CommentRestControllerApi->getComment: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::CommentRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::CommentRestControllerApi->new();
+my $postId = 789; # Long | 
+my $commentId = 789; # Long | 
+
+eval {
+    my $result = $api_instance->getComment(postId => $postId, commentId => $commentId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling CommentRestControllerApi->getComment: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.CommentRestControllerApi()
+postId = 789 # Long |  (default to null)
+commentId = 789 # Long |  (default to null)
+
+try:
+    api_response = api_instance.get_comment(postId, commentId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling CommentRestControllerApi->getComment: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getComment-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate CommentRestControllerApi;
+
+pub fn main() {
+    let postId = 789; // Long
+    let commentId = 789; // Long
+
+    let mut context = CommentRestControllerApi::Context::default();
+    let result = client.getComment(postId, commentId, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">postId*</td>
+<td>
+
+
+    <div id="d2e199_getComment_postId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">commentId*</td>
+<td>
+
+
+    <div id="d2e199_getComment_commentId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-CommentRestController-getComment-title-200"></h3>
+                            <p id="examples-CommentRestController-getComment-description-200" class="marked"></p>
+                            <script>
+                              var responseCommentRestController200_description = `OK`;
+                              var responseCommentRestController200_description_break = responseCommentRestController200_description.indexOf('\n');
+                              if (responseCommentRestController200_description_break == -1) {
+                                $("#examples-CommentRestController-getComment-title-200").text("Status: 200 - " + responseCommentRestController200_description);
+                              } else {
+                                $("#examples-CommentRestController-getComment-title-200").text("Status: 200 - " + responseCommentRestController200_description.substring(0, responseCommentRestController200_description_break));
+                                $("#examples-CommentRestController-getComment-description-200").html(responseCommentRestController200_description.substring(responseCommentRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-CommentRestController-getComment-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-CommentRestController-getComment-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-CommentRestController-getComment-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-CommentRestController-getComment-200-schema">
+                                <div id="responses-CommentRestController-getComment-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/CommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-CommentRestController-getComment-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-CommentRestController-getComment-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-CommentRestController-getComment-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-CommentRestController-getPostComments">
+                      <article id="api-CommentRestController-getPostComments-0" data-group="User" data-name="getPostComments" data-version="0">
+                        <div class="pull-left">
+                          <h1>getPostComments</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/posts/{postId}/comments</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-CommentRestController-getPostComments-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-java">Java</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-getPostComments-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-getPostComments-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-python">Python</a></li>
+                          <li class=""><a href="#examples-CommentRestController-getPostComments-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-CommentRestController-getPostComments-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/posts/{postId}/comments?pageable="
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.CommentRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Pageable pageable = ; // Pageable | 
+
+        try {
+            PageCommentDTO result = apiInstance.getPostComments(postId, pageable);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#getPostComments");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long postId = new Long(); // Long | 
+final Pageable pageable = new Pageable(); // Pageable | 
+
+try {
+    final result = await api_instance.getPostComments(postId, pageable);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->getPostComments: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.CommentRestControllerApi;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Pageable pageable = ; // Pageable | 
+
+        try {
+            PageCommentDTO result = apiInstance.getPostComments(postId, pageable);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#getPostComments");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+CommentRestControllerApi *apiInstance = [[CommentRestControllerApi alloc] init];
+Long *postId = 789; //  (default to null)
+Pageable *pageable = ; //  (default to null)
+
+[apiInstance getPostCommentsWith:postId
+    pageable:pageable
+              completionHandler: ^(PageCommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.CommentRestControllerApi()
+var postId = 789; // {Long} 
+var pageable = ; // {Pageable} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getPostComments(postId, pageable, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-CommentRestController-getPostComments-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getPostCommentsExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new CommentRestControllerApi();
+            var postId = 789;  // Long |  (default to null)
+            var pageable = new Pageable(); // Pageable |  (default to null)
+
+            try {
+                PageCommentDTO result = apiInstance.getPostComments(postId, pageable);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling CommentRestControllerApi.getPostComments: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\CommentRestControllerApi();
+$postId = 789; // Long | 
+$pageable = ; // Pageable | 
+
+try {
+    $result = $api_instance->getPostComments($postId, $pageable);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling CommentRestControllerApi->getPostComments: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::CommentRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::CommentRestControllerApi->new();
+my $postId = 789; # Long | 
+my $pageable = ; # Pageable | 
+
+eval {
+    my $result = $api_instance->getPostComments(postId => $postId, pageable => $pageable);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling CommentRestControllerApi->getPostComments: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.CommentRestControllerApi()
+postId = 789 # Long |  (default to null)
+pageable =  # Pageable |  (default to null)
+
+try:
+    api_response = api_instance.get_post_comments(postId, pageable)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling CommentRestControllerApi->getPostComments: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-getPostComments-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate CommentRestControllerApi;
+
+pub fn main() {
+    let postId = 789; // Long
+    let pageable = ; // Pageable
+
+    let mut context = CommentRestControllerApi::Context::default();
+    let result = client.getPostComments(postId, pageable, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">postId*</td>
+<td>
+
+
+    <div id="d2e199_getPostComments_postId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">pageable*</td>
+<td>
+
+
+    <div id="d2e199_getPostComments_pageable">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Pageable
+                </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-CommentRestController-getPostComments-title-200"></h3>
+                            <p id="examples-CommentRestController-getPostComments-description-200" class="marked"></p>
+                            <script>
+                              var responseCommentRestController200_description = `OK`;
+                              var responseCommentRestController200_description_break = responseCommentRestController200_description.indexOf('\n');
+                              if (responseCommentRestController200_description_break == -1) {
+                                $("#examples-CommentRestController-getPostComments-title-200").text("Status: 200 - " + responseCommentRestController200_description);
+                              } else {
+                                $("#examples-CommentRestController-getPostComments-title-200").text("Status: 200 - " + responseCommentRestController200_description.substring(0, responseCommentRestController200_description_break));
+                                $("#examples-CommentRestController-getPostComments-description-200").html(responseCommentRestController200_description.substring(responseCommentRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-CommentRestController-getPostComments-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-CommentRestController-getPostComments-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-CommentRestController-getPostComments-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-CommentRestController-getPostComments-200-schema">
+                                <div id="responses-CommentRestController-getPostComments-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/PageCommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-CommentRestController-getPostComments-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-CommentRestController-getPostComments-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-CommentRestController-getPostComments-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-CommentRestController-toggleLike">
+                      <article id="api-CommentRestController-toggleLike-0" data-group="User" data-name="toggleLike" data-version="0">
+                        <div class="pull-left">
+                          <h1>toggleLike</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/v1/posts/{postId}/comments/{commentId}/like</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-CommentRestController-toggleLike-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-java">Java</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-toggleLike-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-toggleLike-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-python">Python</a></li>
+                          <li class=""><a href="#examples-CommentRestController-toggleLike-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-CommentRestController-toggleLike-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/posts/{postId}/comments/{commentId}/like"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.CommentRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+
+        try {
+            CommentDTO result = apiInstance.toggleLike(postId, commentId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#toggleLike");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long postId = new Long(); // Long | 
+final Long commentId = new Long(); // Long | 
+
+try {
+    final result = await api_instance.toggleLike(postId, commentId);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->toggleLike: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.CommentRestControllerApi;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+
+        try {
+            CommentDTO result = apiInstance.toggleLike(postId, commentId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#toggleLike");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+CommentRestControllerApi *apiInstance = [[CommentRestControllerApi alloc] init];
+Long *postId = 789; //  (default to null)
+Long *commentId = 789; //  (default to null)
+
+[apiInstance toggleLikeWith:postId
+    commentId:commentId
+              completionHandler: ^(CommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.CommentRestControllerApi()
+var postId = 789; // {Long} 
+var commentId = 789; // {Long} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.toggleLike(postId, commentId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-CommentRestController-toggleLike-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class toggleLikeExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new CommentRestControllerApi();
+            var postId = 789;  // Long |  (default to null)
+            var commentId = 789;  // Long |  (default to null)
+
+            try {
+                CommentDTO result = apiInstance.toggleLike(postId, commentId);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling CommentRestControllerApi.toggleLike: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\CommentRestControllerApi();
+$postId = 789; // Long | 
+$commentId = 789; // Long | 
+
+try {
+    $result = $api_instance->toggleLike($postId, $commentId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling CommentRestControllerApi->toggleLike: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::CommentRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::CommentRestControllerApi->new();
+my $postId = 789; # Long | 
+my $commentId = 789; # Long | 
+
+eval {
+    my $result = $api_instance->toggleLike(postId => $postId, commentId => $commentId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling CommentRestControllerApi->toggleLike: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.CommentRestControllerApi()
+postId = 789 # Long |  (default to null)
+commentId = 789 # Long |  (default to null)
+
+try:
+    api_response = api_instance.toggle_like(postId, commentId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling CommentRestControllerApi->toggleLike: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-toggleLike-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate CommentRestControllerApi;
+
+pub fn main() {
+    let postId = 789; // Long
+    let commentId = 789; // Long
+
+    let mut context = CommentRestControllerApi::Context::default();
+    let result = client.toggleLike(postId, commentId, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">postId*</td>
+<td>
+
+
+    <div id="d2e199_toggleLike_postId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">commentId*</td>
+<td>
+
+
+    <div id="d2e199_toggleLike_commentId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-CommentRestController-toggleLike-title-200"></h3>
+                            <p id="examples-CommentRestController-toggleLike-description-200" class="marked"></p>
+                            <script>
+                              var responseCommentRestController200_description = `OK`;
+                              var responseCommentRestController200_description_break = responseCommentRestController200_description.indexOf('\n');
+                              if (responseCommentRestController200_description_break == -1) {
+                                $("#examples-CommentRestController-toggleLike-title-200").text("Status: 200 - " + responseCommentRestController200_description);
+                              } else {
+                                $("#examples-CommentRestController-toggleLike-title-200").text("Status: 200 - " + responseCommentRestController200_description.substring(0, responseCommentRestController200_description_break));
+                                $("#examples-CommentRestController-toggleLike-description-200").html(responseCommentRestController200_description.substring(responseCommentRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-CommentRestController-toggleLike-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-CommentRestController-toggleLike-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-CommentRestController-toggleLike-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-CommentRestController-toggleLike-200-schema">
+                                <div id="responses-CommentRestController-toggleLike-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/CommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-CommentRestController-toggleLike-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-CommentRestController-toggleLike-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-CommentRestController-toggleLike-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-CommentRestController-updateComment">
+                      <article id="api-CommentRestController-updateComment-0" data-group="User" data-name="updateComment" data-version="0">
+                        <div class="pull-left">
+                          <h1>updateComment</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/api/v1/posts/{postId}/comments/{commentId}</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-CommentRestController-updateComment-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-java">Java</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-updateComment-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-CommentRestController-updateComment-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-python">Python</a></li>
+                          <li class=""><a href="#examples-CommentRestController-updateComment-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-CommentRestController-updateComment-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT \
+ -H "Accept: */*" \
+ -H "Content-Type: application/json" \
+ "http://localhost:8080/api/v1/posts/{postId}/comments/{commentId}" \
+ -d '{
+  &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+  &quot;post&quot; : 5,
+  &quot;author&quot; : {
+    &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+    &quot;bio&quot; : &quot;bio&quot;,
+    &quot;id&quot; : 6,
+    &quot;avatar&quot; : 1,
+    &quot;username&quot; : &quot;username&quot;
+  },
+  &quot;hasUserLiked&quot; : true,
+  &quot;id&quot; : 0,
+  &quot;content&quot; : &quot;content&quot;,
+  &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
+  &quot;likes&quot; : 5
+}'
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-CommentRestController-updateComment-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.CommentRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+        CommentDTO commentDTO = ; // CommentDTO | 
+
+        try {
+            CommentDTO result = apiInstance.updateComment(postId, commentId, commentDTO);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#updateComment");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-updateComment-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long postId = new Long(); // Long | 
+final Long commentId = new Long(); // Long | 
+final CommentDTO commentDTO = new CommentDTO(); // CommentDTO | 
+
+try {
+    final result = await api_instance.updateComment(postId, commentId, commentDTO);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->updateComment: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-CommentRestController-updateComment-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.CommentRestControllerApi;
+
+public class CommentRestControllerApiExample {
+    public static void main(String[] args) {
+        CommentRestControllerApi apiInstance = new CommentRestControllerApi();
+        Long postId = 789; // Long | 
+        Long commentId = 789; // Long | 
+        CommentDTO commentDTO = ; // CommentDTO | 
+
+        try {
+            CommentDTO result = apiInstance.updateComment(postId, commentId, commentDTO);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling CommentRestControllerApi#updateComment");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-CommentRestController-updateComment-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+CommentRestControllerApi *apiInstance = [[CommentRestControllerApi alloc] init];
+Long *postId = 789; //  (default to null)
+Long *commentId = 789; //  (default to null)
+CommentDTO *commentDTO = ; // 
+
+[apiInstance updateCommentWith:postId
+    commentId:commentId
+    commentDTO:commentDTO
+              completionHandler: ^(CommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.CommentRestControllerApi()
+var postId = 789; // {Long} 
+var commentId = 789; // {Long} 
+var commentDTO = ; // {CommentDTO} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.updateComment(postId, commentId, commentDTO, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-CommentRestController-updateComment-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class updateCommentExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new CommentRestControllerApi();
+            var postId = 789;  // Long |  (default to null)
+            var commentId = 789;  // Long |  (default to null)
+            var commentDTO = new CommentDTO(); // CommentDTO | 
+
+            try {
+                CommentDTO result = apiInstance.updateComment(postId, commentId, commentDTO);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling CommentRestControllerApi.updateComment: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\CommentRestControllerApi();
+$postId = 789; // Long | 
+$commentId = 789; // Long | 
+$commentDTO = ; // CommentDTO | 
+
+try {
+    $result = $api_instance->updateComment($postId, $commentId, $commentDTO);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling CommentRestControllerApi->updateComment: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::CommentRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::CommentRestControllerApi->new();
+my $postId = 789; # Long | 
+my $commentId = 789; # Long | 
+my $commentDTO = WWW::OPenAPIClient::Object::CommentDTO->new(); # CommentDTO | 
+
+eval {
+    my $result = $api_instance->updateComment(postId => $postId, commentId => $commentId, commentDTO => $commentDTO);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling CommentRestControllerApi->updateComment: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.CommentRestControllerApi()
+postId = 789 # Long |  (default to null)
+commentId = 789 # Long |  (default to null)
+commentDTO =  # CommentDTO | 
+
+try:
+    api_response = api_instance.update_comment(postId, commentId, commentDTO)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling CommentRestControllerApi->updateComment: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-CommentRestController-updateComment-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate CommentRestControllerApi;
+
+pub fn main() {
+    let postId = 789; // Long
+    let commentId = 789; // Long
+    let commentDTO = ; // CommentDTO
+
+    let mut context = CommentRestControllerApi::Context::default();
+    let result = client.updateComment(postId, commentId, commentDTO, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">postId*</td>
+<td>
+
+
+    <div id="d2e199_updateComment_postId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">commentId*</td>
+<td>
+
+
+    <div id="d2e199_updateComment_commentId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">commentDTO <span style="color:red;">*</span></td>
+<td>
+<p class="marked"></p>
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/CommentDTO"
+      }
+    }
+  },
+  "required" : true
+};
+
+  var schema = findNode('schema',schemaWrapper).schema;
+  if (!schema) {
+    schema = schemaWrapper.schema;
+  }
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else if (schema.items != null && schema.items.$ref != null) {
+    schema.items = defsParser.$refs.get(schema.items.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_updateComment_commentDTO');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_updateComment_commentDTO"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-CommentRestController-updateComment-title-200"></h3>
+                            <p id="examples-CommentRestController-updateComment-description-200" class="marked"></p>
+                            <script>
+                              var responseCommentRestController200_description = `OK`;
+                              var responseCommentRestController200_description_break = responseCommentRestController200_description.indexOf('\n');
+                              if (responseCommentRestController200_description_break == -1) {
+                                $("#examples-CommentRestController-updateComment-title-200").text("Status: 200 - " + responseCommentRestController200_description);
+                              } else {
+                                $("#examples-CommentRestController-updateComment-title-200").text("Status: 200 - " + responseCommentRestController200_description.substring(0, responseCommentRestController200_description_break));
+                                $("#examples-CommentRestController-updateComment-description-200").html(responseCommentRestController200_description.substring(responseCommentRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-CommentRestController-updateComment-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-CommentRestController-updateComment-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-CommentRestController-updateComment-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-CommentRestController-updateComment-200-schema">
+                                <div id="responses-CommentRestController-updateComment-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/CommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-CommentRestController-updateComment-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-CommentRestController-updateComment-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-CommentRestController-updateComment-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
                 <section id="api-ImageRestController">
                   <h1>ImageRestController</h1>
                     <div id="api-ImageRestController-deleteImage">
@@ -3886,7 +6499,7 @@ pub fn main() {
  "http://localhost:8080/api/v1/posts" \
  -d '{
   &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
-  &quot;images&quot; : [ 2, 2 ],
+  &quot;images&quot; : [ 5, 5 ],
   &quot;author&quot; : {
     &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
     &quot;bio&quot; : &quot;bio&quot;,
@@ -3895,16 +6508,17 @@ pub fn main() {
     &quot;username&quot; : &quot;username&quot;
   },
   &quot;hasUserLiked&quot; : true,
+  &quot;commentsCount&quot; : 5,
   &quot;topic&quot; : {
     &quot;name&quot; : &quot;name&quot;,
     &quot;description&quot; : &quot;description&quot;,
-    &quot;id&quot; : 5
+    &quot;id&quot; : 6
   },
   &quot;id&quot; : 0,
   &quot;title&quot; : &quot;title&quot;,
   &quot;content&quot; : &quot;content&quot;,
   &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
-  &quot;likes&quot; : 5
+  &quot;likes&quot; : 1
 }'
 </code></pre>
                           </div>
@@ -5412,10 +8026,10 @@ pub fn main() {
                         </article>
                       </div>
                       <hr>
-                    <div id="api-PostRestController-toggleLike">
-                      <article id="api-PostRestController-toggleLike-0" data-group="User" data-name="toggleLike" data-version="0">
+                    <div id="api-PostRestController-toggleLike1">
+                      <article id="api-PostRestController-toggleLike1-0" data-group="User" data-name="toggleLike1" data-version="0">
                         <div class="pull-left">
-                          <h1>toggleLike</h1>
+                          <h1>toggleLike1</h1>
                           <p></p>
                         </div>
                         <div class="pull-right"></div>
@@ -5429,29 +8043,29 @@ pub fn main() {
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-PostRestController-toggleLike-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-java">Java</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-dart">Dart</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-PostRestController-toggleLike-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-PostRestController-toggleLike-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-python">Python</a></li>
-                          <li class=""><a href="#examples-PostRestController-toggleLike-0-rust">Rust</a></li>
+                          <li class="active"><a href="#examples-PostRestController-toggleLike1-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-java">Java</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-PostRestController-toggleLike1-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-PostRestController-toggleLike1-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-python">Python</a></li>
+                          <li class=""><a href="#examples-PostRestController-toggleLike1-0-rust">Rust</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-PostRestController-toggleLike-0-curl">
+                          <div class="tab-pane active" id="examples-PostRestController-toggleLike1-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X POST \
  -H "Accept: */*" \
  "http://localhost:8080/api/v1/posts/{id}/like"
 </code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-PostRestController-toggleLike-0-java">
+                          <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-java">
                             <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
 import org.openapitools.client.auth.*;
 import org.openapitools.client.model.*;
@@ -5468,10 +8082,10 @@ public class PostRestControllerApiExample {
         Long id = 789; // Long | 
 
         try {
-            PostDTO result = apiInstance.toggleLike(id);
+            PostDTO result = apiInstance.toggleLike1(id);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling PostRestControllerApi#toggleLike");
+            System.err.println("Exception when calling PostRestControllerApi#toggleLike1");
             e.printStackTrace();
         }
     }
@@ -5479,7 +8093,7 @@ public class PostRestControllerApiExample {
 </code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-PostRestController-toggleLike-0-dart">
+                          <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-dart">
                             <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
 
 final api_instance = DefaultApi();
@@ -5487,16 +8101,16 @@ final api_instance = DefaultApi();
 final Long id = new Long(); // Long | 
 
 try {
-    final result = await api_instance.toggleLike(id);
+    final result = await api_instance.toggleLike1(id);
     print(result);
 } catch (e) {
-    print('Exception when calling DefaultApi->toggleLike: $e\n');
+    print('Exception when calling DefaultApi->toggleLike1: $e\n');
 }
 
 </code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-PostRestController-toggleLike-0-android">
+                          <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-android">
                             <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.PostRestControllerApi;
 
 public class PostRestControllerApiExample {
@@ -5505,27 +8119,27 @@ public class PostRestControllerApiExample {
         Long id = 789; // Long | 
 
         try {
-            PostDTO result = apiInstance.toggleLike(id);
+            PostDTO result = apiInstance.toggleLike1(id);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling PostRestControllerApi#toggleLike");
+            System.err.println("Exception when calling PostRestControllerApi#toggleLike1");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-PostRestController-toggleLike-0-groovy">
+  <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-objc">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">
 
 // Create an instance of the API class
 PostRestControllerApi *apiInstance = [[PostRestControllerApi alloc] init];
 Long *id = 789; //  (default to null)
 
-[apiInstance toggleLikeWith:id
+[apiInstance toggleLike1With:id
               completionHandler: ^(PostDTO output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
@@ -5537,7 +8151,7 @@ Long *id = 789; //  (default to null)
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-javascript">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
 
 // Create an instance of the API class
@@ -5551,14 +8165,14 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.toggleLike(id, callback);
+api.toggleLike1(id, callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-PostRestController-toggleLike-0-angular">
+                            <!--<div class="tab-pane" id="examples-PostRestController-toggleLike1-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-csharp">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using Org.OpenAPITools.Api;
@@ -5567,7 +8181,7 @@ using Org.OpenAPITools.Model;
 
 namespace Example
 {
-    public class toggleLikeExample
+    public class toggleLike1Example
     {
         public void main()
         {
@@ -5577,10 +8191,10 @@ namespace Example
             var id = 789;  // Long |  (default to null)
 
             try {
-                PostDTO result = apiInstance.toggleLike(id);
+                PostDTO result = apiInstance.toggleLike1(id);
                 Debug.WriteLine(result);
             } catch (Exception e) {
-                Debug.Print("Exception when calling PostRestControllerApi.toggleLike: " + e.Message );
+                Debug.Print("Exception when calling PostRestControllerApi.toggleLike1: " + e.Message );
             }
         }
     }
@@ -5588,7 +8202,7 @@ namespace Example
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-php">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
@@ -5597,15 +8211,15 @@ $api_instance = new OpenAPITools\Client\Api\PostRestControllerApi();
 $id = 789; // Long | 
 
 try {
-    $result = $api_instance->toggleLike($id);
+    $result = $api_instance->toggleLike1($id);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling PostRestControllerApi->toggleLike: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling PostRestControllerApi->toggleLike1: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-perl">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use WWW::OPenAPIClient::Configuration;
 use WWW::OPenAPIClient::PostRestControllerApi;
@@ -5615,15 +8229,15 @@ my $api_instance = WWW::OPenAPIClient::PostRestControllerApi->new();
 my $id = 789; # Long | 
 
 eval {
-    my $result = $api_instance->toggleLike(id => $id);
+    my $result = $api_instance->toggleLike1(id => $id);
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling PostRestControllerApi->toggleLike: $@\n";
+    warn "Exception when calling PostRestControllerApi->toggleLike1: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-python">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import openapi_client
@@ -5635,20 +8249,20 @@ api_instance = openapi_client.PostRestControllerApi()
 id = 789 # Long |  (default to null)
 
 try:
-    api_response = api_instance.toggle_like(id)
+    api_response = api_instance.toggle_like1(id)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling PostRestControllerApi->toggleLike: %s\n" % e)</code></pre>
+    print("Exception when calling PostRestControllerApi->toggleLike1: %s\n" % e)</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-PostRestController-toggleLike-0-rust">
+                            <div class="tab-pane" id="examples-PostRestController-toggleLike1-0-rust">
                               <pre class="prettyprint"><code class="language-rust">extern crate PostRestControllerApi;
 
 pub fn main() {
     let id = 789; // Long
 
     let mut context = PostRestControllerApi::Context::default();
-    let result = client.toggleLike(id, &context).wait();
+    let result = client.toggleLike1(id, &context).wait();
 
     println!("{:?}", result);
 }
@@ -5673,7 +8287,7 @@ pub fn main() {
 <td>
 
 
-    <div id="d2e199_toggleLike_id">
+    <div id="d2e199_toggleLike1_id">
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
@@ -5699,23 +8313,23 @@ pub fn main() {
 
 
                           <h2>Responses</h2>
-                            <h3 id="examples-PostRestController-toggleLike-title-200"></h3>
-                            <p id="examples-PostRestController-toggleLike-description-200" class="marked"></p>
+                            <h3 id="examples-PostRestController-toggleLike1-title-200"></h3>
+                            <p id="examples-PostRestController-toggleLike1-description-200" class="marked"></p>
                             <script>
                               var responsePostRestController200_description = `OK`;
                               var responsePostRestController200_description_break = responsePostRestController200_description.indexOf('\n');
                               if (responsePostRestController200_description_break == -1) {
-                                $("#examples-PostRestController-toggleLike-title-200").text("Status: 200 - " + responsePostRestController200_description);
+                                $("#examples-PostRestController-toggleLike1-title-200").text("Status: 200 - " + responsePostRestController200_description);
                               } else {
-                                $("#examples-PostRestController-toggleLike-title-200").text("Status: 200 - " + responsePostRestController200_description.substring(0, responsePostRestController200_description_break));
-                                $("#examples-PostRestController-toggleLike-description-200").html(responsePostRestController200_description.substring(responsePostRestController200_description_break));
+                                $("#examples-PostRestController-toggleLike1-title-200").text("Status: 200 - " + responsePostRestController200_description.substring(0, responsePostRestController200_description_break));
+                                $("#examples-PostRestController-toggleLike1-description-200").html(responsePostRestController200_description.substring(responsePostRestController200_description_break));
                               }
                             </script>
 
 
-                            <ul id="responses-detail-PostRestController-toggleLike-200" class="nav nav-tabs nav-tabs-examples" >
+                            <ul id="responses-detail-PostRestController-toggleLike1-200" class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-PostRestController-toggleLike-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-PostRestController-toggleLike1-200-schema">Schema</a>
                                 </li>
 
 
@@ -5724,9 +8338,9 @@ pub fn main() {
                             </ul>
 
 
-                            <div class="tab-content" id="responses-PostRestController-toggleLike-200-wrapper" style='margin-bottom: 10px;'>
-                              <div class="tab-pane active" id="responses-PostRestController-toggleLike-200-schema">
-                                <div id="responses-PostRestController-toggleLike-schema-200" class="exampleStyle">
+                            <div class="tab-content" id="responses-PostRestController-toggleLike1-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-PostRestController-toggleLike1-200-schema">
+                                <div id="responses-PostRestController-toggleLike1-schema-200" class="exampleStyle">
                                   <script>
                                     $(document).ready(function() {
                                       var schemaWrapper = {
@@ -5765,14 +8379,14 @@ pub fn main() {
                                       }
 
                                       var view = new JSONSchemaView(schema, 3);
-                                      $('#responses-PostRestController-toggleLike-200-schema-data').val(JSON.stringify(schema));
-                                      var result = $('#responses-PostRestController-toggleLike-schema-200');
+                                      $('#responses-PostRestController-toggleLike1-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-PostRestController-toggleLike1-schema-200');
                                       result.empty();
                                       result.append(view.render());
                                     });
                                   </script>
                                 </div>
-                                <input id='responses-PostRestController-toggleLike-200-schema-data' type='hidden' value=''></input>
+                                <input id='responses-PostRestController-toggleLike1-200-schema-data' type='hidden' value=''></input>
                               </div>
                             </div>
                         </article>
@@ -5818,7 +8432,7 @@ pub fn main() {
  "http://localhost:8080/api/v1/posts/{id}" \
  -d '{
   &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
-  &quot;images&quot; : [ 2, 2 ],
+  &quot;images&quot; : [ 5, 5 ],
   &quot;author&quot; : {
     &quot;createdAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
     &quot;bio&quot; : &quot;bio&quot;,
@@ -5827,16 +8441,17 @@ pub fn main() {
     &quot;username&quot; : &quot;username&quot;
   },
   &quot;hasUserLiked&quot; : true,
+  &quot;commentsCount&quot; : 5,
   &quot;topic&quot; : {
     &quot;name&quot; : &quot;name&quot;,
     &quot;description&quot; : &quot;description&quot;,
-    &quot;id&quot; : 5
+    &quot;id&quot; : 6
   },
   &quot;id&quot; : 0,
   &quot;title&quot; : &quot;title&quot;,
   &quot;content&quot; : &quot;content&quot;,
   &quot;updatedAt&quot; : &quot;2000-01-23T04:56:07.000+00:00&quot;,
-  &quot;likes&quot; : 5
+  &quot;likes&quot; : 1
 }'
 </code></pre>
                           </div>
@@ -8069,6 +10684,410 @@ pub fn main() {
                         </article>
                       </div>
                       <hr>
+                    <div id="api-UserRestController-getLikedComments">
+                      <article id="api-UserRestController-getLikedComments-0" data-group="User" data-name="getLikedComments" data-version="0">
+                        <div class="pull-left">
+                          <h1>getLikedComments</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/users/{id}/liked-comments</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-getLikedComments-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getLikedComments-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getLikedComments-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-getLikedComments-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-getLikedComments-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/users/{id}/liked-comments?pageable="
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+        Pageable pageable = ; // Pageable | 
+
+        try {
+            PageCommentDTO result = apiInstance.getLikedComments(id, pageable);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getLikedComments");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long id = new Long(); // Long | 
+final Pageable pageable = new Pageable(); // Pageable | 
+
+try {
+    final result = await api_instance.getLikedComments(id, pageable);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->getLikedComments: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+        Pageable pageable = ; // Pageable | 
+
+        try {
+            PageCommentDTO result = apiInstance.getLikedComments(id, pageable);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getLikedComments");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+Long *id = 789; //  (default to null)
+Pageable *pageable = ; //  (default to null)
+
+[apiInstance getLikedCommentsWith:id
+    pageable:pageable
+              completionHandler: ^(PageCommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var id = 789; // {Long} 
+var pageable = ; // {Pageable} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getLikedComments(id, pageable, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-getLikedComments-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getLikedCommentsExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+            var id = 789;  // Long |  (default to null)
+            var pageable = new Pageable(); // Pageable |  (default to null)
+
+            try {
+                PageCommentDTO result = apiInstance.getLikedComments(id, pageable);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.getLikedComments: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+$id = 789; // Long | 
+$pageable = ; // Pageable | 
+
+try {
+    $result = $api_instance->getLikedComments($id, $pageable);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->getLikedComments: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+my $id = 789; # Long | 
+my $pageable = ; # Pageable | 
+
+eval {
+    my $result = $api_instance->getLikedComments(id => $id, pageable => $pageable);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->getLikedComments: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+id = 789 # Long |  (default to null)
+pageable =  # Pageable |  (default to null)
+
+try:
+    api_response = api_instance.get_liked_comments(id, pageable)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->getLikedComments: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getLikedComments-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+    let id = 789; // Long
+    let pageable = ; // Pageable
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.getLikedComments(id, pageable, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+<td>
+
+
+    <div id="d2e199_getLikedComments_id">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">pageable*</td>
+<td>
+
+
+    <div id="d2e199_getLikedComments_pageable">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Pageable
+                </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-getLikedComments-title-200"></h3>
+                            <p id="examples-UserRestController-getLikedComments-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-getLikedComments-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-getLikedComments-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-getLikedComments-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-getLikedComments-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-getLikedComments-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-getLikedComments-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-getLikedComments-200-schema">
+                                <div id="responses-UserRestController-getLikedComments-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/PageCommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-getLikedComments-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-getLikedComments-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-getLikedComments-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-UserRestController-getLikedPosts">
                       <article id="api-UserRestController-getLikedPosts-0" data-group="User" data-name="getLikedPosts" data-version="0">
                         <div class="pull-left">
@@ -8834,6 +11853,410 @@ pub fn main() {
                                   </script>
                                 </div>
                                 <input id='responses-UserRestController-getUser-200-schema-data' type='hidden' value=''></input>
+                              </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-UserRestController-getUserComments">
+                      <article id="api-UserRestController-getUserComments-0" data-group="User" data-name="getUserComments" data-version="0">
+                        <div class="pull-left">
+                          <h1>getUserComments</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/v1/users/{id}/comments</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-UserRestController-getUserComments-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-java">Java</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-dart">Dart</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getUserComments-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-UserRestController-getUserComments-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-python">Python</a></li>
+                          <li class=""><a href="#examples-UserRestController-getUserComments-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-UserRestController-getUserComments-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: */*" \
+ "http://localhost:8080/api/v1/users/{id}/comments?pageable="
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-UserRestController-getUserComments-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.UserRestControllerApi;
+
+import java.io.File;
+import java.util.*;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+        Pageable pageable = ; // Pageable | 
+
+        try {
+            PageCommentDTO result = apiInstance.getUserComments(id, pageable);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getUserComments");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getUserComments-0-dart">
+                            <pre class="prettyprint"><code class="language-dart">import 'package:openapi/api.dart';
+
+final api_instance = DefaultApi();
+
+final Long id = new Long(); // Long | 
+final Pageable pageable = new Pageable(); // Pageable | 
+
+try {
+    final result = await api_instance.getUserComments(id, pageable);
+    print(result);
+} catch (e) {
+    print('Exception when calling DefaultApi->getUserComments: $e\n');
+}
+
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-UserRestController-getUserComments-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.UserRestControllerApi;
+
+public class UserRestControllerApiExample {
+    public static void main(String[] args) {
+        UserRestControllerApi apiInstance = new UserRestControllerApi();
+        Long id = 789; // Long | 
+        Pageable pageable = ; // Pageable | 
+
+        try {
+            PageCommentDTO result = apiInstance.getUserComments(id, pageable);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling UserRestControllerApi#getUserComments");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-UserRestController-getUserComments-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+UserRestControllerApi *apiInstance = [[UserRestControllerApi alloc] init];
+Long *id = 789; //  (default to null)
+Pageable *pageable = ; //  (default to null)
+
+[apiInstance getUserCommentsWith:id
+    pageable:pageable
+              completionHandler: ^(PageCommentDTO output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var OpenApiDefinition = require('open_api_definition');
+
+// Create an instance of the API class
+var api = new OpenApiDefinition.UserRestControllerApi()
+var id = 789; // {Long} 
+var pageable = ; // {Pageable} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getUserComments(id, pageable, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-UserRestController-getUserComments-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getUserCommentsExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new UserRestControllerApi();
+            var id = 789;  // Long |  (default to null)
+            var pageable = new Pageable(); // Pageable |  (default to null)
+
+            try {
+                PageCommentDTO result = apiInstance.getUserComments(id, pageable);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling UserRestControllerApi.getUserComments: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\UserRestControllerApi();
+$id = 789; // Long | 
+$pageable = ; // Pageable | 
+
+try {
+    $result = $api_instance->getUserComments($id, $pageable);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling UserRestControllerApi->getUserComments: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::UserRestControllerApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::UserRestControllerApi->new();
+my $id = 789; # Long | 
+my $pageable = ; # Pageable | 
+
+eval {
+    my $result = $api_instance->getUserComments(id => $id, pageable => $pageable);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling UserRestControllerApi->getUserComments: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.UserRestControllerApi()
+id = 789 # Long |  (default to null)
+pageable =  # Pageable |  (default to null)
+
+try:
+    api_response = api_instance.get_user_comments(id, pageable)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling UserRestControllerApi->getUserComments: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-UserRestController-getUserComments-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate UserRestControllerApi;
+
+pub fn main() {
+    let id = 789; // Long
+    let pageable = ; // Pageable
+
+    let mut context = UserRestControllerApi::Context::default();
+    let result = client.getUserComments(id, pageable, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+<td>
+
+
+    <div id="d2e199_getUserComments_id">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">pageable*</td>
+<td>
+
+
+    <div id="d2e199_getUserComments_pageable">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Pageable
+                </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-UserRestController-getUserComments-title-200"></h3>
+                            <p id="examples-UserRestController-getUserComments-description-200" class="marked"></p>
+                            <script>
+                              var responseUserRestController200_description = `OK`;
+                              var responseUserRestController200_description_break = responseUserRestController200_description.indexOf('\n');
+                              if (responseUserRestController200_description_break == -1) {
+                                $("#examples-UserRestController-getUserComments-title-200").text("Status: 200 - " + responseUserRestController200_description);
+                              } else {
+                                $("#examples-UserRestController-getUserComments-title-200").text("Status: 200 - " + responseUserRestController200_description.substring(0, responseUserRestController200_description_break));
+                                $("#examples-UserRestController-getUserComments-description-200").html(responseUserRestController200_description.substring(responseUserRestController200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-UserRestController-getUserComments-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-UserRestController-getUserComments-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-UserRestController-getUserComments-200-wrapper" style='margin-bottom: 10px;'>
+                              <div class="tab-pane active" id="responses-UserRestController-getUserComments-200-schema">
+                                <div id="responses-UserRestController-getUserComments-schema-200" class="exampleStyle">
+                                  <script>
+                                    $(document).ready(function() {
+                                      var schemaWrapper = {
+  "description" : "OK",
+  "content" : {
+    "*/*" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/PageCommentDTO"
+      }
+    }
+  }
+};
+                                      var schema = findNode('schema',schemaWrapper).schema;
+                                      if (!schema) {
+                                        schema = schemaWrapper.schema;
+                                      }
+                                      if (schema == null) {
+                                        return;
+                                      }
+                                      if (schema.$ref != null) {
+                                        schema = defsParser.$refs.get(schema.$ref);
+                                        if (schema.properties != null) {
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        }
+                                      } else if (schema.items != null && schema.items.$ref != null) {
+                                        schema.items = defsParser.$refs.get(schema.items.$ref);
+                                      } else {
+                                        schemaWrapper.definitions = Object.assign({}, defs);
+                                        $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                          console.log(err);
+                                        });
+                                      }
+
+                                      var view = new JSONSchemaView(schema, 3);
+                                      $('#responses-UserRestController-getUserComments-200-schema-data').val(JSON.stringify(schema));
+                                      var result = $('#responses-UserRestController-getUserComments-schema-200');
+                                      result.empty();
+                                      result.append(view.render());
+                                    });
+                                  </script>
+                                </div>
+                                <input id='responses-UserRestController-getUserComments-200-schema-data' type='hidden' value=''></input>
                               </div>
                             </div>
                         </article>
