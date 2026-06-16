@@ -1,8 +1,9 @@
 package es.codeurjc.backend.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -43,15 +44,16 @@ public class User {
 
     @ManyToMany
     @JoinTable(name = "user_liked_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
-    private List<Post> likedPosts = new ArrayList<>();
+    private Set<Post> likedPosts = new HashSet<>();
 
-    private List<Long> likedComments;
+    @ManyToMany
+    @JoinTable(name = "user_liked_comments", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "comment_id"))
+    private Set<Comment> likedComments = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
 
     public User() {
-
     }
 
     public User(String username, String email, String password, LocalDateTime createdAt, String bio, String... roles) {
@@ -60,8 +62,8 @@ public class User {
         this.password = password;
         this.createdAt = createdAt;
         this.bio = bio;
-        likedPosts = new ArrayList<>();
-        likedComments = new ArrayList<>();
+        likedPosts = new HashSet<>();
+        likedComments = new HashSet<>();
         this.roles = List.of(roles);
     }
 
@@ -94,11 +96,11 @@ public class User {
         return avatar;
     }
 
-    public List<Post> getLikedPosts() {
+    public Set<Post> getLikedPosts() {
         return likedPosts;
     }
 
-    public List<Long> getLikedComments() {
+    public Set<Comment> getLikedComments() {
         return likedComments;
     }
 
@@ -135,11 +137,11 @@ public class User {
         this.avatar = avatar;
     }
 
-    public void setLikedPosts(List<Post> likedPosts) {
+    public void setLikedPosts(Set<Post> likedPosts) {
         this.likedPosts = likedPosts;
     }
 
-    public void setLikedComments(List<Long> likedComments) {
+    public void setLikedComments(Set<Comment> likedComments) {
         this.likedComments = likedComments;
     }
 

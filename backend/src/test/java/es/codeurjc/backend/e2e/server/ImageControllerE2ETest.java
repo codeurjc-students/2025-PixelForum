@@ -75,12 +75,14 @@ class ImageControllerE2ETest {
     @Test
     @DisplayName("Upload empty files should fail")
     void uploadEmptySystemTest() {
+        byte[] empty = new byte[0];
         given()
                 .cookie("AuthToken", authToken)
+                .multiPart("files", "empty.png", empty, "image/png")
                 .when()
                 .post()
                 .then()
-                .statusCode(500);
+                .statusCode(400);
     }
 
     // ------------------- GET -------------------

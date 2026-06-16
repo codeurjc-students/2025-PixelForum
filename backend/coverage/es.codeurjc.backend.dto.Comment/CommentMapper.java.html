@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommentMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.dto.comment</a> &gt; <span class="el_source">CommentMapper.java</span></div><h1>CommentMapper.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.dto.comment;
+
+import java.util.Collection;
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.Comment;
+import es.codeurjc.backend.model.User;
+
+@Mapper(componentModel = &quot;spring&quot;, uses = UserMapper.class)
+public interface CommentMapper {
+
+    @Mapping(target = &quot;hasUserLiked&quot;, ignore = true)
+    CommentDTO toDTO(Comment comment);
+
+    List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments);
+
+    @Mapping(target = &quot;author&quot;, ignore = true)
+    @Mapping(target = &quot;post&quot;, ignore = true)
+    @Mapping(target = &quot;usersThatLiked&quot;, ignore = true)
+    Comment toDomain(CommentDTO commentDTO);
+
+    default CommentDTO toDTOWithLike(Comment comment, User currentUser) {
+<span class="fc" id="L25">        CommentDTO dto = toDTO(comment);</span>
+<span class="fc" id="L26">        Boolean hasLiked = false;</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (currentUser != null) {</span>
+<span class="pc bpc" id="L28" title="1 of 4 branches missed.">            hasLiked = comment.getUsersThatLiked() != null &amp;&amp; comment.getUsersThatLiked().contains(currentUser);</span>
+        }
+<span class="fc" id="L30">        return new CommentDTO(</span>
+<span class="fc" id="L31">                dto.id(), dto.content(),</span>
+<span class="fc" id="L32">                dto.createdAt(), dto.updatedAt(),</span>
+<span class="fc" id="L33">                dto.author(),</span>
+<span class="fc" id="L34">                dto.parentComment(),</span>
+<span class="fc" id="L35">                dto.likes(),</span>
+                hasLiked,
+<span class="fc" id="L37">                dto.post());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -40,10 +40,7 @@ export class PostService {
 			params = params.set('topic', topic.trim());
 		}
 
-		return this.http.get<PageResponse<Post>>(this.baseUrl, {
-			params,
-			withCredentials: true
-		});
+		return this.http.get<PageResponse<Post>>(this.baseUrl, { params, withCredentials: true });
 	}
 
 	getById(id: number): Observable<Post> {

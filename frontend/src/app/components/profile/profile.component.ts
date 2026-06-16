@@ -13,11 +13,12 @@ import { ImageService } from '../../services/image.service';
 import { firstValueFrom } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { CommentListComponent } from '../comment-list/comment-list.component';
 
 @Component({
 	selector: 'app-profile',
 	standalone: true,
-	imports: [CommonModule, PostListComponent],
+	imports: [CommonModule, PostListComponent, CommentListComponent],
 	templateUrl: './profile.component.html',
 	styleUrls: ['./profile.component.scss']
 })

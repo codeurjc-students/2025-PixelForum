@@ -26,6 +26,7 @@ public class SecurityConfig {
 	// API ENDPOINTS
     private static final String API_V = "/api/v1";
     private static final String API_POSTS = API_V + "/posts/**";
+    private static final String API_COMMENTS = API_V + "/posts/*/comments/**";
     private static final String API_USERS = API_V + "/users/**";
 	private static final String API_IMAGES = API_V + "/images/**";
 
@@ -77,7 +78,13 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.POST, API_POSTS).hasRole("USER")
 					.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole("USER")
 					.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole("USER")
-					
+
+					// COMMENTS
+					.requestMatchers(HttpMethod.GET, API_COMMENTS).permitAll()
+					.requestMatchers(HttpMethod.POST, API_COMMENTS).hasRole("USER")
+					.requestMatchers(HttpMethod.PUT, API_COMMENTS).hasRole("USER")
+					.requestMatchers(HttpMethod.DELETE, API_COMMENTS).hasRole("USER")
+
 					// IMAGES
 					.requestMatchers(HttpMethod.GET, API_IMAGES).permitAll()
 					.requestMatchers(HttpMethod.POST, API_IMAGES).hasRole("USER")
@@ -85,6 +92,7 @@ public class SecurityConfig {
 					
 					// USERS
 					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-posts").hasRole("USER")
+					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-comments").hasRole("USER")
 					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/details").hasRole("USER")
 					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()
 					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
@@ -101,7 +109,7 @@ public class SecurityConfig {
 					.requestMatchers("/v3/api-docs.yaml").permitAll()
 					.requestMatchers("/api-docs/**").permitAll()
 					
-					// Otros
+					// Others
 					.anyRequest().permitAll()
 			);
 		

@@ -1,19 +1,27 @@
 <div class="post-detail-container">
-    <!-- Loading State -->
-    <div *ngIf="loading" class="state-container">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading post...</p>
-        </div>
-    </div>
+	<!-- Loading State -->
+	<div *ngIf="loading" class="state-container">
+		<div class="loading-spinner">
+			<div class="spinner"></div>
+			<p>Loading post...</p>
+		</div>
+	</div>
 
-    <!-- Post Detail -->
-    <div *ngIf="post && !loading" class="detail-content">
-        <app-post [post]="post" [mode]="'detail'"></app-post>
-        <!-- Comments Section -->
-        <div class="comments-section" id="comments">
-            <h3>Comments</h3>
-            <p class="placeholder">Comments feature coming soon...</p>
-        </div>
-    </div>
+	<!-- Post Detail -->
+	<div *ngIf="post && !loading" class="detail-content">
+		<app-post [post]="post" [mode]="'detail'"></app-post>
+
+		<!-- Comments Section -->
+		<div class="comments-section" id="comments">
+			<h3 class="comments-title">
+				<svg viewBox="0 0 24 24" class="comments-icon">
+					<path
+						d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" />
+				</svg>
+				Comments
+			</h3>
+			<app-comment-list [postId]="post.id!"
+				(commentCountChanged)="onCommentCountChanged($event)"></app-comment-list>
+		</div>
+	</div>
 </div>

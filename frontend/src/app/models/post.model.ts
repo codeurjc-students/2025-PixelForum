@@ -12,4 +12,5 @@ export interface Post {
 	topic: Topic;
 	likes?: number;
 	hasUserLiked?: boolean;
+	commentsCount?: number;
 }

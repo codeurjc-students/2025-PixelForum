@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { PostDetailComponent } from './post-detail.component';
 import { PostService } from '../../services/post.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,7 +26,7 @@ describe('PostDetailComponent', () => {
 
     beforeEach(async () => {
         postServiceSpy = jasmine.createSpyObj('PostService', ['getById']);
-        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+        routerSpy = jasmine.createSpyObj('Router', ['navigate', 'getCurrentNavigation']);
         locationSpy = jasmine.createSpyObj('Location', ['back']);
 
         await TestBed.configureTestingModule({
@@ -42,6 +42,7 @@ describe('PostDetailComponent', () => {
             ]
         }).compileComponents();
 
+        routerSpy.getCurrentNavigation.and.returnValue(undefined as any);
         fixture = TestBed.createComponent(PostDetailComponent);
         component = fixture.componentInstance;
         spyOn(console, 'error');
@@ -83,6 +84,65 @@ describe('PostDetailComponent', () => {
 
         expect(component.loading).toBeFalse();
         expect(component.post).toEqual(mockPost);
+    });
+
+    // ------- SCROLL TO COMMENTS -------
+
+    it('should read scrollToComments from navigation state', () => {
+        routerSpy.getCurrentNavigation.and.returnValue({ extras: { state: { scrollToComments: true } } } as any);
+
+        const fixture = TestBed.createComponent(PostDetailComponent);
+        const comp = fixture.componentInstance;
+
+        expect(comp.scrollToComments).toBeTrue();
+    });
+
+    it('should scroll to comments when scrollToComments is true', fakeAsync(() => {
+        component.scrollToComments = true;
+        postServiceSpy.getById.and.returnValue(of(mockPost));
+
+        const element = document.createElement('div');
+        spyOn(document, 'getElementById').and.returnValue(element);
+        const scrollSpy = spyOn(element, 'scrollIntoView');
+        component.loadPost(1);
+        tick(100);
+
+        expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth' });
+    }));
+
+    // ------- COMMENT COUNT CHANGE -------
+
+    it('should increase comments count', () => {
+        component.post = {
+            ...mockPost,
+            commentsCount: 5
+        };
+
+        component.onCommentCountChanged(1);
+
+        expect(component.post.commentsCount).toBe(6);
+    });
+
+    it('should decrease comments count', () => {
+        component.post = {
+            ...mockPost,
+            commentsCount: 5
+        };
+
+        component.onCommentCountChanged(-2);
+
+        expect(component.post.commentsCount).toBe(3);
+    });
+
+    it('should not allow comments count below zero', () => {
+        component.post = {
+            ...mockPost,
+            commentsCount: 0
+        };
+
+        component.onCommentCountChanged(-1);
+
+        expect(component.post.commentsCount).toBe(0);
     });
 
     // ---------- GO BACK ----------

@@ -12,12 +12,14 @@ import es.codeurjc.backend.dto.user.UserMapper;
 public interface PostMapper {
 
     @Mapping(target = "hasUserLiked", ignore = true)
+    @Mapping(target = "commentsCount", expression = "java(post.getComments().size())")
     PostDTO toDTO(Post post);
 
     List<PostDTO> toDTOs(Collection<Post> posts);
 
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "usersThatLiked", ignore = true)
+    @Mapping(target = "comments", ignore = true)
     Post toDomain(PostDTO postDTO);
 
     default PostDTO toDTOWithLike(Post post, User currentUser) {
@@ -33,6 +35,7 @@ public interface PostMapper {
                 dto.author(), dto.topic(),
                 dto.likes(),
                 hasLiked,
+                dto.commentsCount(),
                 dto.images());
     }
 }

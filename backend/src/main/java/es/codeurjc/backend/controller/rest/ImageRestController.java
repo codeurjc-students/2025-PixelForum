@@ -25,6 +25,11 @@ public class ImageRestController {
         this.userService = userService;
     }
 
+    private User getCurrentUser(Principal principal) {
+        return userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getImage(@PathVariable long id, @RequestParam(required = false) Integer w,
             @RequestParam(required = false) Integer h, @RequestParam(required = false, defaultValue = "95") int q) {
@@ -40,12 +45,7 @@ public class ImageRestController {
     @PostMapping
     public ResponseEntity<List<Long>> uploadImages(@RequestParam("files") MultipartFile[] files,
             Principal principal) {
-        if (files == null || files.length == 0) {
-            return ResponseEntity.badRequest().build();
-        }
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+        User currentUser = getCurrentUser(principal);
         List<Long> ids = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -64,8 +64,7 @@ public class ImageRestController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteImage(@PathVariable long id, Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User currentUser = getCurrentUser(principal);
         imageService.deleteImage(id, currentUser);
         return ResponseEntity.noContent().build();
     }

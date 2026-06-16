@@ -1,7 +1,9 @@
 package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.codeurjc.backend.dto.comment.CommentDTO;
+import es.codeurjc.backend.dto.comment.CommentMapper;
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.dto.user.BasicUserDTO;
@@ -20,6 +24,7 @@ import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
 import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
@@ -41,17 +46,19 @@ public class UserService {
 	private final PostRepository postRepository;
 	private final PostMapper postMapper;
 	private final CommentRepository commentRepository;
+	private final CommentMapper commentMapper;
 	private final ImageRepository imageRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public UserService(UserMapper mapper, UserRepository userRepository, PostRepository postRepository,
-			PostMapper postMapper, CommentRepository commentRepository, ImageRepository imageRepository,
-			PasswordEncoder passwordEncoder) {
+			PostMapper postMapper, CommentRepository commentRepository, CommentMapper commentMapper,
+			ImageRepository imageRepository, PasswordEncoder passwordEncoder) {
 		this.mapper = mapper;
 		this.userRepository = userRepository;
 		this.postRepository = postRepository;
 		this.postMapper = postMapper;
 		this.commentRepository = commentRepository;
+		this.commentMapper = commentMapper;
 		this.imageRepository = imageRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
@@ -105,7 +112,7 @@ public class UserService {
 		User user = mapper.toDomain(userDTO);
 
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setCreatedAt(LocalDateTime.now());
+		user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		user.setRoles(List.of("USER"));
 
 		return mapper.toDTO(userRepository.save(user));
@@ -166,23 +173,8 @@ public class UserService {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
+		removeLikes(user);
 		commentRepository.deleteByAuthor(user);
-
-		// Remove likes made by this user
-		for (Post likedPost : new ArrayList<>(user.getLikedPosts())) {
-			likedPost.getUsersThatLiked().remove(user);
-			likedPost.setLikes(likedPost.getUsersThatLiked().size());
-		}
-		user.getLikedPosts().clear();
-
-		// Remove likes on posts authored by this user
-		List<Post> posts = postRepository.findByAuthor(user);
-		for (Post post : posts) {
-			for (User u : post.getUsersThatLiked()) {
-				u.getLikedPosts().remove(post);
-			}
-			post.getUsersThatLiked().clear();
-		}
 		postRepository.deleteByAuthor(user);
 
 		if (user.getAvatar() != null) {
@@ -192,6 +184,18 @@ public class UserService {
 		}
 
 		userRepository.delete(user);
+	}
+
+	private void removeLikes(User user) {
+		List<Post> posts = postRepository.findByAuthor(user);
+		List<Long> postIds = posts.stream().map(Post::getId).toList();
+		postRepository.deleteLikesByPostIds(postIds);
+
+		List<Comment> comments = commentRepository.findByAuthor(user);
+		Set<Long> commentIds = new HashSet<>();
+		commentIds.addAll(posts.stream().flatMap(p -> p.getComments().stream()).map(Comment::getId).toList());
+		commentIds.addAll(comments.stream().map(Comment::getId).toList());
+		commentRepository.deleteLikesByCommentIds(new ArrayList<>(commentIds));
 	}
 
 	@Transactional
@@ -258,6 +262,23 @@ public class UserService {
 				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 		return postRepository.findByUsersThatLikedContains(user, pageable)
 				.map(post -> postMapper.toDTOWithLike(post, currentUser));
+	}
+
+	public Page<CommentDTO> getLikedComments(Long id, User currentUser, Pageable pageable) {
+		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
+			throw new AccessDeniedException("You can only view your own liked comments");
+		}
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		return commentRepository.findByUsersThatLikedContains(user, pageable)
+				.map(comment -> commentMapper.toDTOWithLike(comment, currentUser));
+	}
+
+	public Page<CommentDTO> getUserComments(Long id, User currentUser, Pageable pageable) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		return commentRepository.findByAuthor(user, pageable)
+				.map(comment -> commentMapper.toDTOWithLike(comment, currentUser));
 	}
 
 }

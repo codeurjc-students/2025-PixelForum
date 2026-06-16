@@ -1,0 +1,288 @@
+.comment-card {
+	background: #f2f2f2;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.comment-card.clickable {
+	cursor: pointer;
+	transition: box-shadow 0.2s ease, border-color 0.2s ease;
+ 
+	&:hover {
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+ 	}
+}
+
+/* Header */
+.comment-header {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0.2rem 0.4rem;
+    margin: -0.2rem -0.4rem;
+}
+
+.avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: #e5e5e5;
+	color: #111;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	overflow: hidden;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		display: block;
+		border-radius: 50%;
+	}
+
+	.avatar-icon {
+		width: 22px;
+		height: 22px;
+		stroke: #111;
+		stroke-width: 1.5;
+		fill: none;
+	}
+}
+
+.author-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.username {
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: #111;
+}
+
+.timestamp {
+	font-size: 0.8rem;
+	color: #818384;
+}
+
+/* Action buttons (edit/delete) shown on hover */
+.comment-actions {
+	display: flex;
+	gap: 0.25rem;
+	margin-left: auto;
+	transition: opacity 0.2s ease;
+}
+
+.action-btn {
+	width: 30px;
+	height: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	padding: 0;
+
+	.icon {
+		width: 16px;
+		height: 16px;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	&.button {
+		color: #111;
+
+		.icon {
+			stroke: #111;
+		}
+
+		&:hover {
+			background: #e0e0e0;
+		}
+	}
+
+	&:active {
+		transform: scale(0.92);
+	}
+}
+
+/* Body */
+.comment-body {
+	padding-left: calc(36px + 0.75rem); // align with author text
+}
+
+.comment-content {
+	margin: 0;
+	color: #111;
+	font-size: 0.95rem;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+/* Edit form */
+.edit-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.edit-textarea {
+	width: 100%;
+	padding: 0.6rem 0.75rem;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	background: #fff;
+	font-size: 0.95rem;
+	font-family: inherit;
+	line-height: 1.5;
+	color: #111;
+	resize: vertical;
+	transition: border-color 0.2s ease;
+	box-sizing: border-box;
+
+	&:focus {
+		outline: none;
+		border-color: #8BC34A;
+		box-shadow: 0 0 0 2px rgba(139, 195, 74, 0.15);
+	}
+}
+
+.edit-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.char-count {
+	margin-right: auto;
+	font-size: 0.78rem;
+	color: #aaa;
+}
+
+.btn-cancel {
+	padding: 0.35rem 0.9rem;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	background: none;
+	color: #555;
+	font-size: 0.85rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: #e5e5e5;
+		color: #111;
+	}
+}
+
+.btn-save {
+	padding: 0.35rem 0.9rem;
+	border: none;
+	border-radius: 6px;
+	background: #8BC34A;
+	color: #fff;
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: #7cb33a;
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+/* Footer */
+.comment-footer {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding-left: calc(36px + 0.75rem);
+}
+
+.interaction-btn {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.6rem;
+	background: none;
+	border: none;
+	border-radius: 999px;
+	cursor: pointer;
+	color: #111;
+	font-size: 0.85rem;
+	transition: all 0.2s ease;
+
+	.icon {
+		width: 16px;
+		height: 16px;
+		stroke: #111;
+		stroke-width: 2;
+		fill: none;
+		transition: all 0.2s ease;
+	}
+
+	.count {
+		font-size: 0.82rem;
+		font-weight: 500;
+	}
+
+	&:hover {
+		background: #e0e0e0;
+	}
+
+	&:active {
+		transform: scale(0.95);
+	}
+}
+
+.like-btn.liked .icon {
+	fill: #8BC34A;
+}
+
+.edited-badge {
+	font-size: 0.75rem;
+	color: #aaa;
+	font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+
+	.comment-body,
+	.comment-footer {
+		padding-left: 0;
+	}
+
+	.comment-actions {
+		opacity: 1;
+	}
+}

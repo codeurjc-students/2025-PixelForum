@@ -122,7 +122,7 @@ describe('PostComponent', () => {
 
 	it('should navigate to comments', () => {
 		component.goToComments();
-		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts', 1], { fragment: 'comments' });
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts', 1], { state: { scrollToComments: true } });
 	});
 
 	// ---------- EDIT ----------

@@ -25,38 +25,38 @@ public class ImageRestController {
 <span class="fc" id="L25">        this.userService = userService;</span>
 <span class="fc" id="L26">    }</span>
 
+    private User getCurrentUser(Principal principal) {
+<span class="fc" id="L29">        return userService.findByUsername(principal.getName())</span>
+<span class="pc" id="L30">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+    }
+
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;byte[]&gt; getImage(@PathVariable long id, @RequestParam(required = false) Integer w,
             @RequestParam(required = false) Integer h, @RequestParam(required = false, defaultValue = &quot;95&quot;) int q) {
 
-<span class="fc" id="L32">        byte[] imageData = imageService.getImage(id, w, h, q);</span>
+<span class="fc" id="L37">        byte[] imageData = imageService.getImage(id, w, h, q);</span>
 
-<span class="fc" id="L34">        return ResponseEntity.ok()</span>
-<span class="fc" id="L35">                .contentType(MediaType.IMAGE_JPEG)</span>
-<span class="fc" id="L36">                .header(&quot;Cache-Control&quot;, &quot;public, max-age=31536000&quot;)</span>
-<span class="fc" id="L37">                .body(imageData);</span>
+<span class="fc" id="L39">        return ResponseEntity.ok()</span>
+<span class="fc" id="L40">                .contentType(MediaType.IMAGE_JPEG)</span>
+<span class="fc" id="L41">                .header(&quot;Cache-Control&quot;, &quot;public, max-age=31536000&quot;)</span>
+<span class="fc" id="L42">                .body(imageData);</span>
     }
 
     @PostMapping
     public ResponseEntity&lt;List&lt;Long&gt;&gt; uploadImages(@RequestParam(&quot;files&quot;) MultipartFile[] files,
             Principal principal) {
-<span class="pc bpc" id="L43" title="2 of 4 branches missed.">        if (files == null || files.length == 0) {</span>
-<span class="nc" id="L44">            return ResponseEntity.badRequest().build();</span>
-        }
-<span class="fc" id="L46">        User currentUser = userService.findByUsername(principal.getName())</span>
-<span class="pc" id="L47">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
-
+<span class="fc" id="L48">        User currentUser = getCurrentUser(principal);</span>
 <span class="fc" id="L49">        List&lt;Long&gt; ids = new ArrayList&lt;&gt;();</span>
 
 <span class="fc bfc" id="L51" title="All 2 branches covered.">        for (MultipartFile file : files) {</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            if (!file.isEmpty()) {</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (!file.isEmpty()) {</span>
 <span class="fc" id="L53">                Long id = imageService.uploadImage(file, currentUser);</span>
 <span class="fc" id="L54">                ids.add(id);</span>
             }
         }
 
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (ids.isEmpty()) {</span>
-<span class="nc" id="L59">            return ResponseEntity.badRequest().build();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (ids.isEmpty()) {</span>
+<span class="fc" id="L59">            return ResponseEntity.badRequest().build();</span>
         }
 
 <span class="fc" id="L62">        return ResponseEntity.ok(ids);</span>
@@ -64,10 +64,9 @@ public class ImageRestController {
 
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deleteImage(@PathVariable long id, Principal principal) {
-<span class="fc" id="L67">        User currentUser = userService.findByUsername(principal.getName())</span>
-<span class="pc" id="L68">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
-<span class="fc" id="L69">        imageService.deleteImage(id, currentUser);</span>
-<span class="fc" id="L70">        return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L67">        User currentUser = getCurrentUser(principal);</span>
+<span class="fc" id="L68">        imageService.deleteImage(id, currentUser);</span>
+<span class="fc" id="L69">        return ResponseEntity.noContent().build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

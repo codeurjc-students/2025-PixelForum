@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +20,12 @@ import org.springframework.security.access.AccessDeniedException;
 
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
+import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.service.PostService;
@@ -35,9 +38,10 @@ import org.springframework.test.context.ActiveProfiles;
 class PostServiceUnitTest {
 
 	private PostService postService;
+	private PostMapper mapper;
 	private PostRepository postRepository;
 	private ImageRepository imageRepository;
-	private PostMapper mapper;
+	private CommentRepository commentRepository;
 
 	private Post post;
 	private PostDTO postDTO;
@@ -45,11 +49,12 @@ class PostServiceUnitTest {
 
 	@BeforeEach
 	void init() {
+		mapper = mock(PostMapper.class);
 		postRepository = mock(PostRepository.class);
 		imageRepository = mock(ImageRepository.class);
-		mapper = mock(PostMapper.class);
+		commentRepository = mock(CommentRepository.class);
 
-		postService = new PostService(mapper, postRepository, imageRepository);
+		postService = new PostService(mapper, postRepository, imageRepository, commentRepository);
 
 		user = new User();
 		user.setId(1L);
@@ -412,6 +417,24 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("updatePost should detect content change")
+	void updatePostDetectContentChangeTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn(post.getTitle());
+		when(postDTO.content()).thenReturn("NEW CONTENT");
+		when(postDTO.topic()).thenReturn(null);
+
+		when(postRepository.save(post)).thenReturn(post);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		verify(postRepository).save(post);
+	}
+
+	@Test
 	@DisplayName("updatePost should throw AccessDeniedException when not author")
 	void updatePostAccessDeniedTest() {
 		// GIVEN
@@ -437,6 +460,57 @@ class PostServiceUnitTest {
 		assertThrows(EntityNotFoundException.class, () -> {
 			postService.updatePost(1L, postDTO, user);
 		});
+	}
+
+	@Test
+	@DisplayName("updatePost should allow admin to add foreign images to post")
+	void updatePostAdminAddsForeignImageTest() {
+		// GIVEN
+		User admin = new User();
+		admin.setId(10L);
+		admin.setRoles(List.of("ADMIN"));
+
+		User imageOwner = new User();
+		imageOwner.setId(99L);
+
+		Image img = new Image();
+		img.setId(3L);
+		img.setOwner(imageOwner);
+
+		post.setImages(new ArrayList<>());
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn("New title");
+		when(postDTO.images()).thenReturn(List.of(3L));
+		when(imageRepository.findAllById(List.of(3L))).thenReturn(List.of(img));
+		when(postRepository.save(any())).thenReturn(post);
+		when(mapper.toDTOWithLike(any(), any())).thenReturn(postDTO);
+
+		// WHEN & THEN
+		assertDoesNotThrow(() -> postService.updatePost(1L, postDTO, admin));
+	}
+
+	@Test
+	@DisplayName("updatePost should allow removing image that belongs to same post")
+	void updatePostRemoveImageSamePostTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+		img.setPost(post);
+
+		post.setImages(new ArrayList<>(List.of(img)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn("New title");
+		when(postDTO.images()).thenReturn(List.of());
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(imageRepository.findAllById(List.of())).thenReturn(List.of());
+		when(postRepository.save(post)).thenReturn(post);
+		when(mapper.toDTOWithLike(any(), any())).thenReturn(postDTO);
+
+		// WHEN & THEN
+		assertDoesNotThrow(() -> postService.updatePost(1L, postDTO, user));
 	}
 
 	@Test
@@ -484,7 +558,7 @@ class PostServiceUnitTest {
 	}
 
 	@Test
-	@DisplayName("updatePost should remove images")
+	@DisplayName("updatePost should remove images when empty list provided")
 	void updatePostRemoveImagesTest() {
 		// GIVEN
 		Image img = new Image();
@@ -507,6 +581,32 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("updatePost should remove images when null provided")
+	void updatePostRemoveImagesNullDtoTest() {
+		// GIVEN
+		Image img = new Image();
+		img.setId(1L);
+		img.setOwner(user);
+
+		post.setImages(new ArrayList<>(List.of(img)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(null);
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(img));
+		when(postRepository.save(post)).thenReturn(post);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		PostDTO result = postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals(postDTO, result);
+		assertTrue(post.getImages().isEmpty());
+		verify(imageRepository).deleteAllById(List.of(1L));
+		verify(postRepository).save(post);
+	}
+
+	@Test
 	@DisplayName("updatePost should throw when adding non-existing image")
 	void updatePostImageNotFoundTest() {
 		// GIVEN
@@ -523,33 +623,21 @@ class PostServiceUnitTest {
 	}
 
 	@Test
-	@DisplayName("deletePost should delete when author")
-	void deletePostSuccessTest() {
-		// GIVEN
-		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-
-		// WHEN
-		postService.deletePost(1L, user);
-
-		// THEN
-		verify(postRepository).delete(post);
-	}
-
-	@Test
-	@DisplayName("deletePost should remove post from liked posts")
+	@DisplayName("deletePost should succed and remove likes from comments and post")
 	void deletePostShouldRemoveLikesTest() {
 		// GIVEN
-		User liker = new User();
-		liker.setLikedPosts(new ArrayList<>(List.of(post)));
-		post.setUsersThatLiked(new ArrayList<>(List.of(liker)));
+		Comment comment = new Comment();
+		comment.setId(10L);
 
+		post.setComments(List.of(comment));
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
 		// WHEN
 		postService.deletePost(1L, user);
 
 		// THEN
-		assertFalse(liker.getLikedPosts().contains(post));
+		verify(commentRepository).deleteLikesByCommentIds(List.of(10L));
+		verify(postRepository).deleteLikesByPostIds(List.of(1L));
 		verify(postRepository).delete(post);
 	}
 
@@ -602,8 +690,8 @@ class PostServiceUnitTest {
 	@DisplayName("toggleLike should add like when user has not liked the post")
 	void toggleLikeAddLikeTest() {
 		// GIVEN
-		post.setUsersThatLiked(new ArrayList<>());
-		user.setLikedPosts(new ArrayList<>());
+		post.setUsersThatLiked(new HashSet<>());
+		user.setLikedPosts(new HashSet<>());
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
@@ -623,8 +711,8 @@ class PostServiceUnitTest {
 	@DisplayName("toggleLike should remove like when user has already liked the post")
 	void toggleLikeRemoveLikeTest() {
 		// GIVEN
-		post.setUsersThatLiked(new ArrayList<>(List.of(user)));
-		user.setLikedPosts(new ArrayList<>(List.of(post)));
+		post.setUsersThatLiked(new HashSet<>(List.of(user)));
+		user.setLikedPosts(new HashSet<>(List.of(post)));
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);

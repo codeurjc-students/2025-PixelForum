@@ -40,6 +40,11 @@ public class PostRestController {
         this.userService = userService;
     }
 
+    private User getCurrentUser(Principal principal) {
+        return userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+    }
+
     @GetMapping
     public ResponseEntity<Page<PostDTO>> getAllPosts(
             @RequestParam(required = false) String title,
@@ -67,8 +72,7 @@ public class PostRestController {
 
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO, Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        User currentUser = getCurrentUser(principal);
         PostDTO createdPostDTO = postService.createPost(postDTO, currentUser);
 
         URI location = fromCurrentRequest()
@@ -82,26 +86,21 @@ public class PostRestController {
     @PutMapping("/{id}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable long id, @RequestBody PostDTO postDTO,
             Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-
+        User currentUser = getCurrentUser(principal);
         PostDTO updatedPostDTO = postService.updatePost(id, postDTO, currentUser);
         return ResponseEntity.ok(updatedPostDTO);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable long id, Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-
+        User currentUser = getCurrentUser(principal);
         postService.deletePost(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/like")
     public ResponseEntity<PostDTO> toggleLike(@PathVariable long id, Principal principal) {
-        User currentUser = userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+        User currentUser = getCurrentUser(principal);
         PostDTO likedPostDTO = postService.toggleLike(id, currentUser);
         return ResponseEntity.ok(likedPostDTO);
     }

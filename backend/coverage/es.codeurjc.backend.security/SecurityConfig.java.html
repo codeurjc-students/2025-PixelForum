@@ -26,6 +26,7 @@ public class SecurityConfig {
 	// API ENDPOINTS
     private static final String API_V = &quot;/api/v1&quot;;
     private static final String API_POSTS = API_V + &quot;/posts/**&quot;;
+    private static final String API_COMMENTS = API_V + &quot;/posts/*/comments/**&quot;;
     private static final String API_USERS = API_V + &quot;/users/**&quot;;
 	private static final String API_IMAGES = API_V + &quot;/images/**&quot;;
 
@@ -37,90 +38,97 @@ public class SecurityConfig {
 			JwtRequestFilter jwtRequestFilter,
 			RepositoryUserDetailsService userDetailsService,
 			UnauthorizedHandlerJwt unauthorizedHandlerJwt
-<span class="fc" id="L40">	) {</span>
-<span class="fc" id="L41">		this.jwtRequestFilter = jwtRequestFilter;</span>
-<span class="fc" id="L42">		this.userDetailsService = userDetailsService;</span>
-<span class="fc" id="L43">		this.unauthorizedHandlerJwt = unauthorizedHandlerJwt;</span>
-<span class="fc" id="L44">	}</span>
+<span class="fc" id="L41">	) {</span>
+<span class="fc" id="L42">		this.jwtRequestFilter = jwtRequestFilter;</span>
+<span class="fc" id="L43">		this.userDetailsService = userDetailsService;</span>
+<span class="fc" id="L44">		this.unauthorizedHandlerJwt = unauthorizedHandlerJwt;</span>
+<span class="fc" id="L45">	}</span>
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-<span class="fc" id="L48">		return new BCryptPasswordEncoder();</span>
+<span class="fc" id="L49">		return new BCryptPasswordEncoder();</span>
 	}
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-<span class="fc" id="L53">		return authConfig.getAuthenticationManager();</span>
+<span class="fc" id="L54">		return authConfig.getAuthenticationManager();</span>
 	}
 
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
-<span class="fc" id="L58">		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);</span>
-<span class="fc" id="L59">        authProvider.setPasswordEncoder(passwordEncoder());</span>
-<span class="fc" id="L60">		return authProvider;</span>
+<span class="fc" id="L59">		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);</span>
+<span class="fc" id="L60">        authProvider.setPasswordEncoder(passwordEncoder());</span>
+<span class="fc" id="L61">		return authProvider;</span>
 	}
 
 	@Bean
 	public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 		
-<span class="fc" id="L66">		http.authenticationProvider(authenticationProvider());</span>
+<span class="fc" id="L67">		http.authenticationProvider(authenticationProvider());</span>
 
-<span class="fc" id="L68">		http</span>
-<span class="fc" id="L69">			.securityMatcher(&quot;/api/**&quot;)</span>
-<span class="fc" id="L70">			.cors(Customizer.withDefaults())</span>
-<span class="fc" id="L71">			.exceptionHandling(handling -&gt; handling.authenticationEntryPoint(unauthorizedHandlerJwt));</span>
+<span class="fc" id="L69">		http</span>
+<span class="fc" id="L70">			.securityMatcher(&quot;/api/**&quot;)</span>
+<span class="fc" id="L71">			.cors(Customizer.withDefaults())</span>
+<span class="fc" id="L72">			.exceptionHandling(handling -&gt; handling.authenticationEntryPoint(unauthorizedHandlerJwt));</span>
 		
-<span class="fc" id="L73">		http</span>
-<span class="fc" id="L74">			.authorizeHttpRequests(authorize -&gt; authorize</span>
+<span class="fc" id="L74">		http</span>
+<span class="fc" id="L75">			.authorizeHttpRequests(authorize -&gt; authorize</span>
 					// POSTS
-<span class="fc" id="L76">					.requestMatchers(HttpMethod.GET, API_POSTS).permitAll()</span>
-<span class="fc" id="L77">					.requestMatchers(HttpMethod.POST, API_POSTS).hasRole(&quot;USER&quot;)</span>
-<span class="fc" id="L78">					.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole(&quot;USER&quot;)</span>
-<span class="fc" id="L79">					.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole(&quot;USER&quot;)</span>
-					
+<span class="fc" id="L77">					.requestMatchers(HttpMethod.GET, API_POSTS).permitAll()</span>
+<span class="fc" id="L78">					.requestMatchers(HttpMethod.POST, API_POSTS).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L79">					.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L80">					.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole(&quot;USER&quot;)</span>
+
+					// COMMENTS
+<span class="fc" id="L83">					.requestMatchers(HttpMethod.GET, API_COMMENTS).permitAll()</span>
+<span class="fc" id="L84">					.requestMatchers(HttpMethod.POST, API_COMMENTS).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L85">					.requestMatchers(HttpMethod.PUT, API_COMMENTS).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L86">					.requestMatchers(HttpMethod.DELETE, API_COMMENTS).hasRole(&quot;USER&quot;)</span>
+
 					// IMAGES
-<span class="fc" id="L82">					.requestMatchers(HttpMethod.GET, API_IMAGES).permitAll()</span>
-<span class="fc" id="L83">					.requestMatchers(HttpMethod.POST, API_IMAGES).hasRole(&quot;USER&quot;)</span>
-<span class="fc" id="L84">					.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L89">					.requestMatchers(HttpMethod.GET, API_IMAGES).permitAll()</span>
+<span class="fc" id="L90">					.requestMatchers(HttpMethod.POST, API_IMAGES).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L91">					.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole(&quot;USER&quot;)</span>
 					
 					// USERS
-<span class="fc" id="L87">					.requestMatchers(HttpMethod.GET, API_V + &quot;/users/{id}/liked-posts&quot;).hasRole(&quot;USER&quot;)</span>
-<span class="fc" id="L88">					.requestMatchers(HttpMethod.GET, API_V + &quot;/users/{id}/details&quot;).hasRole(&quot;USER&quot;)</span>
-<span class="fc" id="L89">					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()</span>
-<span class="fc" id="L90">					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()</span>
-<span class="fc" id="L91">					.requestMatchers(HttpMethod.PATCH, API_USERS).hasRole(&quot;USER&quot;)</span>
-<span class="fc" id="L92">					.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L94">					.requestMatchers(HttpMethod.GET, API_V + &quot;/users/{id}/liked-posts&quot;).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L95">					.requestMatchers(HttpMethod.GET, API_V + &quot;/users/{id}/liked-comments&quot;).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L96">					.requestMatchers(HttpMethod.GET, API_V + &quot;/users/{id}/details&quot;).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L97">					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()</span>
+<span class="fc" id="L98">					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()</span>
+<span class="fc" id="L99">					.requestMatchers(HttpMethod.PATCH, API_USERS).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L100">					.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole(&quot;USER&quot;)</span>
 					
 					// AUTH
-<span class="fc" id="L95">					.requestMatchers(HttpMethod.GET, API_V + &quot;/auth/me&quot;).hasRole(&quot;USER&quot;)</span>
+<span class="fc" id="L103">					.requestMatchers(HttpMethod.GET, API_V + &quot;/auth/me&quot;).hasRole(&quot;USER&quot;)</span>
 					
 					// DOCUMENTATION
-<span class="fc" id="L98">					.requestMatchers(&quot;/v3/api-docs/**&quot;).permitAll()</span>
-<span class="fc" id="L99">					.requestMatchers(&quot;/swagger-ui.html&quot;).permitAll()</span>
-<span class="fc" id="L100">					.requestMatchers(&quot;/swagger-ui/**&quot;).permitAll()</span>
-<span class="fc" id="L101">					.requestMatchers(&quot;/v3/api-docs.yaml&quot;).permitAll()</span>
-<span class="fc" id="L102">					.requestMatchers(&quot;/api-docs/**&quot;).permitAll()</span>
+<span class="fc" id="L106">					.requestMatchers(&quot;/v3/api-docs/**&quot;).permitAll()</span>
+<span class="fc" id="L107">					.requestMatchers(&quot;/swagger-ui.html&quot;).permitAll()</span>
+<span class="fc" id="L108">					.requestMatchers(&quot;/swagger-ui/**&quot;).permitAll()</span>
+<span class="fc" id="L109">					.requestMatchers(&quot;/v3/api-docs.yaml&quot;).permitAll()</span>
+<span class="fc" id="L110">					.requestMatchers(&quot;/api-docs/**&quot;).permitAll()</span>
 					
-					// Otros
-<span class="fc" id="L105">					.anyRequest().permitAll()</span>
+					// Others
+<span class="fc" id="L113">					.anyRequest().permitAll()</span>
 			);
 		
         // Disable Form login Authentication
-<span class="fc" id="L109">        http.formLogin(AbstractHttpConfigurer::disable);</span>
+<span class="fc" id="L117">        http.formLogin(AbstractHttpConfigurer::disable);</span>
 
         // Disable CSRF protection (it is difficult to implement in REST APIs)
-<span class="fc" id="L112">        http.csrf(AbstractHttpConfigurer::disable);</span>
+<span class="fc" id="L120">        http.csrf(AbstractHttpConfigurer::disable);</span>
 
         // Disable Basic Authentication
-<span class="fc" id="L115">        http.httpBasic(AbstractHttpConfigurer::disable);</span>
+<span class="fc" id="L123">        http.httpBasic(AbstractHttpConfigurer::disable);</span>
 
         // Stateless session
-<span class="fc" id="L118">        http.sessionManagement(management -&gt; management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+<span class="fc" id="L126">        http.sessionManagement(management -&gt; management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
 
 		// Add JWT Token filter
-<span class="fc" id="L121">		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L129">		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="fc" id="L123">		return http.build();</span>
+<span class="fc" id="L131">		return http.build();</span>
 	}
 
 }

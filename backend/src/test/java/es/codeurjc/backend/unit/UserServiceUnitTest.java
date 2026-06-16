@@ -2,10 +2,14 @@ package es.codeurjc.backend.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.Month;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import es.codeurjc.backend.dto.comment.CommentDTO;
+import es.codeurjc.backend.dto.comment.CommentMapper;
 import es.codeurjc.backend.dto.post.PostDTO;
 import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.dto.user.BasicUserDTO;
@@ -27,6 +33,7 @@ import es.codeurjc.backend.dto.user.ChangePasswordDTO;
 import es.codeurjc.backend.dto.user.CreateUserDTO;
 import es.codeurjc.backend.dto.user.UserDTO;
 import es.codeurjc.backend.dto.user.UserMapper;
+import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
@@ -41,12 +48,15 @@ import jakarta.persistence.EntityNotFoundException;
 @DisplayName("UserService Unitary tests")
 class UserServiceUnitTest {
 
+    private static final LocalDateTime FIXED_TIME = LocalDateTime.of(2026, Month.MAY, 1, 10, 0);
+
     private UserService userService;
 
     private UserRepository userRepository;
     private PostRepository postRepository;
     private PostMapper postMapper;
     private CommentRepository commentRepository;
+    private CommentMapper commentMapper;
     private ImageRepository imageRepository;
     private PasswordEncoder passwordEncoder;
     private UserMapper userMapper;
@@ -57,6 +67,8 @@ class UserServiceUnitTest {
     private Image image;
     private Post post;
     private PostDTO postDTO;
+    private Comment comment;
+    private CommentDTO commentDTO;
 
     @BeforeEach
     void init() {
@@ -64,12 +76,13 @@ class UserServiceUnitTest {
         postRepository = mock(PostRepository.class);
         postMapper = mock(PostMapper.class);
         commentRepository = mock(CommentRepository.class);
+        commentMapper = mock(CommentMapper.class);
         imageRepository = mock(ImageRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         userMapper = mock(UserMapper.class);
 
         userService = new UserService(userMapper, userRepository, postRepository, postMapper, commentRepository,
-                imageRepository, passwordEncoder);
+                commentMapper, imageRepository, passwordEncoder);
 
         user = new User();
         user.setId(1L);
@@ -77,7 +90,7 @@ class UserServiceUnitTest {
         user.setEmail("test@example.com");
         user.setPassword("encodedPassword");
         user.setRoles(List.of("USER"));
-        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(FIXED_TIME);
 
         admin = new User();
         admin.setId(2L);
@@ -102,10 +115,18 @@ class UserServiceUnitTest {
         post = new Post();
         post.setId(1L);
         post.setAuthor(user);
-        post.setUsersThatLiked(new ArrayList<>());
+        post.setUsersThatLiked(new HashSet<>());
 
-        postDTO = new PostDTO(1L, "Test Post", "Content", LocalDateTime.now(), LocalDateTime.now(),
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null), null, 0, false, List.of());
+        postDTO = new PostDTO(1L, "Test Post", "Content", FIXED_TIME, FIXED_TIME,
+                new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1, List.of());
+
+        comment = new Comment();
+        comment.setId(1L);
+        comment.setAuthor(user);
+        comment.setUsersThatLiked(new HashSet<>());
+
+        commentDTO = new CommentDTO(1L, "Test comment", FIXED_TIME, FIXED_TIME,
+                new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
     }
 
     // =============== getUser ===============
@@ -114,7 +135,7 @@ class UserServiceUnitTest {
     @DisplayName("getUser should return user when exists")
     void getUserSuccessTest() {
         // GIVEN
-        BasicUserDTO basicUserDTO = new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null);
+        BasicUserDTO basicUserDTO = new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toBasicDTO(user)).thenReturn(basicUserDTO);
 
@@ -149,8 +170,8 @@ class UserServiceUnitTest {
         List<User> users = List.of(user, admin);
         Page<User> userPage = new PageImpl<>(users, pageable, 2);
         List<BasicUserDTO> dtos = List.of(
-                new BasicUserDTO(1L, "testuser", LocalDateTime.now(), "Bio", null),
-                new BasicUserDTO(2L, "admin", LocalDateTime.now(), "Admin bio", null));
+                new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null),
+                new BasicUserDTO(2L, "admin", FIXED_TIME, "Admin bio", null));
 
         when(userRepository.findAll(pageable)).thenReturn(userPage);
         when(userMapper.toBasicDTO(user)).thenReturn(dtos.get(0));
@@ -188,7 +209,7 @@ class UserServiceUnitTest {
     @DisplayName("getUserDetails should return user details when user is the owner")
     void getUserDetailsOwnerTest() {
         // GIVEN
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toDTO(user)).thenReturn(userDTO);
@@ -206,7 +227,7 @@ class UserServiceUnitTest {
     @DisplayName("getUserDetails should allow admin to view any user details")
     void getUserDetailsAdminTest() {
         // GIVEN
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toDTO(user)).thenReturn(userDTO);
@@ -346,7 +367,7 @@ class UserServiceUnitTest {
         createdUser.setPassword("encodedPassword");
         createdUser.setRoles(List.of("USER"));
 
-        UserDTO resultDTO = new UserDTO(3L, "newuser", "new@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO resultDTO = new UserDTO(3L, "newuser", "new@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
@@ -407,7 +428,7 @@ class UserServiceUnitTest {
     void updateUserChangeUsernameTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("newusername", null, null, null);
-        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", LocalDateTime.now(), "Bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", FIXED_TIME, "Bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -430,7 +451,7 @@ class UserServiceUnitTest {
     void updateUserChangeEmailTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO(null, "newemail@example.com", null, null);
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "newemail@example.com", LocalDateTime.now(), "Bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "newemail@example.com", FIXED_TIME, "Bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -453,7 +474,7 @@ class UserServiceUnitTest {
     void updateUserChangeBioTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO(null, null, null, "New bio");
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "New bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "New bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -473,7 +494,7 @@ class UserServiceUnitTest {
     void updateUserAdminTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("newusername", null, null, null);
-        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", LocalDateTime.now(), "Bio", null,
+        UserDTO resultDTO = new UserDTO(1L, "newusername", "test@example.com", FIXED_TIME, "Bio", null,
                 List.of(), List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -537,7 +558,7 @@ class UserServiceUnitTest {
     void updateUserSameUsernameTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("testuser", null, null, null);
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -557,7 +578,7 @@ class UserServiceUnitTest {
     void updateUserSameEmailTest() {
         // GIVEN
         CreateUserDTO userDTO = new CreateUserDTO("testuser", "test@example.com", null, null);
-        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO resultDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -672,7 +693,7 @@ class UserServiceUnitTest {
     @DisplayName("deleteUser should delete user when user is owner")
     void deleteUserSuccessTest() {
         // GIVEN
-        user.setLikedPosts(new ArrayList<>());
+        user.setLikedPosts(new HashSet<>());
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
 
@@ -688,44 +709,84 @@ class UserServiceUnitTest {
     }
 
     @Test
-    @DisplayName("deleteUser should remove user likes from posts")
-    void deleteUserRemoveLikesTest() {
+    @DisplayName("deleteUser should delete likes from user posts")
+    void deleteUserDeleteLikesFromPostsTest() {
         // GIVEN
-        Post likedPost = new Post();
-        likedPost.setId(2L);
-        likedPost.setUsersThatLiked(new ArrayList<>(List.of(user)));
-        likedPost.setLikes(1);
-        user.setLikedPosts(new ArrayList<>(List.of(likedPost)));
+        Post post1 = new Post();
+        post1.setId(10L);
+
+        Post post2 = new Post();
+        post2.setId(20L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(postRepository.findByAuthor(user)).thenReturn(List.of());
+        when(postRepository.findByAuthor(user)).thenReturn(List.of(post1, post2));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of());
 
         // WHEN
         userService.deleteUser(1L, user);
 
         // THEN
-        assertTrue(user.getLikedPosts().isEmpty());
-        assertTrue(likedPost.getUsersThatLiked().isEmpty());
-        verify(userRepository).delete(user);
+        verify(postRepository).deleteLikesByPostIds(List.of(10L, 20L));
     }
 
     @Test
-    @DisplayName("deleteUser should remove likes on user posts")
-    void deleteUserRemoveLikesOnPostsTest() {
+    @DisplayName("deleteUser should delete likes from user comments")
+    void deleteUserDeleteLikesFromCommentsTest() {
         // GIVEN
-        post.getUsersThatLiked().add(otherUser);
-        otherUser.setLikedPosts(new ArrayList<>(List.of(post)));
-        user.setLikedPosts(new ArrayList<>());
+        Comment deleteComment = new Comment();
+        deleteComment.setId(30L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
+        when(postRepository.findByAuthor(user)).thenReturn(List.of());
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of(deleteComment));
 
         // WHEN
         userService.deleteUser(1L, user);
 
         // THEN
-        assertTrue(post.getUsersThatLiked().isEmpty());
-        verify(postRepository).deleteByAuthor(user);
+        verify(commentRepository).deleteLikesByCommentIds(List.of(30L));
+    }
+
+    @Test
+    @DisplayName("deleteUser should delete likes from comments inside user posts")
+    void deleteUserDeleteLikesFromCommentsInPostsTest() {
+        // GIVEN
+        Comment deleteComment = new Comment();
+        deleteComment.setId(100L);
+        post.setComments(List.of(deleteComment));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of());
+
+        // WHEN
+        userService.deleteUser(1L, user);
+
+        // THEN
+        verify(commentRepository).deleteLikesByCommentIds(List.of(100L));
+    }
+
+    @Test
+    @DisplayName("deleteUser should remove likes from both own comments and comments in posts")
+    void deleteUserMixedCommentLikesTest() {
+        // GIVEN
+        Comment postComment = new Comment();
+        postComment.setId(10L);
+
+        Comment ownComment = new Comment();
+        ownComment.setId(20L);
+
+        post.setComments(List.of(postComment));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(postRepository.findByAuthor(user)).thenReturn(List.of(post));
+        when(commentRepository.findByAuthor(user)).thenReturn(List.of(ownComment));
+
+        // WHEN
+        userService.deleteUser(1L, user);
+
+        // THEN
+        verify(commentRepository)
+                .deleteLikesByCommentIds(argThat(ids -> ids.contains(10L) && ids.contains(20L) && ids.size() == 2));
     }
 
     @Test
@@ -733,7 +794,7 @@ class UserServiceUnitTest {
     void deleteUserWithAvatarTest() {
         // GIVEN
         user.setAvatar(image);
-        user.setLikedPosts(new ArrayList<>());
+        user.setLikedPosts(new HashSet<>());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
@@ -751,7 +812,7 @@ class UserServiceUnitTest {
     @DisplayName("deleteUser should allow admin to delete any user")
     void deleteUserAdminTest() {
         // GIVEN
-        user.setLikedPosts(new ArrayList<>());
+        user.setLikedPosts(new HashSet<>());
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByAuthor(user)).thenReturn(List.of());
 
@@ -791,7 +852,7 @@ class UserServiceUnitTest {
     void setProfileImageSuccessTest() {
         // GIVEN
         image.setPost(null);
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -818,7 +879,7 @@ class UserServiceUnitTest {
         user.setAvatar(oldAvatar);
         image.setPost(null);
 
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -854,7 +915,7 @@ class UserServiceUnitTest {
         // GIVEN
         image.setOwner(user);
         image.setPost(null);
-        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now(), "Bio", null, List.of(),
+        UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
                 List.of("USER"));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -901,6 +962,7 @@ class UserServiceUnitTest {
         // THEN
         assertNull(result);
         verify(imageRepository).delete(image);
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -1092,5 +1154,147 @@ class UserServiceUnitTest {
         assertThrows(EntityNotFoundException.class, () -> {
             userService.getLikedPosts(999L, admin, pageable);
         });
+    }
+
+    // =============== getLikedComments ===============
+
+    @Test
+    @DisplayName("getLikedComments should return liked comments for user")
+    void getLikedCommentsSuccessTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), pageable, 1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByUsersThatLikedContains(user, pageable)).thenReturn(commentPage);
+        when(commentMapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getLikedComments(1L, user, pageable);
+
+        // THEN
+        assertEquals(1, result.getContent().size());
+        verify(userRepository).findById(1L);
+        verify(commentRepository).findByUsersThatLikedContains(user, pageable);
+        verify(commentMapper).toDTOWithLike(comment, user);
+    }
+
+    @Test
+    @DisplayName("getLikedComments should return empty page when user has no liked comments")
+    void getLikedCommentsEmptyTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByUsersThatLikedContains(user, pageable)).thenReturn(emptyPage);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getLikedComments(1L, user, pageable);
+
+        // THEN
+        assertTrue(result.isEmpty());
+        verify(commentRepository).findByUsersThatLikedContains(user, pageable);
+        verify(commentMapper, never()).toDTOWithLike(any(), any());
+    }
+
+    @Test
+    @DisplayName("getLikedComments should allow admin to view any user liked comments")
+    void getLikedCommentsAdminTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), pageable, 1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByUsersThatLikedContains(user, pageable)).thenReturn(commentPage);
+        when(commentMapper.toDTOWithLike(comment, admin)).thenReturn(commentDTO);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getLikedComments(1L, admin, pageable);
+
+        // THEN
+        assertEquals(1, result.getContent().size());
+        verify(userRepository).findById(1L);
+        verify(commentRepository).findByUsersThatLikedContains(user, pageable);
+        verify(commentMapper).toDTOWithLike(comment, admin);
+    }
+
+    @Test
+    @DisplayName("getLikedComments should throw AccessDeniedException when user is not owner or admin")
+    void getLikedCommentsAccessDeniedTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // WHEN & THEN
+        assertThrows(AccessDeniedException.class, () -> userService.getLikedComments(1L, otherUser, pageable));
+        verify(userRepository, never()).findById(anyLong());
+        verify(commentRepository, never()).findByUsersThatLikedContains(any(), any());
+    }
+
+    @Test
+    @DisplayName("getLikedComments should throw EntityNotFoundException when user not found")
+    void getLikedCommentsNotFoundTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // WHEN & THEN
+        assertThrows(EntityNotFoundException.class, () -> userService.getLikedComments(999L, admin, pageable));
+        verify(commentRepository, never()).findByUsersThatLikedContains(any(), any());
+    }
+
+    // =============== getUserComments ===============
+
+    @Test
+    @DisplayName("getUserComments should return user comments")
+    void getUserCommentsSuccessTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), pageable, 1);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByAuthor(user, pageable)).thenReturn(commentPage);
+        when(commentMapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getUserComments(1L, user, pageable);
+
+        // THEN
+        assertEquals(1, result.getContent().size());
+        verify(userRepository).findById(1L);
+        verify(commentRepository).findByAuthor(user, pageable);
+        verify(commentMapper).toDTOWithLike(comment, user);
+    }
+
+    @Test
+    @DisplayName("getUserComments should throw EntityNotFoundException when user not found")
+    void getUserCommentsNotFoundTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // WHEN & THEN
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserComments(999L, user, pageable));
+        verify(commentRepository, never()).findByAuthor(any(), any());
+    }
+
+    @Test
+    @DisplayName("getUserComments should return empty page when user has no comments")
+    void getUserCommentsEmptyTest() {
+        // GIVEN
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(commentRepository.findByAuthor(user, pageable)).thenReturn(emptyPage);
+
+        // WHEN
+        Page<CommentDTO> result = userService.getUserComments(1L, user, pageable);
+
+        // THEN
+        assertTrue(result.isEmpty());
+        verify(commentRepository).findByAuthor(user, pageable);
+        verify(commentMapper, never()).toDTOWithLike(any(), any());
     }
 }

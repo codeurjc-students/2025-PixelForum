@@ -103,6 +103,7 @@ class PostServiceIntegrationTest {
                 topic,
                 null,
                 null,
+                0,
                 List.of(img.getId()));
 
         // WHEN
@@ -130,6 +131,7 @@ class PostServiceIntegrationTest {
                 topic,
                 null,
                 null,
+                0,
                 List.of(99999L));
 
         // WHEN & THEN
@@ -159,6 +161,7 @@ class PostServiceIntegrationTest {
                 topic,
                 null,
                 null,
+                0,
                 List.of(img.getId()));
 
         // WHEN & THEN
@@ -206,6 +209,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
+                0,
                 null);
 
         // WHEN
@@ -234,6 +238,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
+                0,
                 null);
 
         long postId = post.getId();
@@ -258,6 +263,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
+                0,
                 null);
 
         // WHEN
@@ -289,6 +295,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
+                0,
                 List.of(img.getId()));
 
         // WHEN
@@ -319,6 +326,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
+                0,
                 List.of(img.getId()));
 
         postService.updatePost(post.getId(), withImage, user);
@@ -334,6 +342,7 @@ class PostServiceIntegrationTest {
                 post.getTopic(),
                 null,
                 null,
+                0,
                 List.of());
 
         // WHEN
