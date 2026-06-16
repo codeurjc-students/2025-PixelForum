@@ -106,6 +106,17 @@ class CommentUISystemTest {
 		return Integer.parseInt(count.getText().trim());
 	}
 
+	private void waitForCommentLikes(String content, int expected) {
+		wait.until(d -> {
+			try {
+				return getCommentLikes(content) == expected;
+			} catch (org.openqa.selenium.StaleElementReferenceException
+					| org.openqa.selenium.NoSuchElementException e) {
+				return false;
+			}
+		});
+	}
+
 	// =============== Read ===============
 
 	@Test
@@ -229,17 +240,15 @@ class CommentUISystemTest {
 
 		int likesBefore = getCommentLikes(content);
 
-		WebElement likeBtn = findCommentCard(content).findElement(By.cssSelector(".like-btn"));
-		likeBtn.click();
+		findCommentCard(content).findElement(By.cssSelector(".like-btn")).click();
 
 		// THEN Like added
-		wait.until(d -> getCommentLikes(content) == likesBefore + 1);
+		waitForCommentLikes(content, likesBefore + 1);
 		assertEquals(likesBefore + 1, getCommentLikes(content), "Likes should increase by 1");
 
 		// Unlike
-		likeBtn = findCommentCard(content).findElement(By.cssSelector(".like-btn"));
-		likeBtn.click();
-		wait.until(d -> getCommentLikes(content) == likesBefore);
+		findCommentCard(content).findElement(By.cssSelector(".like-btn")).click();
+		waitForCommentLikes(content, likesBefore);
 		assertEquals(likesBefore, getCommentLikes(content), "Likes should return to original value");
 	}
 }

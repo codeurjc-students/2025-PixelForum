@@ -44,20 +44,33 @@ class CommentControllerE2ETest {
 				.contentType(ContentType.JSON)
 				.body(loginData)
 				.when()
-				.post("/api/v1/auth/login")
+				.post("http://localhost:" + port + "/api/v1/auth/login")
 				.then()
 				.statusCode(200)
 				.extract().response();
 
 		authToken = loginResponse.getCookie("AuthToken");
 
-		// Use first available post as context for all comment tests
-		testPostId = given()
+		Map<String, Object> topic = new HashMap<>();
+		topic.put("id", 1);
+
+		Map<String, Object> postBody = new HashMap<>();
+		postBody.put("title", "Test post");
+		postBody.put("content", "Created for comment tests");
+		postBody.put("topic", topic);
+
+		Response postResponse = given()
+				.cookie("AuthToken", authToken)
+				.contentType(ContentType.JSON)
+				.body(postBody)
 				.when()
-				.get("/api/v1/posts?page=0&size=1")
+				.post("/api/v1/posts")
 				.then()
-				.statusCode(200)
-				.extract().jsonPath().getLong("content[0].id");
+				.statusCode(201)
+				.extract()
+				.response();
+
+		testPostId = postResponse.jsonPath().getLong("id");
 	}
 
 	private String commentsPath() {
