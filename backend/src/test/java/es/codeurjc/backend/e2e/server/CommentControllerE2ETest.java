@@ -64,7 +64,7 @@ class CommentControllerE2ETest {
 				.contentType(ContentType.JSON)
 				.body(postBody)
 				.when()
-				.post("/api/v1/posts")
+				.post("http://localhost:" + port + "/api/v1/posts")
 				.then()
 				.statusCode(201)
 				.extract()
