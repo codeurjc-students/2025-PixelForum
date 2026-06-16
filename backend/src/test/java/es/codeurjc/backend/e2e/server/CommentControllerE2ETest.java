@@ -34,6 +34,7 @@ class CommentControllerE2ETest {
 	void setUp() {
 		RestAssured.port = port;
 		RestAssured.baseURI = "http://localhost";
+		RestAssured.basePath = "";
 
 		// Login as martin
 		Map<String, String> loginData = new HashMap<>();
