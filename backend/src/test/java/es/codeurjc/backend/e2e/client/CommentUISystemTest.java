@@ -232,7 +232,6 @@ class CommentUISystemTest {
 		// WHEN - Like it as robert
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
 		driver.manage().deleteAllCookies();
-		driver.navigate().refresh();
 		login("robert", "user");
 		driver.get(postUrl);
 		wait.until(ExpectedConditions.presenceOfElementLocated(By

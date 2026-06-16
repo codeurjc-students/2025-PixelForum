@@ -277,7 +277,7 @@ class UserUISystemTest {
         WebElement passwordTab = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("password-tab")));
         passwordTab.click();
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input[formControlName='oldPassword']")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='oldPassword']")));
 
         // Fill password fields
         driver.findElement(By.cssSelector("input[formControlName='oldPassword']")).sendKeys("user");
