@@ -14,10 +14,10 @@ export class ImageService {
 		files.forEach((file) => {
 			formData.append('files', file);
 		});
-		return this.http.post<string[]>(`${this.baseUrl}`, formData, { withCredentials: true });
+		return this.http.post<string[]>(`${this.baseUrl}`, formData);
 	}
 
 	deleteImage(id: number): Observable<void> {
-		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
+		return this.http.delete<void>(`${this.baseUrl}/${id}`);
 	}
 }

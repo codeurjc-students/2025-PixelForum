@@ -28,7 +28,7 @@ export class AuthService {
 		return this.http.post<AuthResponse>(
 			this.baseUrl + 'login',
 			{ username, password },
-			{ headers: { 'skip-error': 'true' }, withCredentials: true }
+			{ headers: { 'skip-error': 'true' } }
 		).pipe(
 			switchMap(response => {
 				if (response.status === 'SUCCESS') {
@@ -42,9 +42,7 @@ export class AuthService {
 
 	logout() {
 		return this.http.post(
-			this.baseUrl + 'logout',
-			{},
-			{ withCredentials: true }
+			this.baseUrl + 'logout', {}
 		).pipe(
 			tap(() => this.userSubject.next(null)),
 			catchError(() => {
@@ -57,7 +55,7 @@ export class AuthService {
 	me() {
 		return this.http.get<User>(
 			this.baseUrl + 'me',
-			{ headers: { 'skip-error': 'true' }, withCredentials: true }
+			{ headers: { 'skip-error': 'true' } }
 		);
 	}
 

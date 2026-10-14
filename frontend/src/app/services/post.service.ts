@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Post } from '../models/post.model';
 import { environment } from '../../environments/environment';
 import { PageResponse } from '../models/pageResponse.model';
+import { PostComponent } from '../components/post/post.component';
 
 @Injectable({ providedIn: 'root' })
 export class PostService {
@@ -40,26 +41,26 @@ export class PostService {
 			params = params.set('topic', topic.trim());
 		}
 
-		return this.http.get<PageResponse<Post>>(this.baseUrl, { params, withCredentials: true });
+		return this.http.get<PageResponse<Post>>(this.baseUrl, { params });
 	}
 
 	getById(id: number): Observable<Post> {
-		return this.http.get<Post>(`${this.baseUrl}/${id}`, { withCredentials: true });
+		return this.http.get<Post>(`${this.baseUrl}/${id}`);
 	}
 
 	create(post: Post): Observable<Post> {
-		return this.http.post<Post>(this.baseUrl, post, { withCredentials: true });
+		return this.http.post<Post>(this.baseUrl, post);
 	}
 
 	update(post: Post): Observable<Post> {
-		return this.http.put<Post>(`${this.baseUrl}/${post.id}`, post, { withCredentials: true });
+		return this.http.put<Post>(`${this.baseUrl}/${post.id}`, post);
 	}
 
 	delete(id: number): Observable<void> {
-		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
+		return this.http.delete<void>(`${this.baseUrl}/${id}`);
 	}
 
 	toggleLike(id: number): Observable<Post> {
-		return this.http.post<Post>(`${this.baseUrl}/${id}/like`, {}, { withCredentials: true });
+		return this.http.post<Post>(`${this.baseUrl}/${id}/like`, {});
 	}
 }

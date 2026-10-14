@@ -22,7 +22,6 @@ export class ErrorInterceptor implements HttpInterceptor {
 	) { }
 
 	intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
 		if (req.headers.has('skip-error')) {
 			return next.handle(req);
 		}

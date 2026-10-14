@@ -25,7 +25,7 @@ describe('AuthService - Unit Tests', () => {
 		expect(service).toBeTruthy();
 	});
 
-	it('login should send POST with withCredentials', () => {
+	it('login should send POST', () => {
 		const username = 'testuser';
 		const password = 'password123';
 		const loginResponse = { status: 'SUCCESS', message: '', error: null };
@@ -36,12 +36,10 @@ describe('AuthService - Unit Tests', () => {
 		const loginReq = httpMock.expectOne(baseUrl + 'login');
 		expect(loginReq.request.method).toBe('POST');
 		expect(loginReq.request.body).toEqual({ username, password });
-		expect(loginReq.request.withCredentials).toBe(true);
 		loginReq.flush(loginResponse);
 
 		const meReq = httpMock.expectOne(baseUrl + 'me');
 		expect(meReq.request.method).toBe('GET');
-		expect(meReq.request.withCredentials).toBe(true);
 		meReq.flush(mockUser);
 	});
 
@@ -93,14 +91,13 @@ describe('AuthService - Unit Tests', () => {
 		req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 	});
 
-	it('logout should send POST with withCredentials', () => {
+	it('logout should send POST', () => {
 		const mockResponse = { status: 'SUCCESS' };
 
 		service.logout().subscribe();
 
 		const req = httpMock.expectOne(baseUrl + 'logout');
 		expect(req.request.method).toBe('POST');
-		expect(req.request.withCredentials).toBe(true);
 
 		req.flush(mockResponse);
 	});
@@ -119,14 +116,13 @@ describe('AuthService - Unit Tests', () => {
 		req.flush(mockResponse);
 	});
 
-	it('me should send GET with withCredentials', () => {
+	it('me should send GET', () => {
 		const mockUser = { username: 'testuser' };
 
 		service.me().subscribe();
 
 		const req = httpMock.expectOne(baseUrl + 'me');
 		expect(req.request.method).toBe('GET');
-		expect(req.request.withCredentials).toBe(true);
 
 		req.flush(mockUser);
 	});

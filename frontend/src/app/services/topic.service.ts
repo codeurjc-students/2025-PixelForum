@@ -12,10 +12,10 @@ export class TopicService {
 	constructor(private http: HttpClient) { }
 
 	getAll(): Observable<Topic[]> {
-		return this.http.get<Topic[]>(this.baseUrl, { withCredentials: true });
+		return this.http.get<Topic[]>(this.baseUrl);
 	}
 
 	getById(id: number): Observable<Topic> {
-		return this.http.get<Topic>(`${this.baseUrl}${id}`, { withCredentials: true });
+		return this.http.get<Topic>(`${this.baseUrl}${id}`);
 	}
 }
