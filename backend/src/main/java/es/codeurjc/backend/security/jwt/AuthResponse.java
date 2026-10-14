@@ -1,8 +1,8 @@
 package es.codeurjc.backend.security.jwt;
 
 public class AuthResponse {
-    
-    private Status status;
+
+	private Status status;
 	private String message;
 	private String error;
 

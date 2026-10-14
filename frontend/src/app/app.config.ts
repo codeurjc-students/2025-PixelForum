@@ -5,15 +5,15 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@a
 import { ErrorInterceptor } from './interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
-	provideHttpClient(withInterceptorsFromDi()),
+	providers: [
+		provideBrowserGlobalErrorListeners(),
+		provideZoneChangeDetection({ eventCoalescing: true }),
+		provideRouter(routes),
+		provideHttpClient(withInterceptorsFromDi()),
 		{
 			provide: HTTP_INTERCEPTORS,
 			useClass: ErrorInterceptor,
 			multi: true
 		}
-  ]
+	]
 };

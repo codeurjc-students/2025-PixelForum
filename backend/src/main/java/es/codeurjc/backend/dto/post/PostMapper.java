@@ -11,31 +11,31 @@ import es.codeurjc.backend.dto.user.UserMapper;
 @Mapper(componentModel = "spring", uses = UserMapper.class)
 public interface PostMapper {
 
-    @Mapping(target = "hasUserLiked", ignore = true)
-    @Mapping(target = "commentsCount", expression = "java(post.getComments().size())")
-    PostDTO toDTO(Post post);
+	@Mapping(target = "hasUserLiked", ignore = true)
+	@Mapping(target = "commentsCount", expression = "java(post.getComments().size())")
+	PostDTO toDTO(Post post);
 
-    List<PostDTO> toDTOs(Collection<Post> posts);
+	List<PostDTO> toDTOs(Collection<Post> posts);
 
-    @Mapping(target = "author", ignore = true)
-    @Mapping(target = "usersThatLiked", ignore = true)
-    @Mapping(target = "comments", ignore = true)
-    Post toDomain(PostDTO postDTO);
+	@Mapping(target = "author", ignore = true)
+	@Mapping(target = "usersThatLiked", ignore = true)
+	@Mapping(target = "comments", ignore = true)
+	Post toDomain(PostDTO postDTO);
 
-    default PostDTO toDTOWithLike(Post post, User currentUser) {
-        PostDTO dto = toDTO(post);
-        Boolean hasLiked = false;
-        if (currentUser != null) {
-            hasLiked = post.getUsersThatLiked() != null &&
-                    post.getUsersThatLiked().contains(currentUser);
-        }
-        return new PostDTO(
-                dto.id(), dto.title(), dto.content(),
-                dto.createdAt(), dto.updatedAt(),
-                dto.author(), dto.topic(),
-                dto.likes(),
-                hasLiked,
-                dto.commentsCount(),
-                dto.images());
-    }
+	default PostDTO toDTOWithLike(Post post, User currentUser) {
+		PostDTO dto = toDTO(post);
+		Boolean hasLiked = false;
+		if (currentUser != null) {
+			hasLiked = post.getUsersThatLiked() != null &&
+					post.getUsersThatLiked().contains(currentUser);
+		}
+		return new PostDTO(
+				dto.id(), dto.title(), dto.content(),
+				dto.createdAt(), dto.updatedAt(),
+				dto.author(), dto.topic(),
+				dto.likes(),
+				hasLiked,
+				dto.commentsCount(),
+				dto.images());
+	}
 }

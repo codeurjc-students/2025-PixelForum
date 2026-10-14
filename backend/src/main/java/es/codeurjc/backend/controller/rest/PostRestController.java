@@ -30,78 +30,78 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/v1/posts")
 public class PostRestController {
 
-    private static final String USER_NOT_FOUND = "User not found";
+	private static final String USER_NOT_FOUND = "User not found";
 
-    private final PostService postService;
-    private final UserService userService;
+	private final PostService postService;
+	private final UserService userService;
 
-    public PostRestController(PostService postService, UserService userService) {
-        this.postService = postService;
-        this.userService = userService;
-    }
+	public PostRestController(PostService postService, UserService userService) {
+		this.postService = postService;
+		this.userService = userService;
+	}
 
-    private User getCurrentUser(Principal principal) {
-        return userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-    }
+	private User getCurrentUser(Principal principal) {
+		return userService.findByUsername(principal.getName())
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+	}
 
-    @GetMapping
-    public ResponseEntity<Page<PostDTO>> getAllPosts(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String authorUsername,
-            @RequestParam(required = false) String topic,
-            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            Principal principal) {
+	@GetMapping
+	public ResponseEntity<Page<PostDTO>> getAllPosts(
+			@RequestParam(required = false) String title,
+			@RequestParam(required = false) String authorUsername,
+			@RequestParam(required = false) String topic,
+			@PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+			Principal principal) {
 
-        User user = null;
-        if (principal != null) {
-            user = userService.findByUsername(principal.getName()).orElse(null);
-        }
-        Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable, user);
-        return ResponseEntity.ok(page);
-    }
+		User user = null;
+		if (principal != null) {
+			user = userService.findByUsername(principal.getName()).orElse(null);
+		}
+		Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable, user);
+		return ResponseEntity.ok(page);
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> getPostById(@PathVariable long id, Principal principal) {
-        User user = null;
-        if (principal != null) {
-            user = userService.findByUsername(principal.getName()).orElse(null);
-        }
-        return ResponseEntity.ok(postService.getPost(id, user));
-    }
+	@GetMapping("/{id}")
+	public ResponseEntity<PostDTO> getPostById(@PathVariable long id, Principal principal) {
+		User user = null;
+		if (principal != null) {
+			user = userService.findByUsername(principal.getName()).orElse(null);
+		}
+		return ResponseEntity.ok(postService.getPost(id, user));
+	}
 
-    @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO, Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        PostDTO createdPostDTO = postService.createPost(postDTO, currentUser);
+	@PostMapping
+	public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO, Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		PostDTO createdPostDTO = postService.createPost(postDTO, currentUser);
 
-        URI location = fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdPostDTO.id())
-                .toUri();
+		URI location = fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(createdPostDTO.id())
+				.toUri();
 
-        return ResponseEntity.created(location).body(createdPostDTO);
-    }
+		return ResponseEntity.created(location).body(createdPostDTO);
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> updatePost(@PathVariable long id, @RequestBody PostDTO postDTO,
-            Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        PostDTO updatedPostDTO = postService.updatePost(id, postDTO, currentUser);
-        return ResponseEntity.ok(updatedPostDTO);
-    }
+	@PutMapping("/{id}")
+	public ResponseEntity<PostDTO> updatePost(@PathVariable long id, @RequestBody PostDTO postDTO,
+			Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		PostDTO updatedPostDTO = postService.updatePost(id, postDTO, currentUser);
+		return ResponseEntity.ok(updatedPostDTO);
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable long id, Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        postService.deletePost(id, currentUser);
-        return ResponseEntity.noContent().build();
-    }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deletePost(@PathVariable long id, Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		postService.deletePost(id, currentUser);
+		return ResponseEntity.noContent().build();
+	}
 
-    @PostMapping("/{id}/like")
-    public ResponseEntity<PostDTO> toggleLike(@PathVariable long id, Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        PostDTO likedPostDTO = postService.toggleLike(id, currentUser);
-        return ResponseEntity.ok(likedPostDTO);
-    }
+	@PostMapping("/{id}/like")
+	public ResponseEntity<PostDTO> toggleLike(@PathVariable long id, Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		PostDTO likedPostDTO = postService.toggleLike(id, currentUser);
+		return ResponseEntity.ok(likedPostDTO);
+	}
 }

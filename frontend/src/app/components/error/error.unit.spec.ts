@@ -5,64 +5,64 @@ import { ErrorService } from '../../services/error.service';
 
 describe('ErrorComponent', () => {
 
-    let component: ErrorComponent;
-    let fixture: ComponentFixture<ErrorComponent>;
+	let component: ErrorComponent;
+	let fixture: ComponentFixture<ErrorComponent>;
 
-    let errorServiceSpy: jasmine.SpyObj<ErrorService>;
-    let routerSpy: jasmine.SpyObj<Router>;
+	let errorServiceSpy: jasmine.SpyObj<ErrorService>;
+	let routerSpy: jasmine.SpyObj<Router>;
 
-    const mockError = { status: 500, errorName: 'Internal Server Error', message: 'An unexpected error occurred' };
+	const mockError = { status: 500, errorName: 'Internal Server Error', message: 'An unexpected error occurred' };
 
-    beforeEach(async () => {
-        errorServiceSpy = jasmine.createSpyObj('ErrorService', ['getError', 'clear']);
-        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+	beforeEach(async () => {
+		errorServiceSpy = jasmine.createSpyObj('ErrorService', ['getError', 'clear']);
+		routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
-        await TestBed.configureTestingModule({
-            imports: [ErrorComponent],
-            providers: [
-                { provide: ErrorService, useValue: errorServiceSpy },
-                { provide: Router, useValue: routerSpy }
-            ]
-        }).compileComponents();
+		await TestBed.configureTestingModule({
+			imports: [ErrorComponent],
+			providers: [
+				{ provide: ErrorService, useValue: errorServiceSpy },
+				{ provide: Router, useValue: routerSpy }
+			]
+		}).compileComponents();
 
-        fixture = TestBed.createComponent(ErrorComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    });
+		fixture = TestBed.createComponent(ErrorComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 
-    // ---------- INIT ----------
+	// ---------- INIT ----------
 
-    it('should set error from service on init', () => {
-        errorServiceSpy.getError.and.returnValue(mockError);
+	it('should set error from service on init', () => {
+		errorServiceSpy.getError.and.returnValue(mockError);
 
-        component.ngOnInit();
+		component.ngOnInit();
 
-        expect(component.status).toBe(500);
-        expect(component.errorName).toBe('Internal Server Error');
-        expect(component.message).toBe('An unexpected error occurred');
-    });
+		expect(component.status).toBe(500);
+		expect(component.errorName).toBe('Internal Server Error');
+		expect(component.message).toBe('An unexpected error occurred');
+	});
 
-    it('should default to 404 if no error', () => {
-        errorServiceSpy.getError.and.returnValue(null);
+	it('should default to 404 if no error', () => {
+		errorServiceSpy.getError.and.returnValue(null);
 
-        component.ngOnInit();
+		component.ngOnInit();
 
-        expect(component.status).toBe(404);
-        expect(component.errorName).toBe('Page not found');
-        expect(component.message).toBe('The page you are looking for does not exist');
-    });
+		expect(component.status).toBe(404);
+		expect(component.errorName).toBe('Page not found');
+		expect(component.message).toBe('The page you are looking for does not exist');
+	});
 
-    // ---------- GO HOME ----------
+	// ---------- GO HOME ----------
 
-    it('should clear error and navigate home', () => {
-        component.goHome();
+	it('should clear error and navigate home', () => {
+		component.goHome();
 
-        expect(errorServiceSpy.clear).toHaveBeenCalled();
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['posts']);
-    });
+		expect(errorServiceSpy.clear).toHaveBeenCalled();
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['posts']);
+	});
 
 });

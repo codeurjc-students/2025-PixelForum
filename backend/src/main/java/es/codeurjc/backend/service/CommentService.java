@@ -42,7 +42,7 @@ public class CommentService {
 	}
 
 	private CommentDTO toDTO(Comment comment, User currentUser) {
-		 return mapper.toDTOWithLike(comment, currentUser);
+		return mapper.toDTOWithLike(comment, currentUser);
 	}
 
 	public CommentDTO getComment(Long id, User currentUser) {

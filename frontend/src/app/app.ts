@@ -5,16 +5,16 @@ import { RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.css',
-  imports: [RouterOutlet, HeaderComponent, SidebarComponent],
+	selector: 'app-root',
+	templateUrl: './app.html',
+	styleUrl: './app.css',
+	imports: [RouterOutlet, HeaderComponent, SidebarComponent],
 })
 export class App {
-  constructor(private authService: AuthService) {}
+	constructor(private authService: AuthService) { }
 
-  ngOnInit() {
-    this.authService.checkAuth().subscribe();
-  }
+	ngOnInit() {
+		this.authService.checkAuth().subscribe();
+	}
 
 }

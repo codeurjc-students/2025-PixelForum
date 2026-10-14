@@ -1,8 +1,8 @@
 package es.codeurjc.backend.security.jwt;
 
 public class LoginRequest {
-    
-    private String username;
+
+	private String username;
 	private String password;
 
 	public LoginRequest() {

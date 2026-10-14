@@ -4,166 +4,166 @@ import { AuthService } from '../auth.service';
 import { environment } from '../../../environments/environment';
 
 describe('AuthService - Unit Tests', () => {
-    let service: AuthService;
-    let httpMock: HttpTestingController;
-    const baseUrl = environment.apiUrl + 'auth/';
+	let service: AuthService;
+	let httpMock: HttpTestingController;
+	const baseUrl = environment.apiUrl + 'auth/';
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-            providers: [AuthService]
-        });
-        service = TestBed.inject(AuthService);
-        httpMock = TestBed.inject(HttpTestingController);
-    });
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			imports: [HttpClientTestingModule],
+			providers: [AuthService]
+		});
+		service = TestBed.inject(AuthService);
+		httpMock = TestBed.inject(HttpTestingController);
+	});
 
-    afterEach(() => {
-        httpMock.verify();
-    });
+	afterEach(() => {
+		httpMock.verify();
+	});
 
-    it('should be created', () => {
-        expect(service).toBeTruthy();
-    });
+	it('should be created', () => {
+		expect(service).toBeTruthy();
+	});
 
-    it('login should send POST with withCredentials', () => {
-        const username = 'testuser';
-        const password = 'password123';
-        const loginResponse = { status: 'SUCCESS', message: '', error: null };
-        const mockUser = { id: 1, username: 'testuser', roles: [] };
+	it('login should send POST with withCredentials', () => {
+		const username = 'testuser';
+		const password = 'password123';
+		const loginResponse = { status: 'SUCCESS', message: '', error: null };
+		const mockUser = { id: 1, username: 'testuser', roles: [] };
 
-        service.login(username, password).subscribe();
+		service.login(username, password).subscribe();
 
-        const loginReq = httpMock.expectOne(baseUrl + 'login');
-        expect(loginReq.request.method).toBe('POST');
-        expect(loginReq.request.body).toEqual({ username, password });
-        expect(loginReq.request.withCredentials).toBe(true);
-        loginReq.flush(loginResponse);
+		const loginReq = httpMock.expectOne(baseUrl + 'login');
+		expect(loginReq.request.method).toBe('POST');
+		expect(loginReq.request.body).toEqual({ username, password });
+		expect(loginReq.request.withCredentials).toBe(true);
+		loginReq.flush(loginResponse);
 
-        const meReq = httpMock.expectOne(baseUrl + 'me');
-        expect(meReq.request.method).toBe('GET');
-        expect(meReq.request.withCredentials).toBe(true);
-        meReq.flush(mockUser);
-    });
+		const meReq = httpMock.expectOne(baseUrl + 'me');
+		expect(meReq.request.method).toBe('GET');
+		expect(meReq.request.withCredentials).toBe(true);
+		meReq.flush(mockUser);
+	});
 
-    it('should set loggedIn$ to true on successful login', (done) => {
-        const mockResponse = { status: 'SUCCESS', message: '', error: null };
+	it('should set loggedIn$ to true on successful login', (done) => {
+		const mockResponse = { status: 'SUCCESS', message: '', error: null };
 
-        service.login('user', 'pass').subscribe(() => {
-            service.loggedIn$.subscribe(isLoggedIn => {
-                expect(isLoggedIn).toBeTrue();
-                done();
-            });
-        });
+		service.login('user', 'pass').subscribe(() => {
+			service.loggedIn$.subscribe(isLoggedIn => {
+				expect(isLoggedIn).toBeTrue();
+				done();
+			});
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'login');
-        expect(req.request.method).toBe('POST');
-        req.flush(mockResponse);
+		const req = httpMock.expectOne(baseUrl + 'login');
+		expect(req.request.method).toBe('POST');
+		req.flush(mockResponse);
 
-        const meReq = httpMock.expectOne(baseUrl + 'me');
-        expect(meReq.request.method).toBe('GET');
-        meReq.flush({ username: 'user' });
-    });
+		const meReq = httpMock.expectOne(baseUrl + 'me');
+		expect(meReq.request.method).toBe('GET');
+		meReq.flush({ username: 'user' });
+	});
 
-    it('should NOT set loggedIn$ to true on failed login', (done) => {
-        const mockResponse = { status: 'FAILURE', message: 'Bad credentials', error: 'BAD_CREDENTIALS' };
+	it('should NOT set loggedIn$ to true on failed login', (done) => {
+		const mockResponse = { status: 'FAILURE', message: 'Bad credentials', error: 'BAD_CREDENTIALS' };
 
-        service.login('user', 'wrongpass').subscribe(() => {
-            service.loggedIn$.subscribe(isLoggedIn => {
-                expect(isLoggedIn).toBeFalse();
-                done();
-            });
-        });
+		service.login('user', 'wrongpass').subscribe(() => {
+			service.loggedIn$.subscribe(isLoggedIn => {
+				expect(isLoggedIn).toBeFalse();
+				done();
+			});
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'login');
-        expect(req.request.method).toBe('POST');
-        req.flush(mockResponse);
-    });
+		const req = httpMock.expectOne(baseUrl + 'login');
+		expect(req.request.method).toBe('POST');
+		req.flush(mockResponse);
+	});
 
-    it('should handle HTTP error correctly', (done) => {
-        service.login('user', 'wrongpass').subscribe({
-            error: () => {
-                service.loggedIn$.subscribe(isLoggedIn => {
-                    expect(isLoggedIn).toBeFalse();
-                    done();
-                });
-            }
-        });
+	it('should handle HTTP error correctly', (done) => {
+		service.login('user', 'wrongpass').subscribe({
+			error: () => {
+				service.loggedIn$.subscribe(isLoggedIn => {
+					expect(isLoggedIn).toBeFalse();
+					done();
+				});
+			}
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'login');
-        req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-    });
+		const req = httpMock.expectOne(baseUrl + 'login');
+		req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+	});
 
-    it('logout should send POST with withCredentials', () => {
-        const mockResponse = { status: 'SUCCESS' };
+	it('logout should send POST with withCredentials', () => {
+		const mockResponse = { status: 'SUCCESS' };
 
-        service.logout().subscribe();
+		service.logout().subscribe();
 
-        const req = httpMock.expectOne(baseUrl + 'logout');
-        expect(req.request.method).toBe('POST');
-        expect(req.request.withCredentials).toBe(true);
+		const req = httpMock.expectOne(baseUrl + 'logout');
+		expect(req.request.method).toBe('POST');
+		expect(req.request.withCredentials).toBe(true);
 
-        req.flush(mockResponse);
-    });
+		req.flush(mockResponse);
+	});
 
-    it('logout should update loggedIn$ to false', (done) => {
-        const mockResponse = { status: 'SUCCESS' };
+	it('logout should update loggedIn$ to false', (done) => {
+		const mockResponse = { status: 'SUCCESS' };
 
-        service.logout().subscribe(() => {
-            service.loggedIn$.subscribe(isLoggedIn => {
-                expect(isLoggedIn).toBe(false);
-                done();
-            });
-        });
+		service.logout().subscribe(() => {
+			service.loggedIn$.subscribe(isLoggedIn => {
+				expect(isLoggedIn).toBe(false);
+				done();
+			});
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'logout');
-        req.flush(mockResponse);
-    });
+		const req = httpMock.expectOne(baseUrl + 'logout');
+		req.flush(mockResponse);
+	});
 
-    it('me should send GET with withCredentials', () => {
-        const mockUser = { username: 'testuser' };
+	it('me should send GET with withCredentials', () => {
+		const mockUser = { username: 'testuser' };
 
-        service.me().subscribe();
+		service.me().subscribe();
 
-        const req = httpMock.expectOne(baseUrl + 'me');
-        expect(req.request.method).toBe('GET');
-        expect(req.request.withCredentials).toBe(true);
+		const req = httpMock.expectOne(baseUrl + 'me');
+		expect(req.request.method).toBe('GET');
+		expect(req.request.withCredentials).toBe(true);
 
-        req.flush(mockUser);
-    });
+		req.flush(mockUser);
+	});
 
-    it('checkAuth should set loggedIn to true when me succeeds', (done) => {
-        const mockUser = { username: 'testuser' };
+	it('checkAuth should set loggedIn to true when me succeeds', (done) => {
+		const mockUser = { username: 'testuser' };
 
-        service.checkAuth().subscribe(() => {
-            service.loggedIn$.subscribe(isLoggedIn => {
-                expect(isLoggedIn).toBe(true);
-                done();
-            });
-        });
+		service.checkAuth().subscribe(() => {
+			service.loggedIn$.subscribe(isLoggedIn => {
+				expect(isLoggedIn).toBe(true);
+				done();
+			});
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'me');
-        req.flush(mockUser);
-    });
+		const req = httpMock.expectOne(baseUrl + 'me');
+		req.flush(mockUser);
+	});
 
-    it('checkAuth should set loggedIn to false when me fails', (done) => {
-        service.checkAuth().subscribe(() => {
-            service.loggedIn$.subscribe(isLoggedIn => {
-                expect(isLoggedIn).toBe(false);
-                done();
-            });
-        });
+	it('checkAuth should set loggedIn to false when me fails', (done) => {
+		service.checkAuth().subscribe(() => {
+			service.loggedIn$.subscribe(isLoggedIn => {
+				expect(isLoggedIn).toBe(false);
+				done();
+			});
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'me');
-        req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-    });
+		const req = httpMock.expectOne(baseUrl + 'me');
+		req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+	});
 
-    it('checkAuth should emit null when me fails', (done) => {
-        service.checkAuth().subscribe(result => {
-            expect(result).toBeNull();
-            done();
-        });
+	it('checkAuth should emit null when me fails', (done) => {
+		service.checkAuth().subscribe(result => {
+			expect(result).toBeNull();
+			done();
+		});
 
-        const req = httpMock.expectOne(baseUrl + 'me');
-        req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
-    });
+		const req = httpMock.expectOne(baseUrl + 'me');
+		req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+	});
 });

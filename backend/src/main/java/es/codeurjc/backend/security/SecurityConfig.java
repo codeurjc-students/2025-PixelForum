@@ -24,10 +24,10 @@ import es.codeurjc.backend.security.jwt.UnauthorizedHandlerJwt;
 public class SecurityConfig {
 
 	// API ENDPOINTS
-    private static final String API_V = "/api/v1";
-    private static final String API_POSTS = API_V + "/posts/**";
-    private static final String API_COMMENTS = API_V + "/posts/*/comments/**";
-    private static final String API_USERS = API_V + "/users/**";
+	private static final String API_V = "/api/v1";
+	private static final String API_POSTS = API_V + "/posts/**";
+	private static final String API_COMMENTS = API_V + "/posts/*/comments/**";
+	private static final String API_USERS = API_V + "/users/**";
 	private static final String API_IMAGES = API_V + "/images/**";
 
 	private final JwtRequestFilter jwtRequestFilter;
@@ -37,8 +37,7 @@ public class SecurityConfig {
 	public SecurityConfig(
 			JwtRequestFilter jwtRequestFilter,
 			RepositoryUserDetailsService userDetailsService,
-			UnauthorizedHandlerJwt unauthorizedHandlerJwt
-	) {
+			UnauthorizedHandlerJwt unauthorizedHandlerJwt) {
 		this.jwtRequestFilter = jwtRequestFilter;
 		this.userDetailsService = userDetailsService;
 		this.unauthorizedHandlerJwt = unauthorizedHandlerJwt;
@@ -57,73 +56,72 @@ public class SecurityConfig {
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
+		authProvider.setPasswordEncoder(passwordEncoder());
 		return authProvider;
 	}
 
 	@Bean
 	public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-		
+
 		http.authenticationProvider(authenticationProvider());
 
 		http
-			.securityMatcher("/api/**")
-			.cors(Customizer.withDefaults())
-			.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
-		
+				.securityMatcher("/api/**")
+				.cors(Customizer.withDefaults())
+				.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
+
 		http
-			.authorizeHttpRequests(authorize -> authorize
-					// POSTS
-					.requestMatchers(HttpMethod.GET, API_POSTS).permitAll()
-					.requestMatchers(HttpMethod.POST, API_POSTS).hasRole("USER")
-					.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole("USER")
-					.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole("USER")
+				.authorizeHttpRequests(authorize -> authorize
+						// POSTS
+						.requestMatchers(HttpMethod.GET, API_POSTS).permitAll()
+						.requestMatchers(HttpMethod.POST, API_POSTS).hasRole("USER")
+						.requestMatchers(HttpMethod.PUT, API_POSTS).hasRole("USER")
+						.requestMatchers(HttpMethod.DELETE, API_POSTS).hasRole("USER")
 
-					// COMMENTS
-					.requestMatchers(HttpMethod.GET, API_COMMENTS).permitAll()
-					.requestMatchers(HttpMethod.POST, API_COMMENTS).hasRole("USER")
-					.requestMatchers(HttpMethod.PUT, API_COMMENTS).hasRole("USER")
-					.requestMatchers(HttpMethod.DELETE, API_COMMENTS).hasRole("USER")
+						// COMMENTS
+						.requestMatchers(HttpMethod.GET, API_COMMENTS).permitAll()
+						.requestMatchers(HttpMethod.POST, API_COMMENTS).hasRole("USER")
+						.requestMatchers(HttpMethod.PUT, API_COMMENTS).hasRole("USER")
+						.requestMatchers(HttpMethod.DELETE, API_COMMENTS).hasRole("USER")
 
-					// IMAGES
-					.requestMatchers(HttpMethod.GET, API_IMAGES).permitAll()
-					.requestMatchers(HttpMethod.POST, API_IMAGES).hasRole("USER")
-					.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole("USER")
-					
-					// USERS
-					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-posts").hasRole("USER")
-					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-comments").hasRole("USER")
-					.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/details").hasRole("USER")
-					.requestMatchers(HttpMethod.GET, API_USERS).permitAll()
-					.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
-					.requestMatchers(HttpMethod.PATCH, API_USERS).hasRole("USER")
-					.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole("USER")
-					
-					// AUTH
-					.requestMatchers(HttpMethod.GET, API_V + "/auth/me").hasRole("USER")
-					
-					// DOCUMENTATION
-					.requestMatchers("/v3/api-docs/**").permitAll()
-					.requestMatchers("/swagger-ui.html").permitAll()
-					.requestMatchers("/swagger-ui/**").permitAll()
-					.requestMatchers("/v3/api-docs.yaml").permitAll()
-					.requestMatchers("/api-docs/**").permitAll()
-					
-					// Others
-					.anyRequest().permitAll()
-			);
-		
-        // Disable Form login Authentication
-        http.formLogin(AbstractHttpConfigurer::disable);
+						// IMAGES
+						.requestMatchers(HttpMethod.GET, API_IMAGES).permitAll()
+						.requestMatchers(HttpMethod.POST, API_IMAGES).hasRole("USER")
+						.requestMatchers(HttpMethod.DELETE, API_IMAGES).hasRole("USER")
 
-        // Disable CSRF protection (it is difficult to implement in REST APIs)
-        http.csrf(AbstractHttpConfigurer::disable);
+						// USERS
+						.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-posts").hasRole("USER")
+						.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/liked-comments").hasRole("USER")
+						.requestMatchers(HttpMethod.GET, API_V + "/users/{id}/details").hasRole("USER")
+						.requestMatchers(HttpMethod.GET, API_USERS).permitAll()
+						.requestMatchers(HttpMethod.POST, API_USERS).permitAll()
+						.requestMatchers(HttpMethod.PATCH, API_USERS).hasRole("USER")
+						.requestMatchers(HttpMethod.DELETE, API_USERS).hasRole("USER")
 
-        // Disable Basic Authentication
-        http.httpBasic(AbstractHttpConfigurer::disable);
+						// AUTH
+						.requestMatchers(HttpMethod.GET, API_V + "/auth/me").hasRole("USER")
 
-        // Stateless session
-        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+						// DOCUMENTATION
+						.requestMatchers("/v3/api-docs/**").permitAll()
+						.requestMatchers("/swagger-ui.html").permitAll()
+						.requestMatchers("/swagger-ui/**").permitAll()
+						.requestMatchers("/v3/api-docs.yaml").permitAll()
+						.requestMatchers("/api-docs/**").permitAll()
+
+						// Others
+						.anyRequest().permitAll());
+
+		// Disable Form login Authentication
+		http.formLogin(AbstractHttpConfigurer::disable);
+
+		// Disable CSRF protection (it is difficult to implement in REST APIs)
+		http.csrf(AbstractHttpConfigurer::disable);
+
+		// Disable Basic Authentication
+		http.httpBasic(AbstractHttpConfigurer::disable);
+
+		// Stateless session
+		http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		// Add JWT Token filter
 		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

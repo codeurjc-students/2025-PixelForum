@@ -11,14 +11,15 @@ import es.codeurjc.backend.model.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    UserDTO toDTO(User user);
+	UserDTO toDTO(User user);
+
 	BasicUserDTO toBasicDTO(User user);
 
-    List<UserDTO> toDTOs(Collection<User> users);
+	List<UserDTO> toDTOs(Collection<User> users);
 
-    @Mapping(target = "password", ignore = true)
-    @Mapping(target = "likedComments", ignore = true)
-    User toDomain(UserDTO userDTO);
+	@Mapping(target = "password", ignore = true)
+	@Mapping(target = "likedComments", ignore = true)
+	User toDomain(UserDTO userDTO);
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
@@ -28,14 +29,15 @@ public interface UserMapper {
 	@Mapping(target = "roles", ignore = true)
 	User toDomain(CreateUserDTO userDTO);
 
-    // Image -> Long
+	// Image -> Long
 	default Long mapImage(Image image) {
 		return image != null ? image.getId() : null;
 	}
 
 	// Long -> Image
 	default Image mapImage(Long id) {
-		if (id == null) return null;
+		if (id == null)
+			return null;
 		Image image = new Image();
 		image.setId(id);
 		return image;
@@ -48,7 +50,8 @@ public interface UserMapper {
 
 	// Long -> Post
 	default Post mapPost(Long id) {
-		if (id == null) return null;
+		if (id == null)
+			return null;
 		Post post = new Post();
 		post.setId(id);
 		return post;

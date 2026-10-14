@@ -7,15 +7,15 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class TopicService {
 
-    private baseUrl = environment.apiUrl + 'topics/';
+	private baseUrl = environment.apiUrl + 'topics/';
 
-    constructor(private http: HttpClient) {}
+	constructor(private http: HttpClient) { }
 
-    getAll(): Observable<Topic[]> {
-        return this.http.get<Topic[]>(this.baseUrl, { withCredentials: true });
-    }
+	getAll(): Observable<Topic[]> {
+		return this.http.get<Topic[]>(this.baseUrl, { withCredentials: true });
+	}
 
-    getById(id: number): Observable<Topic> {
-        return this.http.get<Topic>(`${this.baseUrl}${id}`, { withCredentials: true });
-    }
+	getById(id: number): Observable<Topic> {
+		return this.http.get<Topic>(`${this.baseUrl}${id}`, { withCredentials: true });
+	}
 }

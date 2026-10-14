@@ -17,55 +17,55 @@ import java.util.*;
 @RequestMapping("/api/v1/images")
 public class ImageRestController {
 
-    private final ImageService imageService;
-    private final UserService userService;
+	private final ImageService imageService;
+	private final UserService userService;
 
-    public ImageRestController(ImageService imageService, UserService userService) {
-        this.imageService = imageService;
-        this.userService = userService;
-    }
+	public ImageRestController(ImageService imageService, UserService userService) {
+		this.imageService = imageService;
+		this.userService = userService;
+	}
 
-    private User getCurrentUser(Principal principal) {
-        return userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-    }
+	private User getCurrentUser(Principal principal) {
+		return userService.findByUsername(principal.getName())
+				.orElseThrow(() -> new EntityNotFoundException("User not found"));
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<byte[]> getImage(@PathVariable long id, @RequestParam(required = false) Integer w,
-            @RequestParam(required = false) Integer h, @RequestParam(required = false, defaultValue = "95") int q) {
+	@GetMapping("/{id}")
+	public ResponseEntity<byte[]> getImage(@PathVariable long id, @RequestParam(required = false) Integer w,
+			@RequestParam(required = false) Integer h, @RequestParam(required = false, defaultValue = "95") int q) {
 
-        byte[] imageData = imageService.getImage(id, w, h, q);
+		byte[] imageData = imageService.getImage(id, w, h, q);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .header("Cache-Control", "public, max-age=31536000")
-                .body(imageData);
-    }
+		return ResponseEntity.ok()
+				.contentType(MediaType.IMAGE_JPEG)
+				.header("Cache-Control", "public, max-age=31536000")
+				.body(imageData);
+	}
 
-    @PostMapping
-    public ResponseEntity<List<Long>> uploadImages(@RequestParam("files") MultipartFile[] files,
-            Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        List<Long> ids = new ArrayList<>();
+	@PostMapping
+	public ResponseEntity<List<Long>> uploadImages(@RequestParam("files") MultipartFile[] files,
+			Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		List<Long> ids = new ArrayList<>();
 
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                Long id = imageService.uploadImage(file, currentUser);
-                ids.add(id);
-            }
-        }
+		for (MultipartFile file : files) {
+			if (!file.isEmpty()) {
+				Long id = imageService.uploadImage(file, currentUser);
+				ids.add(id);
+			}
+		}
 
-        if (ids.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+		if (ids.isEmpty()) {
+			return ResponseEntity.badRequest().build();
+		}
 
-        return ResponseEntity.ok(ids);
-    }
+		return ResponseEntity.ok(ids);
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteImage(@PathVariable long id, Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        imageService.deleteImage(id, currentUser);
-        return ResponseEntity.noContent().build();
-    }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteImage(@PathVariable long id, Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		imageService.deleteImage(id, currentUser);
+		return ResponseEntity.noContent().build();
+	}
 }

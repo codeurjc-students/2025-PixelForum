@@ -9,7 +9,7 @@ export class GuestGuard implements CanActivate {
 	constructor(
 		private authService: AuthService,
 		private router: Router
-	) {}
+	) { }
 
 	canActivate() {
 		return this.authService.me().pipe(

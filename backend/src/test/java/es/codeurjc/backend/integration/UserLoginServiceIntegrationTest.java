@@ -25,106 +25,106 @@ import es.codeurjc.backend.security.jwt.UserLoginService;
 @SpringBootTest
 class UserLoginServiceIntegrationTest {
 
-    @Autowired
-    private UserLoginService userLoginService;
+	@Autowired
+	private UserLoginService userLoginService;
 
-    @Test
-    @DisplayName("Login should succeed with valid credentials and set cookies")
-    void loginSuccessTest() {
-        // GIVEN
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        LoginRequest loginRequest = new LoginRequest("admin", "admin0");
+	@Test
+	@DisplayName("Login should succeed with valid credentials and set cookies")
+	void loginSuccessTest() {
+		// GIVEN
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		LoginRequest loginRequest = new LoginRequest("admin", "admin0");
 
-        // WHEN
-        ResponseEntity<AuthResponse> result = userLoginService.login(response, loginRequest);
+		// WHEN
+		ResponseEntity<AuthResponse> result = userLoginService.login(response, loginRequest);
 
-        // THEN
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertNotNull(result.getBody());
-        assertEquals(AuthResponse.Status.SUCCESS, result.getBody().getStatus());
+		// THEN
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertNotNull(result.getBody());
+		assertEquals(AuthResponse.Status.SUCCESS, result.getBody().getStatus());
 
-        Cookie accessCookie = response.getCookie(TokenType.ACCESS.cookieName);
-        Cookie refreshCookie = response.getCookie(TokenType.REFRESH.cookieName);
+		Cookie accessCookie = response.getCookie(TokenType.ACCESS.cookieName);
+		Cookie refreshCookie = response.getCookie(TokenType.REFRESH.cookieName);
 
-        assertNotNull(accessCookie, "Access cookie should not be null");
-        assertNotNull(refreshCookie, "Refresh cookie should not be null");
-        assertTrue(accessCookie.isHttpOnly(), "Access cookie should be HttpOnly");
-        assertTrue(refreshCookie.isHttpOnly(), "Refresh cookie should be HttpOnly");
-    }
+		assertNotNull(accessCookie, "Access cookie should not be null");
+		assertNotNull(refreshCookie, "Refresh cookie should not be null");
+		assertTrue(accessCookie.isHttpOnly(), "Access cookie should be HttpOnly");
+		assertTrue(refreshCookie.isHttpOnly(), "Refresh cookie should be HttpOnly");
+	}
 
-    @Test
-    @DisplayName("Login should fail with invalid credentials")
-    void loginInvalidCredentialsTest() {
-        // GIVEN
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        LoginRequest loginRequest = new LoginRequest("user", "wrongpassword");
+	@Test
+	@DisplayName("Login should fail with invalid credentials")
+	void loginInvalidCredentialsTest() {
+		// GIVEN
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		LoginRequest loginRequest = new LoginRequest("user", "wrongpassword");
 
-        // WHEN & THEN
-        assertThrows(Exception.class, () -> userLoginService.login(response, loginRequest));
-    }
+		// WHEN & THEN
+		assertThrows(Exception.class, () -> userLoginService.login(response, loginRequest));
+	}
 
-    @Test
-    @DisplayName("Refresh should succeed with valid refresh token")
-    void refreshSuccessTest() {
-        // GIVEN
-        MockHttpServletResponse loginResponse = new MockHttpServletResponse();
-        LoginRequest loginRequest = new LoginRequest("admin", "admin0");
-        userLoginService.login(loginResponse, loginRequest);
+	@Test
+	@DisplayName("Refresh should succeed with valid refresh token")
+	void refreshSuccessTest() {
+		// GIVEN
+		MockHttpServletResponse loginResponse = new MockHttpServletResponse();
+		LoginRequest loginRequest = new LoginRequest("admin", "admin0");
+		userLoginService.login(loginResponse, loginRequest);
 
-        Cookie refreshCookie = loginResponse.getCookie(TokenType.REFRESH.cookieName);
-        assertNotNull(refreshCookie, "Refresh cookie should not be null");
+		Cookie refreshCookie = loginResponse.getCookie(TokenType.REFRESH.cookieName);
+		assertNotNull(refreshCookie, "Refresh cookie should not be null");
 
-        // WHEN
-        MockHttpServletResponse refreshResponse = new MockHttpServletResponse();
-        ResponseEntity<AuthResponse> refreshResult =
-                userLoginService.refresh(refreshResponse, refreshCookie.getValue());
+		// WHEN
+		MockHttpServletResponse refreshResponse = new MockHttpServletResponse();
+		ResponseEntity<AuthResponse> refreshResult = userLoginService.refresh(refreshResponse,
+				refreshCookie.getValue());
 
-        // THEN
-        assertEquals(HttpStatus.OK, refreshResult.getStatusCode());
-        assertEquals(AuthResponse.Status.SUCCESS, refreshResult.getBody().getStatus());
+		// THEN
+		assertEquals(HttpStatus.OK, refreshResult.getStatusCode());
+		assertEquals(AuthResponse.Status.SUCCESS, refreshResult.getBody().getStatus());
 
-        Cookie newAccessCookie = refreshResponse.getCookie(TokenType.ACCESS.cookieName);
-        Cookie newRefreshCookie = refreshResponse.getCookie(TokenType.REFRESH.cookieName);
+		Cookie newAccessCookie = refreshResponse.getCookie(TokenType.ACCESS.cookieName);
+		Cookie newRefreshCookie = refreshResponse.getCookie(TokenType.REFRESH.cookieName);
 
-        assertNotNull(newAccessCookie, "New access cookie should not be null");
-        assertNotNull(newRefreshCookie, "New refresh cookie should not be null");
-        assertFalse(newAccessCookie.getValue().isEmpty(), "New access cookie should have value");
-        assertFalse(newRefreshCookie.getValue().isEmpty(), "New refresh cookie should have value");
-    }
+		assertNotNull(newAccessCookie, "New access cookie should not be null");
+		assertNotNull(newRefreshCookie, "New refresh cookie should not be null");
+		assertFalse(newAccessCookie.getValue().isEmpty(), "New access cookie should have value");
+		assertFalse(newRefreshCookie.getValue().isEmpty(), "New refresh cookie should have value");
+	}
 
-    @Test
-    @DisplayName("Refresh should fail with invalid refresh token")
-    void refreshInvalidTokenTest() {
-        // GIVEN
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        String invalidToken = "invalid-refresh-token";
+	@Test
+	@DisplayName("Refresh should fail with invalid refresh token")
+	void refreshInvalidTokenTest() {
+		// GIVEN
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		String invalidToken = "invalid-refresh-token";
 
-        // WHEN
-        ResponseEntity<AuthResponse> result = userLoginService.refresh(response, invalidToken);
+		// WHEN
+		ResponseEntity<AuthResponse> result = userLoginService.refresh(response, invalidToken);
 
-        // THEN
-        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
-        assertEquals(AuthResponse.Status.FAILURE, result.getBody().getStatus());
-    }
+		// THEN
+		assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+		assertEquals(AuthResponse.Status.FAILURE, result.getBody().getStatus());
+	}
 
-    @Test
-    @DisplayName("Logout should clear both cookies")
-    void logoutTest() {
-        // GIVEN
-        MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	@DisplayName("Logout should clear both cookies")
+	void logoutTest() {
+		// GIVEN
+		MockHttpServletResponse response = new MockHttpServletResponse();
 
-        // WHEN
-        String result = userLoginService.logout(response);
+		// WHEN
+		String result = userLoginService.logout(response);
 
-        // THEN
-        assertEquals("Logout successfully", result);
+		// THEN
+		assertEquals("Logout successfully", result);
 
-        Cookie accessCookie = response.getCookie(TokenType.ACCESS.cookieName);
-        Cookie refreshCookie = response.getCookie(TokenType.REFRESH.cookieName);
+		Cookie accessCookie = response.getCookie(TokenType.ACCESS.cookieName);
+		Cookie refreshCookie = response.getCookie(TokenType.REFRESH.cookieName);
 
-        assertNotNull(accessCookie, "Access cookie should not be null");
-        assertNotNull(refreshCookie, "Refresh cookie should not be null");
-        assertEquals(0, accessCookie.getMaxAge(), "Access cookie should be deleted");
-        assertEquals(0, refreshCookie.getMaxAge(), "Refresh cookie should be deleted");
-    }
+		assertNotNull(accessCookie, "Access cookie should not be null");
+		assertNotNull(refreshCookie, "Refresh cookie should not be null");
+		assertEquals(0, accessCookie.getMaxAge(), "Access cookie should be deleted");
+		assertEquals(0, refreshCookie.getMaxAge(), "Refresh cookie should be deleted");
+	}
 }

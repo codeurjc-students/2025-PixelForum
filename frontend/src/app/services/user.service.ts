@@ -9,47 +9,47 @@ import { Post } from '../models/post.model';
 @Injectable({ providedIn: 'root' })
 export class UserService {
 
-    private baseUrl = environment.apiUrl + 'users';
+	private baseUrl = environment.apiUrl + 'users';
 
-    constructor(private http: HttpClient) { }
+	constructor(private http: HttpClient) { }
 
-    getAll(page: number = 0, size: number = 10): Observable<PageResponse<User>> {
-        return this.http.get<PageResponse<User>>(this.baseUrl, { params: { page, size }, withCredentials: true });
-    }
+	getAll(page: number = 0, size: number = 10): Observable<PageResponse<User>> {
+		return this.http.get<PageResponse<User>>(this.baseUrl, { params: { page, size }, withCredentials: true });
+	}
 
-    getById(id: number): Observable<User> {
-        return this.http.get<User>(`${this.baseUrl}/${id}`, { withCredentials: true });
-    }
+	getById(id: number): Observable<User> {
+		return this.http.get<User>(`${this.baseUrl}/${id}`, { withCredentials: true });
+	}
 
-    getUserDetails(userId: number): Observable<User> {
-        return this.http.get<User>(`${this.baseUrl}/${userId}/details`, { withCredentials: true });
-    }
+	getUserDetails(userId: number): Observable<User> {
+		return this.http.get<User>(`${this.baseUrl}/${userId}/details`, { withCredentials: true });
+	}
 
-    getLikedPosts(userId: number, page: number, size: number) {
-        return this.http.get<PageResponse<Post>>(`${this.baseUrl}/${userId}/liked-posts`, { params: { page, size }, withCredentials: true });
-    }
+	getLikedPosts(userId: number, page: number, size: number) {
+		return this.http.get<PageResponse<Post>>(`${this.baseUrl}/${userId}/liked-posts`, { params: { page, size }, withCredentials: true });
+	}
 
-    register(userData: any): Observable<User> {
-        return this.http.post<User>(this.baseUrl, userData, { headers: { 'skip-error': 'true' }, withCredentials: true });
-    }
+	register(userData: any): Observable<User> {
+		return this.http.post<User>(this.baseUrl, userData, { headers: { 'skip-error': 'true' }, withCredentials: true });
+	}
 
-    updateProfile(id: number, data: { username: string; email: string; bio: string }): Observable<User> {
-        return this.http.patch<User>(`${this.baseUrl}/${id}`, data, { headers: { 'skip-error': 'true' }, withCredentials: true });
-    }
+	updateProfile(id: number, data: { username: string; email: string; bio: string }): Observable<User> {
+		return this.http.patch<User>(`${this.baseUrl}/${id}`, data, { headers: { 'skip-error': 'true' }, withCredentials: true });
+	}
 
-    changePassword(id: number, data: { oldPassword: string; newPassword: string }): Observable<void> {
-        return this.http.patch<void>(`${this.baseUrl}/${id}/password`, data, { headers: { 'skip-error': 'true' }, withCredentials: true });
-    }
+	changePassword(id: number, data: { oldPassword: string; newPassword: string }): Observable<void> {
+		return this.http.patch<void>(`${this.baseUrl}/${id}/password`, data, { headers: { 'skip-error': 'true' }, withCredentials: true });
+	}
 
-    setAvatar(id: number, imageId: number): Observable<User> {
-        return this.http.post<User>(`${this.baseUrl}/${id}/avatar?imageId=${imageId}`, {}, { withCredentials: true });
-    }
+	setAvatar(id: number, imageId: number): Observable<User> {
+		return this.http.post<User>(`${this.baseUrl}/${id}/avatar?imageId=${imageId}`, {}, { withCredentials: true });
+	}
 
-    deleteAvatar(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/${id}/avatar`, { withCredentials: true });
-    }
+	deleteAvatar(id: number): Observable<void> {
+		return this.http.delete<void>(`${this.baseUrl}/${id}/avatar`, { withCredentials: true });
+	}
 
-    deleteAccount(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
-    }
+	deleteAccount(id: number): Observable<void> {
+		return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
+	}
 }

@@ -29,79 +29,79 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/v1/posts/{postId}/comments")
 public class CommentRestController {
 
-    private static final String USER_NOT_FOUND = "User not found";
+	private static final String USER_NOT_FOUND = "User not found";
 
-    private final CommentService commentService;
-    private final UserService userService;
+	private final CommentService commentService;
+	private final UserService userService;
 
-    public CommentRestController(CommentService commentService, UserService userService) {
-        this.commentService = commentService;
-        this.userService = userService;
-    }
+	public CommentRestController(CommentService commentService, UserService userService) {
+		this.commentService = commentService;
+		this.userService = userService;
+	}
 
-    private User getCurrentUser(Principal principal) {
-        return userService.findByUsername(principal.getName())
-                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-    }
+	private User getCurrentUser(Principal principal) {
+		return userService.findByUsername(principal.getName())
+				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+	}
 
-    @GetMapping
-    public ResponseEntity<Page<CommentDTO>> getPostComments(@PathVariable Long postId,
-            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            Principal principal) {
-        User user = null;
-        if (principal != null) {
-            user = userService.findByUsername(principal.getName()).orElse(null);
-        }
-        Page<CommentDTO> page = commentService.getPostComments(postId, pageable, user);
-        return ResponseEntity.ok(page);
-    }
+	@GetMapping
+	public ResponseEntity<Page<CommentDTO>> getPostComments(@PathVariable Long postId,
+			@PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+			Principal principal) {
+		User user = null;
+		if (principal != null) {
+			user = userService.findByUsername(principal.getName()).orElse(null);
+		}
+		Page<CommentDTO> page = commentService.getPostComments(postId, pageable, user);
+		return ResponseEntity.ok(page);
+	}
 
-    @GetMapping("/{commentId}")
-    public ResponseEntity<CommentDTO> getComment(@PathVariable Long postId, @PathVariable Long commentId,
-            Principal principal) {
-        User user = null;
-        if (principal != null) {
-            user = userService.findByUsername(principal.getName()).orElse(null);
-        }
-        CommentDTO commentDTO = commentService.getComment(commentId, user);
-        return ResponseEntity.ok(commentDTO);
-    }
+	@GetMapping("/{commentId}")
+	public ResponseEntity<CommentDTO> getComment(@PathVariable Long postId, @PathVariable Long commentId,
+			Principal principal) {
+		User user = null;
+		if (principal != null) {
+			user = userService.findByUsername(principal.getName()).orElse(null);
+		}
+		CommentDTO commentDTO = commentService.getComment(commentId, user);
+		return ResponseEntity.ok(commentDTO);
+	}
 
-    @PostMapping
-    public ResponseEntity<CommentDTO> createComment(@PathVariable Long postId, @RequestBody CommentDTO commentDTO,
-            Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        CommentDTO createdCommentDTO = commentService.createComment(postId, commentDTO, currentUser);
+	@PostMapping
+	public ResponseEntity<CommentDTO> createComment(@PathVariable Long postId, @RequestBody CommentDTO commentDTO,
+			Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		CommentDTO createdCommentDTO = commentService.createComment(postId, commentDTO, currentUser);
 
-        URI location = fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdCommentDTO.id())
-                .toUri();
+		URI location = fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(createdCommentDTO.id())
+				.toUri();
 
-        return ResponseEntity.created(location).body(createdCommentDTO);
-    }
+		return ResponseEntity.created(location).body(createdCommentDTO);
+	}
 
-    @PutMapping("/{commentId}")
-    public ResponseEntity<CommentDTO> updateComment(@PathVariable Long postId, @PathVariable Long commentId,
-            @RequestBody CommentDTO commentDTO, Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        CommentDTO updatedCommentDTO = commentService.updateComment(commentId, commentDTO, currentUser);
-        return ResponseEntity.ok(updatedCommentDTO);
-    }
+	@PutMapping("/{commentId}")
+	public ResponseEntity<CommentDTO> updateComment(@PathVariable Long postId, @PathVariable Long commentId,
+			@RequestBody CommentDTO commentDTO, Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		CommentDTO updatedCommentDTO = commentService.updateComment(commentId, commentDTO, currentUser);
+		return ResponseEntity.ok(updatedCommentDTO);
+	}
 
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long postId, @PathVariable Long commentId,
-            Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        commentService.deleteComment(commentId, currentUser);
-        return ResponseEntity.noContent().build();
-    }
+	@DeleteMapping("/{commentId}")
+	public ResponseEntity<Void> deleteComment(@PathVariable Long postId, @PathVariable Long commentId,
+			Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		commentService.deleteComment(commentId, currentUser);
+		return ResponseEntity.noContent().build();
+	}
 
-    @PostMapping("/{commentId}/like")
-    public ResponseEntity<CommentDTO> toggleLike(@PathVariable Long postId, @PathVariable Long commentId,
-            Principal principal) {
-        User currentUser = getCurrentUser(principal);
-        CommentDTO likedCommentDTO = commentService.toggleLike(commentId, currentUser);
-        return ResponseEntity.ok(likedCommentDTO);
-    }
+	@PostMapping("/{commentId}/like")
+	public ResponseEntity<CommentDTO> toggleLike(@PathVariable Long postId, @PathVariable Long commentId,
+			Principal principal) {
+		User currentUser = getCurrentUser(principal);
+		CommentDTO likedCommentDTO = commentService.toggleLike(commentId, currentUser);
+		return ResponseEntity.ok(likedCommentDTO);
+	}
 }
