@@ -236,6 +236,37 @@ describe('CreatePostComponent', () => {
 		expect(component.errorMessage).toBe('Test error');
 	});
 
+	// ---------- VALIDATION ----------
+
+	it('should block creation when the title is only whitespace', async () => {
+		component.selectedTopic = mockTopic;
+		component.createPostForm.patchValue({ title: '   ', content: 'Content' });
+
+		await component.createPost();
+
+		expect(component.errorMessage).toBe('The title cannot be empty.');
+		expect(postServiceSpy.create).not.toHaveBeenCalled();
+	});
+
+	it('should send normalized title and content', async () => {
+		postServiceSpy.create.and.returnValue(of(mockPost));
+		component.selectedTopic = mockTopic;
+		component.createPostForm.patchValue({
+			title: '  My    title \n',
+			content: '  Hello   world  \r\n\r\n\r\n\r\n bye '
+		});
+
+		await component.createPost();
+
+		expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({ title: 'My title', content: 'Hello world\n\nbye' }));
+	});
+
+	it('should not report a content error when the content is empty (optional)', () => {
+		component.createPostForm.patchValue({ content: '   ' });
+
+		expect(component.contentValidationError).toBeNull();
+	});
+
 	// ---------- CREATE POST ----------
 
 	it('should show error if form invalid', async () => {

@@ -56,7 +56,7 @@
 
 	<!-- Text Content (only in detail mode or when no images) -->
 	<div *ngIf="mode === 'detail' || imageCount === 0" class="post-text-section">
-		<p class="post-content">{{ post.content }}</p>
+		<p class="post-content" [class.clamped]="mode === 'list'">{{ post.content }}</p>
 	</div>
 
 	<!-- Interactions Footer -->

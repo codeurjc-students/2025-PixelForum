@@ -55,18 +55,18 @@
 				<mat-form-field appearance="outline" class="full-width">
 					<mat-label>Bio (optional)</mat-label>
 					<textarea matInput formControlName="bio" rows="2" id="bio" placeholder="Tell us about yourself..."
-						maxlength="255"></textarea>
+						maxlength="300"></textarea>
 					<mat-hint align="end">
-						{{ registerForm.get('bio')?.value?.length || 0 }}/255
+						{{ registerForm.get('bio')?.value?.length || 0 }}/300
 					</mat-hint>
-					<mat-error *ngIf="isFieldInvalid('bio')">
-						{{ getErrorMessage('bio') }}
+					<mat-error *ngIf="bioValidationError">
+						<span>{{ bioValidationError }}</span>
 					</mat-error>
 				</mat-form-field>
 			</div>
 
 			<!-- SIGN UP BUTTON -->
-			<button mat-raised-button type="submit" class="submit-button" [disabled]="registerForm.invalid || isLoading"
+			<button mat-raised-button type="submit" class="submit-button" [disabled]="registerForm.invalid || !!bioValidationError || isLoading"
 				id="register-button">
 				<span *ngIf="!isLoading">Sign Up</span>
 				<span *ngIf="isLoading">

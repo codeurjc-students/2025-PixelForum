@@ -90,6 +90,54 @@ class CommentServiceIntegrationTest {
 		assertThrows(EntityNotFoundException.class, () -> commentService.createComment(-1L, dto, user));
 	}
 
+	@Test
+	@Transactional
+	@DisplayName("Should normalize content when creating a comment")
+	void createCommentNormalizesContentTest() {
+		// GIVEN
+		CommentDTO dto = buildCommentDTO("  Hello   world  \n\n\n\n  bye  ");
+
+		// WHEN
+		CommentDTO created = commentService.createComment(post.getId(), dto, user);
+
+		// THEN
+		assertEquals("Hello world\n\nbye", created.content());
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when comment exceeds 2000 characters")
+	void createCommentTooLongTest() {
+		// GIVEN
+		CommentDTO dto = buildCommentDTO("a".repeat(2001));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(post.getId(), dto, user));
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when comment exceeds 30 lines")
+	void createCommentTooManyLinesTest() {
+		// GIVEN
+		CommentDTO dto = buildCommentDTO("a\n".repeat(30) + "a");
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(post.getId(), dto, user));
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should persist a comment of exactly 2000 characters")
+	void createCommentMaxLengthPersistsTest() {
+		// GIVEN
+		CommentDTO dto = buildCommentDTO("a".repeat(2000));
+
+		// WHEN
+		CommentDTO created = commentService.createComment(post.getId(), dto, user);
+
+		// THEN
+		assertEquals(2000, commentService.getComment(created.id(), user).content().length());
+	}
+
 	// =============== getComment ===============
 
 	@Test
@@ -207,6 +255,22 @@ class CommentServiceIntegrationTest {
 
 		// WHEN & THEN
 		assertThrows(AccessDeniedException.class, () -> commentService.updateComment(commentId, updateDTO, otherUser));
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should not set updatedAt when content only differs by whitespace")
+	void updateCommentOnlyWhitespaceChangesTest() {
+		// GIVEN
+		CommentDTO created = commentService.createComment(post.getId(), buildCommentDTO("Same content"), user);
+		CommentDTO dirty = new CommentDTO(created.id(), "  Same   content  ", null, null, null, null, 0, false,
+				post.getId());
+
+		// WHEN
+		CommentDTO result = commentService.updateComment(created.id(), dirty, user);
+
+		// THEN
+		assertNull(result.updatedAt());
 	}
 
 	// =============== deleteComment ===============

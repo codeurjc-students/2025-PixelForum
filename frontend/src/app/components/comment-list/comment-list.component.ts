@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
 import { PageResponse } from '../../models/pageResponse.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import { normalizeMultiline, validateMultiline } from '../../utils/text-rules';
 
 @Component({
 	selector: 'app-comment-list',
@@ -44,6 +45,7 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 	readonly pageSize = 10;
 
 	newCommentContent = '';
+	readonly commentRules = { label: 'The comment', maxLength: 2000, maxLines: 30 };
 	isLoggedIn = false;
 
 	private destroy$ = new Subject<void>();
@@ -127,14 +129,21 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 		});
 	}
 
+	get commentValidationError(): string | null {
+		if (!this.newCommentContent) return null;
+		return validateMultiline(this.newCommentContent, this.commentRules);
+	}
+
 	submitComment(): void {
-		if (!this.newCommentContent.trim() || this.isSubmitting || !this.postId) return;
+		if (this.isSubmitting || !this.postId || this.commentValidationError || !this.newCommentContent) return;
+
+		const content = normalizeMultiline(this.newCommentContent);
 
 		this.authService.loggedIn$.pipe(take(1)).subscribe(loggedIn => {
 			if (!loggedIn) return;
 
 			this.isSubmitting = true;
-			this.commentService.create(this.postId!, { content: this.newCommentContent.trim() }).subscribe({
+			this.commentService.create(this.postId!, { content }).subscribe({
 				next: (created: Comment) => {
 					this.newCommentContent = '';
 					this.isSubmitting = false;

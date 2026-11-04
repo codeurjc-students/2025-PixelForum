@@ -131,7 +131,7 @@
 
 /* Body */
 .comment-body {
-	padding-left: calc(36px + 0.75rem); // align with author text
+	padding-left: calc(36px + 0.75rem); // Align with author text
 }
 
 .comment-content {
@@ -141,6 +141,32 @@
 	line-height: 1.6;
 	white-space: pre-wrap;
 	word-break: break-word;
+	display: -webkit-box;
+	-webkit-line-clamp: 6;
+	line-clamp: 6;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+
+	&.expanded {
+		display: block;
+		-webkit-line-clamp: unset;
+		line-clamp: unset;
+		overflow: visible;
+	}
+}
+
+.read-more {
+	background: none;
+	border: none;
+	padding: 0;
+	margin-top: 0.25rem;
+	color: #818384;
+	font-size: 0.85rem;
+	cursor: pointer;
+
+	&:hover {
+		text-decoration: underline;
+	}
 }
 
 /* Edit form */
@@ -169,6 +195,12 @@
 		border-color: #8BC34A;
 		box-shadow: 0 0 0 2px rgba(139, 195, 74, 0.15);
 	}
+}
+
+.validation-error {
+	margin: 4px 0;
+	color: #e53935;
+	font-size: 0.85rem;
 }
 
 .edit-actions {

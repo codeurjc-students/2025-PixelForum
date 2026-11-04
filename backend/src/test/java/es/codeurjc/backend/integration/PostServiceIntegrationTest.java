@@ -59,6 +59,10 @@ class PostServiceIntegrationTest {
 		return imageRepository.save(img);
 	}
 
+	private PostDTO buildDTO(String title, String content, Topic topic) {
+		return new PostDTO(null, title, content, null, null, null, topic, null, null, 0, List.of());
+	}
+
 	@Test
 	@DisplayName("Should create a post successfully")
 	void createPostTest() {
@@ -168,6 +172,74 @@ class PostServiceIntegrationTest {
 		assertThrows(AccessDeniedException.class, () -> {
 			postService.createPost(dto, user);
 		});
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should normalize title and content when creating a post")
+	void createPostNormalizesTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+		PostDTO dto = buildDTO("  My    title \n", "  Hello   world  \n\n\n\n bye ", topic);
+
+		// WHEN
+		PostDTO created = postService.createPost(dto, user);
+
+		// THEN
+		assertEquals("My title", created.title());
+		assertEquals("Hello world\n\nbye", created.content());
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should create a post without content")
+	void createPostWithoutContentTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+
+		// WHEN
+		PostDTO created = postService.createPost(buildDTO("No content", "", topic), user);
+
+		// THEN
+		assertNull(created.content());
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when title is blank")
+	void createPostBlankTitleTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class,
+				() -> postService.createPost(buildDTO("   ", "Content", topic), user));
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when title exceeds 300 characters")
+	void createPostTitleTooLongTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class,
+				() -> postService.createPost(buildDTO("a".repeat(301), "Content", topic), user));
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when content exceeds 5000 characters")
+	void createPostContentTooLongTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class,
+				() -> postService.createPost(buildDTO("Title", "a".repeat(5001), topic), user));
 	}
 
 	@Test
@@ -350,6 +422,55 @@ class PostServiceIntegrationTest {
 
 		// THEN
 		assertTrue(updated.images().isEmpty());
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should not change updatedAt when title and content only differ by whitespace")
+	void updatePostOnlyWhitespaceChangesTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+		PostDTO created = postService.createPost(buildDTO("Same title", "Same content", topic), user);
+
+		// WHEN
+		PostDTO updated = postService.updatePost(created.id(), buildDTO("  Same   title ", "  Same   content  ", topic),
+				user);
+
+		// THEN
+		assertEquals(created.updatedAt(), updated.updatedAt());
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should clear content when updating with blank content")
+	void updatePostClearContentTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+		PostDTO created = postService.createPost(buildDTO("Title", "Some content", topic), user);
+
+		// WHEN
+		PostDTO updated = postService.updatePost(created.id(), buildDTO("Title", "   ", topic), user);
+
+		// THEN
+		assertNull(updated.content());
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("Should throw IllegalArgumentException on invalid update and keep the post unchanged")
+	void updatePostInvalidKeepsPostTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		Topic topic = topicService.findAll().get(0);
+		PostDTO created = postService.createPost(buildDTO("Original", "Content", topic), user);
+		Long id = created.id();
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class,
+				() -> postService.updatePost(id, buildDTO("a".repeat(301), "Content", topic), user));
+		assertEquals("Original", postService.getPost(id, user).title());
 	}
 
 	@Test

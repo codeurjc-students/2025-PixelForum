@@ -226,6 +226,51 @@ class UserServiceIntegrationTest {
 		assertThrows(IllegalArgumentException.class, () -> userService.createUser(newUserDTO));
 	}
 
+	@Test
+	@DisplayName("Should normalize bio when creating a user")
+	@Transactional
+	void createUserNormalizesBioTest() {
+		// GIVEN
+		String suffix = String.valueOf(System.currentTimeMillis() % 100000000L);
+		CreateUserDTO dto = new CreateUserDTO("usr" + suffix, "usr" + suffix + "@example.com", "password123",
+				"  Hello    world \n\n\n\n bye ");
+
+		// WHEN
+		UserDTO result = userService.createUser(dto);
+
+		// THEN
+		assertEquals("Hello world\n\nbye", result.bio());
+	}
+
+	@Test
+	@DisplayName("Should store the email in lowercase when creating a user")
+	@Transactional
+	void createUserLowercasesEmailTest() {
+		// GIVEN
+		String suffix = String.valueOf(System.currentTimeMillis() % 100000000L);
+		CreateUserDTO dto = new CreateUserDTO("usr" + suffix, "Usr" + suffix + "@Example.COM", "password123", null);
+
+		// WHEN
+		UserDTO result = userService.createUser(dto);
+
+		// THEN
+		assertEquals("usr" + suffix + "@example.com", result.email());
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when creating a user with invalid data")
+	void createUserInvalidDataTest() {
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class,
+				() -> userService.createUser(new CreateUserDTO("john doe", "john@example.com", "password123", null)));
+		assertThrows(IllegalArgumentException.class,
+				() -> userService.createUser(new CreateUserDTO("johndoe", "not-an-email", "password123", null)));
+		assertThrows(IllegalArgumentException.class,
+				() -> userService.createUser(new CreateUserDTO("johndoe", "john@example.com", "short", null)));
+		assertThrows(IllegalArgumentException.class, () -> userService
+				.createUser(new CreateUserDTO("johndoe", "john@example.com", "password123", "a".repeat(301))));
+	}
+
 	// =============== updateUser ===============
 
 	@Test
@@ -234,7 +279,7 @@ class UserServiceIntegrationTest {
 	void updateUserChangeUsernameTest() {
 		// GIVEN
 		User user = userService.findByUsername("martin").orElseThrow();
-		String newUsername = "martin_updated_" + System.currentTimeMillis();
+		String newUsername = "martin_" + (System.currentTimeMillis() % 100000000L);
 		CreateUserDTO updateDTO = new CreateUserDTO(newUsername, null, null, null);
 
 		// WHEN
@@ -336,6 +381,46 @@ class UserServiceIntegrationTest {
 		assertThrows(EntityNotFoundException.class, () -> userService.updateUser(nonExistentId, updateDTO, admin));
 	}
 
+	@Test
+	@DisplayName("Should not report 'already taken' when updating with the same email in different case")
+	@Transactional
+	void updateUserSameEmailDifferentCaseTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		CreateUserDTO dto = new CreateUserDTO(null, user.getEmail().toUpperCase(), null, null);
+
+		// WHEN & THEN
+		assertDoesNotThrow(() -> userService.updateUser(user.getId(), dto, user));
+	}
+
+	@Test
+	@DisplayName("Should clear bio when updating with a blank bio")
+	@Transactional
+	void updateUserClearBioTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		CreateUserDTO dto = new CreateUserDTO(null, null, null, "   ");
+
+		// WHEN
+		UserDTO result = userService.updateUser(user.getId(), dto, user);
+
+		// THEN
+		assertNull(result.bio());
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when updating with an invalid username")
+	@Transactional
+	void updateUserInvalidUsernameTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		CreateUserDTO dto = new CreateUserDTO("john doe", null, null, null);
+		Long id = user.getId();
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.updateUser(id, dto, user));
+	}
+
 	// =============== changePassword ===============
 
 	@Test
@@ -412,6 +497,19 @@ class UserServiceIntegrationTest {
 
 		// WHEN & THEN
 		assertThrows(EntityNotFoundException.class, () -> userService.changePassword(nonExistentId, dto, admin));
+	}
+
+	@Test
+	@DisplayName("Should throw IllegalArgumentException when new password is too short")
+	@Transactional
+	void changePasswordTooShortTest() {
+		// GIVEN
+		User user = userService.findByUsername("martin").orElseThrow();
+		ChangePasswordDTO dto = new ChangePasswordDTO("user", "short");
+		Long id = user.getId();
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.changePassword(id, dto, user));
 	}
 
 	// =============== deleteUser ===============

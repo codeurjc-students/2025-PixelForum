@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { ErrorService } from '../../services/error.service';
 import { AuthService } from '../../services/auth.service';
+import { normalizeMultiline, normalizeSingleLine, validateMultiline, validateSingleLine } from '../../utils/text-rules';
 
 @Component({
 	selector: 'app-create-post',
@@ -38,6 +39,8 @@ export class CreatePostComponent implements OnInit {
 	isLoadingPost = false;
 	existingImageIds: string[] = []; // IDs of existing images for edit mode
 
+	readonly titleRules = { label: 'The title', maxLength: 300 };
+	readonly contentRules = { label: 'The post content', maxLength: 5000, maxLines: 50 };
 	private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 	constructor(
@@ -67,8 +70,8 @@ export class CreatePostComponent implements OnInit {
 
 	private initializeForm(): void {
 		this.createPostForm = this.fb.group({
-			title: ['', [Validators.required, Validators.maxLength(300)]],
-			content: [null, [Validators.maxLength(5000)]],
+			title: ['', [Validators.required]],
+			content: [null],
 			topicSearch: ['']
 		});
 	}
@@ -223,9 +226,30 @@ export class CreatePostComponent implements OnInit {
 		this.previewImages.splice(index, 1);
 	}
 
+	get titleValidationError(): string | null {
+		const raw = this.createPostForm.get('title')?.value;
+		if (!raw) return null;
+		return validateSingleLine(raw, this.titleRules);
+	}
+
+	get contentValidationError(): string | null {
+		const raw = this.createPostForm.get('content')?.value;
+		if (!raw?.trim()) return null;
+		return validateMultiline(raw, this.contentRules);
+	}
+
 	async createPost(): Promise<void> {
 		if (!this.createPostForm.valid || !this.selectedTopic) {
 			this.setError('Please fill in all required fields correctly');
+			return;
+		}
+
+		if (this.titleValidationError) {
+			this.setError(this.titleValidationError);
+			return;
+		}
+		if (this.contentValidationError) {
+			this.setError(this.contentValidationError);
 			return;
 		}
 
@@ -255,9 +279,12 @@ export class CreatePostComponent implements OnInit {
 			const allImageIds = [...this.existingImageIds, ...newImageIds];
 
 			// Create post
+			const title = normalizeSingleLine(this.createPostForm.get('title')?.value);
+			const content = normalizeMultiline(this.createPostForm.get('content')?.value ?? '');
+
 			const postData: Post = {
-				title: this.createPostForm.get('title')?.value,
-				content: this.createPostForm.get('content')?.value || null,
+				title: title,
+				content: content,
 				topic: this.selectedTopic,
 				images: allImageIds.length > 0 ? allImageIds : undefined
 			};

@@ -32,6 +32,7 @@ import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.repository.UserRepository;
+import es.codeurjc.backend.utils.TextRules;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -103,15 +104,21 @@ public class UserService {
 	}
 
 	public UserDTO createUser(CreateUserDTO userDTO) {
-		if (userRepository.findByUsername(userDTO.username()).isPresent()) {
+		String username = TextRules.username(userDTO.username());
+		String email = TextRules.email(userDTO.email());
+
+		if (userRepository.findByUsername(username).isPresent()) {
 			throw new IllegalArgumentException("Username already taken");
 		}
-		if (userRepository.findByEmail(userDTO.email()).isPresent()) {
+		if (userRepository.findByEmail(email).isPresent()) {
 			throw new IllegalArgumentException("Email already taken");
 		}
 		User user = mapper.toDomain(userDTO);
 
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setBio(TextRules.optionalMultiline("The bio", userDTO.bio(), 300, 5));
+		user.setPassword(passwordEncoder.encode(TextRules.password(userDTO.password())));
 		user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		user.setRoles(List.of("USER"));
 
@@ -127,24 +134,30 @@ public class UserService {
 				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
 		// USERNAME
-		if (userDTO.username() != null && !user.getUsername().equals(userDTO.username())) {
-			if (userRepository.findByUsername(userDTO.username()).isPresent()) {
-				throw new IllegalArgumentException("Username already taken");
+		if (userDTO.username() != null) {
+			String username = TextRules.username(userDTO.username());
+			if (!user.getUsername().equals(username)) {
+				if (userRepository.findByUsername(username).isPresent()) {
+					throw new IllegalArgumentException("Username already taken");
+				}
+				user.setUsername(username);
 			}
-			user.setUsername(userDTO.username());
 		}
 
 		// EMAIL
-		if (userDTO.email() != null && !user.getEmail().equals(userDTO.email())) {
-			if (userRepository.findByEmail(userDTO.email()).isPresent()) {
-				throw new IllegalArgumentException("Email already taken");
+		if (userDTO.email() != null) {
+			String email = TextRules.email(userDTO.email());
+			if (!user.getEmail().equals(email)) {
+				if (userRepository.findByEmail(email).isPresent()) {
+					throw new IllegalArgumentException("Email already taken");
+				}
+				user.setEmail(email);
 			}
-			user.setEmail(userDTO.email());
 		}
 
 		// BIO
 		if (userDTO.bio() != null) {
-			user.setBio(userDTO.bio());
+			user.setBio(TextRules.optionalMultiline("The bio", userDTO.bio(), 300, 5));
 		}
 
 		return mapper.toDTO(userRepository.save(user));
@@ -162,7 +175,7 @@ public class UserService {
 			throw new IllegalArgumentException("Invalid current password");
 		}
 
-		user.setPassword(passwordEncoder.encode(dto.newPassword()));
+		user.setPassword(passwordEncoder.encode(TextRules.password(dto.newPassword())));
 	}
 
 	@Transactional

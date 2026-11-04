@@ -38,16 +38,24 @@
 
 	<!-- Content or Edit form -->
 	<div class="comment-body">
-		<p class="comment-content" *ngIf="!isEditing">{{ comment.content }}</p>
+		<p #contentInput class="comment-content" [class.expanded]="isExpanded" *ngIf="!isEditing">{{ comment.content }}
+		</p>
 
+		<button class="read-more" *ngIf="!isEditing && (isClamped || isExpanded)"
+			(click)="toggleExpand(); $event.stopPropagation()">
+			{{ isExpanded ? 'Show less' : 'Read more' }}
+		</button>
 		<div class="edit-form" *ngIf="isEditing" (click)="$event.stopPropagation()">
 			<textarea class="edit-textarea" [(ngModel)]="editContent" rows="3" maxlength="2000"
 				placeholder="Edit your comment..." (keydown.escape)="cancelEdit()">
             </textarea>
+			<p class="validation-error" *ngIf="commentValidationError as error">
+				{{ error }}
+			</p>
 			<div class="edit-actions">
 				<span class="char-count">{{ editContent.length }}/2000</span>
 				<button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
-				<button class="btn-save" (click)="saveEdit()" [disabled]="!editContent.trim()">Save</button>
+				<button class="btn-save" (click)="saveEdit()" [disabled]="!editContent.trim() || !!commentValidationError">Save</button>
 			</div>
 		</div>
 	</div>

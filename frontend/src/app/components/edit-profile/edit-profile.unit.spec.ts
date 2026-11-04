@@ -85,6 +85,39 @@ describe('EditProfileComponent - Unit Tests', () => {
 		expect(component.profileForm.value.bio).toBe('bio');
 	});
 
+	// ---------- VALIDATION ----------
+
+	it('should mark the form invalid and expose the error when the bio exceeds the limits', () => {
+		component.profileForm.patchValue({ bio: 'a\n'.repeat(component.bioRules.maxLines) + 'a' });
+		component.profileForm.get('bio')?.markAsTouched();
+
+		expect(component.profileForm.get('bio')?.invalid).toBeTrue();
+		expect(component.isProfileFieldInvalid('bio')).toBeTrue();
+		expect(component.getProfileErrorMessage('bio')).toBe(`Maximum ${component.bioRules.maxLines} lines allowed.`);
+	});
+
+	it('should send the normalized bio', () => {
+		component.userId = 1;
+		component.profileForm.patchValue({
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: '  Hello   world  \r\n\r\n\r\n\r\n bye '
+		});
+		userService.updateProfile.and.returnValue(of(mockUser));
+		authService.checkAuth.and.returnValue(of(null));
+
+		(component as any).updateProfile();
+
+		expect(userService.updateProfile).toHaveBeenCalledWith(1, jasmine.objectContaining({ bio: 'Hello world\n\nbye' }));
+	});
+
+	it('should reject an invalid username and an invalid email', () => {
+		component.profileForm.patchValue({ username: 'john doe', email: 'not-an-email' });
+
+		expect(component.profileForm.get('username')?.hasError('pattern')).toBeTrue();
+		expect(component.profileForm.get('email')?.hasError('email')).toBeTrue();
+	});
+
 	// ---------- PROFILE SUBMIT ----------
 
 	it('should update profile directly when only bio changes', () => {

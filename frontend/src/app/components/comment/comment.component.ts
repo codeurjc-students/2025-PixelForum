@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Comment } from '../../models/comment.model';
@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { map, Observable, take } from 'rxjs';
 import { Router } from '@angular/router';
+import { normalizeMultiline, validateMultiline } from '../../utils/text-rules';
 
 @Component({
 	selector: 'app-comment',
@@ -17,19 +18,23 @@ import { Router } from '@angular/router';
 	templateUrl: './comment.component.html',
 	styleUrls: ['./comment.component.scss']
 })
-export class CommentComponent implements OnInit {
+export class CommentComponent implements OnInit, AfterViewChecked {
 	@Input() comment!: Comment;
 	@Input() postId?: number;
 	@Input() readonly = false;
 	@Output() commentDeleted = new EventEmitter<number>();
 	@Output() commentUpdated = new EventEmitter<Comment>();
 	@Output() commentUnliked = new EventEmitter<number>();
+	@ViewChild('contentInput') contentInput?: ElementRef<HTMLElement>;
 
 	isOwner$!: Observable<boolean>;
 	hasUserLiked = false;
 
+	isExpanded = false;
+	isClamped = false;
 	isEditing = false;
 	editContent = '';
+	readonly commentRules = { label: 'The comment', maxLength: 2000, maxLines: 30 };
 
 	avatarUrl: string = '';
 
@@ -49,6 +54,16 @@ export class CommentComponent implements OnInit {
 				user ? user.id === this.comment.author?.id || user.roles.includes('ADMIN') : false
 			)
 		);
+	}
+
+	ngAfterViewChecked(): void {
+		const elem = this.contentInput?.nativeElement;
+		if (!elem || this.isExpanded) return;
+		const clamped = elem.scrollHeight > elem.clientHeight;
+		if (clamped !== this.isClamped) {
+			// Avoid ExpressionChangedAfterItHasBeenChecked
+			Promise.resolve().then(() => this.isClamped = clamped);
+		}
 	}
 
 	goToUser(): void {
@@ -82,6 +97,10 @@ export class CommentComponent implements OnInit {
 		});
 	}
 
+	toggleExpand(): void {
+		this.isExpanded = !this.isExpanded;
+	}
+
 	startEdit(): void {
 		this.editContent = this.comment.content ?? '';
 		this.isEditing = true;
@@ -92,13 +111,21 @@ export class CommentComponent implements OnInit {
 		this.editContent = '';
 	}
 
+	get commentValidationError(): string | null {
+		if (!this.editContent) return null;
+		return validateMultiline(this.editContent, this.commentRules);
+	}
+
 	saveEdit(): void {
 		const pid = this.postId ?? this.comment.post;
-		if (!this.editContent.trim() || !this.comment.id || !pid) return;
-		this.commentService.update(pid, this.comment.id, { content: this.editContent }).subscribe({
+		if (!this.comment.id || !pid || this.commentValidationError || !this.editContent) return;
+
+		const content = normalizeMultiline(this.editContent);
+		this.commentService.update(pid, this.comment.id, { content }).subscribe({
 			next: (updated: Comment) => {
 				this.comment = updated;
 				this.isEditing = false;
+				this.editContent = '';
 				this.commentUpdated.emit(updated);
 				this.snackBar.open('Comment updated', 'Close', { duration: 3000 });
 			}

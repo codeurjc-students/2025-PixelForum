@@ -36,6 +36,8 @@ public class User {
 	private String password;
 
 	private LocalDateTime createdAt;
+
+	@Column(length = 300)
 	private String bio;
 
 	@OneToOne

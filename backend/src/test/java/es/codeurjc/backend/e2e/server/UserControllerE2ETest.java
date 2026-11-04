@@ -113,8 +113,8 @@ class UserControllerE2ETest {
 	void createUserSystemTest() {
 		// GIVEN
 		Map<String, String> userData = new HashMap<>();
-		userData.put("username", "newuser" + System.currentTimeMillis());
-		userData.put("email", "newuser" + System.currentTimeMillis() + "@example.com");
+		userData.put("username", "newuser" + System.currentTimeMillis() % 100000000L);
+		userData.put("email", "newuser" + System.currentTimeMillis() % 100000000L + "@example.com");
 		userData.put("password", "password123");
 		userData.put("bio", "New user bio");
 
@@ -193,9 +193,9 @@ class UserControllerE2ETest {
 	void changePasswordSystemTest() {
 		// GIVEN: Create a new user to change password
 		Map<String, String> userData = new HashMap<>();
-		String uniqueUsername = "changepwd" + System.currentTimeMillis();
+		String uniqueUsername = "changepwd" + System.currentTimeMillis() % 100000000L;
 		userData.put("username", uniqueUsername);
-		userData.put("email", "changepwd" + System.currentTimeMillis() + "@example.com");
+		userData.put("email", "changepwd" + System.currentTimeMillis() % 100000000L + "@example.com");
 		userData.put("password", "oldPassword123");
 		userData.put("bio", "User for password change");
 
@@ -265,9 +265,9 @@ class UserControllerE2ETest {
 	void deleteUserOwnAccountSystemTest() {
 		// GIVEN: Create a new user to delete
 		Map<String, String> userData = new HashMap<>();
-		String uniqueUsername = "usertodeleteuser" + System.currentTimeMillis();
+		String uniqueUsername = "deleteuser" + System.currentTimeMillis() % 100000000L;
 		userData.put("username", uniqueUsername);
-		userData.put("email", "delete_" + System.currentTimeMillis() + "@example.com");
+		userData.put("email", "delete_" + System.currentTimeMillis() % 100000000L + "@example.com");
 		userData.put("password", "password123");
 		userData.put("bio", "User to delete");
 

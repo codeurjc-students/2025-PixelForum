@@ -92,6 +92,11 @@ class CommentServiceUnitTest {
 				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
 	}
 
+	private CommentDTO dtoWithContent(String content) {
+		return new CommentDTO(1L, content, FIXED_TIME, FIXED_TIME,
+				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
+	}
+
 	// =============== findById ===============
 
 	@Test
@@ -270,6 +275,36 @@ class CommentServiceUnitTest {
 		verify(commentRepository, never()).save(any());
 	}
 
+	@Test
+	@DisplayName("createComment should normalize content before saving")
+	void createCommentNormalizesContentTest() {
+		// GIVEN
+		CommentDTO dirty = dtoWithContent("  Hello   world  \r\n\r\n\r\n\r\n  bye  ");
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(mapper.toDomain(dirty)).thenReturn(comment);
+		when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+		when(mapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+		// WHEN
+		commentService.createComment(1L, dirty, user);
+
+		// THEN
+		assertEquals("Hello world\n\nbye", comment.getContent());
+	}
+
+	@Test
+	@DisplayName("createComment should throw IllegalArgumentException when content is null")
+	void createCommentNullContentTest() {
+		// GIVEN
+		CommentDTO dto = dtoWithContent(null);
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(mapper.toDomain(dto)).thenReturn(comment);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(1L, dto, user));
+		verify(commentRepository, never()).save(any());
+	}
+
 	// =============== updateComment ===============
 
 	@Test
@@ -350,6 +385,39 @@ class CommentServiceUnitTest {
 
 		// WHEN & THEN
 		assertThrows(EntityNotFoundException.class, () -> commentService.updateComment(999L, commentDTO, user));
+	}
+
+	@Test
+	@DisplayName("updateComment should normalize content before saving")
+	void updateCommentNormalizesContentTest() {
+		// GIVEN
+		CommentDTO dirty = dtoWithContent("  Updated    content \r\n");
+		when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+		when(commentRepository.save(comment)).thenReturn(comment);
+		when(mapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+		// WHEN
+		commentService.updateComment(1L, dirty, user);
+
+		// THEN
+		assertEquals("Updated content", comment.getContent());
+		assertNotNull(comment.getUpdatedAt());
+	}
+
+	@Test
+	@DisplayName("updateComment should not save when content only differs by whitespace")
+	void updateCommentOnlyWhitespaceChangesTest() {
+		// GIVEN
+		CommentDTO dirty = dtoWithContent("  Test   comment  ");
+		when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+		when(mapper.toDTOWithLike(comment, user)).thenReturn(commentDTO);
+
+		// WHEN
+		commentService.updateComment(1L, dirty, user);
+
+		// THEN
+		verify(commentRepository, never()).save(any());
+		assertNull(comment.getUpdatedAt());
 	}
 
 	// =============== deleteComment ===============

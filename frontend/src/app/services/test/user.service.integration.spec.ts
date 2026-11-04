@@ -104,12 +104,8 @@ describe('UserService - Integration', () => {
 	});
 
 	it('register should create a new user', (done: DoneFn) => {
-		const timestamp = Date.now();
-		const newUser = {
-			username: 'testuser' + timestamp,
-			email: `test${timestamp}@mail.com`,
-			password: 'password123'
-		};
+		const timestamp = Date.now() % 100000000;
+		const newUser = { username: 'testuser' + timestamp, email: `test${timestamp}@mail.com`, password: 'password123' };
 
 		service.register(newUser).subscribe({
 			next: user => {
@@ -126,11 +122,7 @@ describe('UserService - Integration', () => {
 	});
 
 	it('register with duplicated username should fail', (done: DoneFn) => {
-		const duplicatedUser = {
-			username: 'martin',
-			email: 'duplicate@mail.com',
-			password: 'password123'
-		};
+		const duplicatedUser = { username: 'martin', email: 'duplicate@mail.com', password: 'password123' };
 
 		service.register(duplicatedUser).subscribe({
 			next: () => {
@@ -145,11 +137,7 @@ describe('UserService - Integration', () => {
 	});
 
 	it('updateProfile should update profile', (done: DoneFn) => {
-		const updatedData = {
-			username: currentUser.username,
-			email: currentUser.email || '',
-			bio: 'Updated bio ' + Date.now()
-		};
+		const updatedData = { username: currentUser.username, email: currentUser.email || '', bio: 'Updated bio ' + Date.now() };
 
 		service.updateProfile(currentUser.id!, updatedData).subscribe({
 			next: updatedUser => {
@@ -166,11 +154,7 @@ describe('UserService - Integration', () => {
 	it('should not allow updating another user profile', (done: DoneFn) => {
 		authService.login('robert', 'user').subscribe({
 			next: () => {
-				const updatedData = {
-					username: currentUser.username,
-					email: currentUser.email || '',
-					bio: 'Illegal update'
-				};
+				const updatedData = { username: currentUser.username, email: currentUser.email || '', bio: 'Illegal update' };
 
 				service.updateProfile(currentUser.id!, updatedData).subscribe({
 					next: () => {
@@ -191,37 +175,39 @@ describe('UserService - Integration', () => {
 	});
 
 	it('changePassword should change password', (done: DoneFn) => {
+		const timestamp = Date.now() % 100000000;
+		const tmp = { username: 'pwd' + timestamp, email: `pwd${timestamp}@mail.com`, password: 'password123' };
 		const newPassword = 'newpassword123';
 
-		service.changePassword(currentUser.id!, { oldPassword: 'user', newPassword }).subscribe({
-			next: () => {
-				authService.logout().subscribe({
+		service.register(tmp).subscribe({
+			next: created => {
+				authService.login(tmp.username, tmp.password).subscribe({
 					next: () => {
-						authService.login('martin', newPassword).subscribe({
-							next: user => {
-								expect(user).toBeTruthy();
-								// Restore original password
-								service.changePassword(currentUser.id!, { oldPassword: newPassword, newPassword: 'user' }).subscribe({
-									next: () => done(),
-									error: err => {
-										fail('Error restoring password: ' + err.message);
-										done();
+						service.changePassword(created.id!, { oldPassword: tmp.password, newPassword }).subscribe({
+							next: () => {
+								authService.logout().subscribe({
+									next: () => {
+										authService.login(tmp.username, newPassword).subscribe({
+											next: user => {
+												expect(user).toBeTruthy();
+												// Cleanup: delete the created user
+												service.deleteAccount(created.id!).subscribe({
+													next: () => done(),
+													error: err => { fail('Cleanup failed: ' + err.message); done(); }
+												});
+											},
+											error: err => { fail('Login with new password failed: ' + err.message); done(); }
+										});
 									}
 								});
 							},
-							error: err => {
-								fail('Login with new password failed: ' + err.message);
-								done();
-							}
+							error: err => { fail('Error changing password: ' + err.message); done(); }
 						});
-
-					}
+					},
+					error: err => { fail('Login failed: ' + err.message); done(); }
 				});
 			},
-			error: err => {
-				fail('Error changing password: ' + err.message);
-				done();
-			}
+			error: err => { fail('Error creating user: ' + err.message); done(); }
 		});
 	});
 
@@ -352,12 +338,8 @@ describe('UserService - Integration', () => {
 	});
 
 	it('deleteAccount should remove the created user', (done: DoneFn) => {
-		const timestamp = Date.now();
-		const newUser = {
-			username: 'deleteuser' + timestamp,
-			email: `delete${timestamp}@mail.com`,
-			password: 'password123'
-		};
+		const timestamp = Date.now() % 100000000;
+		const newUser = { username: 'deleteuser' + timestamp, email: `delete${timestamp}@mail.com`, password: 'password123' };
 
 		// CREATE USER
 		service.register(newUser).subscribe({

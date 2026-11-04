@@ -135,7 +135,7 @@ describe('RegisterComponent - Unit Tests', () => {
 		expect(component.errorMessage).toBe('Username already exists');
 	});
 
-	it('should send null bio when empty', () => {
+	it('should send empty bio when it only contains whitespace', () => {
 		component.registerForm.setValue({
 			username: 'test',
 			email: 'test@test.com',
@@ -148,9 +148,7 @@ describe('RegisterComponent - Unit Tests', () => {
 
 		component.onSubmit();
 
-		expect(userService.register).toHaveBeenCalledWith(jasmine.objectContaining({
-			bio: null
-		}));
+		expect(userService.register).toHaveBeenCalledWith(jasmine.objectContaining({ bio: '' }));
 	});
 
 	it('should clear password mismatch after fixing confirmation', () => {
@@ -168,14 +166,6 @@ describe('RegisterComponent - Unit Tests', () => {
 
 		confirm = component.registerForm.get('confirmPassword');
 		expect(confirm?.hasError('passwordMismatch')).toBeFalse();
-	});
-
-	it('should return bio maxlength error', () => {
-		const field = component.registerForm.get('bio');
-		field?.setErrors({ maxlength: true });
-
-		expect(component.getErrorMessage('bio'))
-			.toBe('Bio must not exceed 255 characters');
 	});
 
 	// --------- Form Errors ---------

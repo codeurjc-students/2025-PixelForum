@@ -127,6 +127,68 @@ describe('CommentComponent', () => {
 		});
 	});
 
+
+	// ---------- READ MORE / SHOW LESS ----------
+
+	it('should expand comment when toggleExpand is called', () => {
+		component.toggleExpand();
+		expect(component.isExpanded).toBeTrue();
+	});
+
+	it('should collapse comment when toggleExpand is called twice', () => {
+		component.toggleExpand();
+		component.toggleExpand();
+		expect(component.isExpanded).toBeFalse();
+	});
+
+	it('should set isClamped to true when comment content overflows', async () => {
+		const elem = component.contentInput?.nativeElement;
+		expect(elem).toBeTruthy();
+
+		Object.defineProperty(elem, 'scrollHeight', {
+			configurable: true,
+			value: 200
+		});
+		Object.defineProperty(elem, 'clientHeight', {
+			configurable: true,
+			value: 100
+		});
+
+		component.ngAfterViewChecked();
+		await Promise.resolve();
+
+		expect(component.isClamped).toBeTrue();
+	});
+
+	it('should set isClamped to false when comment content does not overflow', async () => {
+		const elem = component.contentInput?.nativeElement;
+		expect(elem).toBeTruthy();
+		component.isClamped = true;
+
+		Object.defineProperty(elem, 'scrollHeight', {
+			configurable: true,
+			value: 100
+		});
+		Object.defineProperty(elem, 'clientHeight', {
+			configurable: true,
+			value: 100
+		});
+
+		component.ngAfterViewChecked();
+		await Promise.resolve();
+
+		expect(component.isClamped).toBeFalse();
+	});
+
+	it('should not check overflow when comment is expanded', () => {
+		component.isExpanded = true;
+		component.isClamped = true;
+
+		component.ngAfterViewChecked();
+
+		expect(component.isClamped).toBeTrue();
+	});
+
 	// ---------- NAVIGATION ----------
 
 	it('should navigate to user profile when author exists', () => {
@@ -246,13 +308,6 @@ describe('CommentComponent', () => {
 		expect(snackBarSpy.open).toHaveBeenCalledWith('Comment updated', 'Close', { duration: 3000 });
 	});
 
-	it('should not save edit if editContent is blank', () => {
-		component.postId = 5;
-		component.editContent = '   ';
-		component.saveEdit();
-		expect(commentServiceSpy.update).not.toHaveBeenCalled();
-	});
-
 	it('should resolve postId from comment.post when saving edit', () => {
 		const updatedComment: Comment = { ...mockComment, content: 'Updated' };
 		commentServiceSpy.update.and.returnValue(of(updatedComment));
@@ -263,6 +318,25 @@ describe('CommentComponent', () => {
 		component.saveEdit();
 
 		expect(commentServiceSpy.update).toHaveBeenCalledWith(5, 10, { content: 'Updated' });
+	});
+
+	it('should not save edit when content contains only whitespace', () => {
+		component.postId = 5;
+		component.editContent = '   \n   ';
+		component.saveEdit();
+
+		expect(commentServiceSpy.update).not.toHaveBeenCalled();
+	});
+
+	it('should normalize content before saving edit', () => {
+		const updatedComment: Comment = { ...mockComment, content: 'First line\nSecond line' };
+		commentServiceSpy.update.and.returnValue(of(updatedComment));
+
+		component.postId = 5;
+		component.editContent = '  First line  \n  Second line  ';
+		component.saveEdit();
+
+		expect(commentServiceSpy.update).toHaveBeenCalledWith(5, 10, { content: 'First line\nSecond line' });
 	});
 
 	// ---------- DELETE ----------

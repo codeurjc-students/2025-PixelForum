@@ -34,12 +34,12 @@
 						<mat-form-field appearance="outline" class="form-field full-width">
 							<mat-label>Bio</mat-label>
 							<textarea matInput formControlName="bio" rows="3" [disabled]="isLoadingProfile"
-								placeholder="Tell us about yourself..." maxlength="255"></textarea>
+								placeholder="Tell us about yourself..." maxlength="300"></textarea>
 							<mat-hint align="end">
-								{{ profileForm.get('bio')?.value?.length || 0 }}/255
+								{{ profileForm.get('bio')?.value?.length || 0 }}/300
 							</mat-hint>
-							<mat-error *ngIf="isProfileFieldInvalid('bio')">
-								{{ getProfileErrorMessage('bio') }}
+							<mat-error *ngIf="bioValidationError">
+								<span>{{ bioValidationError }}</span>
 							</mat-error>
 						</mat-form-field>
 					</div>
@@ -54,7 +54,7 @@
 							class="cancel-button">
 							Cancel
 						</button>
-						<button mat-raised-button color="primary" type="submit" [disabled]="!canSubmitProfile()"
+						<button mat-raised-button color="primary" type="submit" [disabled]="!canSubmitProfile() || !!bioValidationError || isLoadingProfile"
 							class="submit-button">
 							<span *ngIf="!isLoadingProfile">Save Changes</span>
 							<span *ngIf="isLoadingProfile">

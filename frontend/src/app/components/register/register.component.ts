@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { UserService } from '../../services/user.service';
+import { normalizeMultiline, validateMultiline } from '../../utils/text-rules';
 
 @Component({
 	selector: 'app-register',
@@ -32,6 +33,7 @@ export class RegisterComponent {
 	hidePassword = true;
 	hideConfirmPassword = true;
 	errorMessage = '';
+	readonly bioRules = { label: 'Bio', maxLength: 300, maxLines: 5 };
 
 	constructor(
 		private fb: FormBuilder,
@@ -44,11 +46,11 @@ export class RegisterComponent {
 
 	private createForm(): FormGroup {
 		return this.fb.group({
-			username: ['', [Validators.required, Validators.minLength(3)]],
-			email: ['', [Validators.required, Validators.email]],
+			username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9_.-]+$/)]],
+			email: ['', [Validators.required, Validators.maxLength(254), Validators.email]],
 			password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(64)]],
 			confirmPassword: ['', Validators.required],
-			bio: ['', [Validators.maxLength(255)]]
+			bio: ['', [() => this.bioValidationError ? { bioInvalid: true } : null]]
 		}, { validators: this.passwordMatchValidator });
 	}
 
@@ -83,8 +85,19 @@ export class RegisterComponent {
 		this.hideConfirmPassword = !this.hideConfirmPassword;
 	}
 
+	get bioValidationError(): string | null {
+		const raw = this.registerForm?.get('bio')?.value;
+		if (!raw?.trim()) return null;
+		return validateMultiline(raw, this.bioRules);
+	}
+
 	onSubmit(): void {
 		if (!this.registerForm.valid) return;
+
+		if (this.bioValidationError) {
+			this.errorMessage = this.bioValidationError;
+			return;
+		}
 
 		this.isLoading = true;
 		this.errorMessage = '';
@@ -94,7 +107,7 @@ export class RegisterComponent {
 			username,
 			email,
 			password,
-			bio: bio?.trim() ? bio : null
+			bio: normalizeMultiline(bio)
 		};
 
 		this.userService.register(registrationData).subscribe({
@@ -128,10 +141,13 @@ export class RegisterComponent {
 		if (fieldName === 'username') {
 			if (field.hasError('required')) return 'Please enter your username';
 			if (field.hasError('minlength')) return 'Username must be at least 3 characters';
+			if (field.hasError('maxlength')) return 'Username must not exceed 20 characters';
+			if (field.hasError('pattern')) return 'Only letters, numbers, underscores, dots and hyphens are allowed';
 		}
 
 		if (fieldName === 'email') {
 			if (field.hasError('required')) return 'Please enter your email';
+			if (field.hasError('maxlength')) return 'Email must not exceed 254 characters';
 			if (field.hasError('email')) return 'Please enter a valid email';
 		}
 
@@ -147,7 +163,7 @@ export class RegisterComponent {
 		}
 
 		if (fieldName === 'bio') {
-			if (field.hasError('maxlength')) return 'Bio must not exceed 255 characters';
+			return this.bioValidationError ?? '';
 		}
 
 		return '';

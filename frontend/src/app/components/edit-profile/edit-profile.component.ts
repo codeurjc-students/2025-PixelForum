@@ -14,6 +14,7 @@ import { User } from '../../models/user.model';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { normalizeMultiline, validateMultiline } from '../../utils/text-rules';
 
 @Component({
 	selector: 'app-edit-profile',
@@ -44,6 +45,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 	hideNewPassword = true;
 	hideConfirmPassword = true;
 
+	readonly bioRules = { label: 'Bio', maxLength: 300, maxLines: 5 };
 	private originalProfileData: { username: string; email: string; bio: string } | null = null;
 	private destroy$ = new Subject<void>();
 
@@ -77,9 +79,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 
 	private createProfileForm(): FormGroup {
 		return this.fb.group({
-			username: ['', [Validators.required, Validators.minLength(3)]],
-			email: ['', [Validators.required, Validators.email]],
-			bio: ['', [Validators.maxLength(255)]]
+			username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9_.-]+$/)]],
+			email: ['', [Validators.required, Validators.maxLength(254), Validators.email]],
+			bio: ['', [() => this.bioValidationError ? { bioInvalid: true } : null]]
 		});
 	}
 
@@ -169,21 +171,33 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 		);
 	}
 
+	get bioValidationError(): string | null {
+		const raw = this.profileForm?.get('bio')?.value;
+		if (!raw?.trim()) return null;
+		return validateMultiline(raw, this.bioRules);
+	}
+
 	private updateProfile(): void {
 		if (!this.userId) return;
+
+		if (this.bioValidationError) {
+			this.profileErrorMessage = this.bioValidationError;
+			return;
+		}
 
 		this.isLoadingProfile = true;
 		this.profileErrorMessage = '';
 
 		const { username, email, bio } = this.profileForm.value;
+		const normalizedBio = normalizeMultiline(bio);
 
-		this.userService.updateProfile(this.userId, { username, email, bio })
+		this.userService.updateProfile(this.userId, { username, email, bio: normalizedBio })
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (user: User) => {
 					this.isLoadingProfile = false;
 					this.user = user;
-					this.originalProfileData = { username: user.username, email: user.email || '', bio: user.bio || '' };
+					this.originalProfileData = { username: user.username, email: user.email || '', bio: normalizedBio };
 					this.authService.checkAuth().subscribe();
 					this.snackBar.open('Profile updated successfully', 'Close', { duration: 3000 });
 					this.router.navigate(['/users', this.userId]);
@@ -284,15 +298,18 @@ export class EditProfileComponent implements OnInit, OnDestroy {
 		if (fieldName === 'username') {
 			if (field.hasError('required')) return 'Username is required';
 			if (field.hasError('minlength')) return 'Username must be at least 3 characters';
+			if (field.hasError('maxlength')) return 'Username must not exceed 20 characters';
+			if (field.hasError('pattern')) return 'Only letters, numbers, underscores, dots and hyphens are allowed';
 		}
 
 		if (fieldName === 'email') {
 			if (field.hasError('required')) return 'Email is required';
+			if (field.hasError('maxlength')) return 'Email must not exceed 254 characters';
 			if (field.hasError('email')) return 'Please enter a valid email';
 		}
 
 		if (fieldName === 'bio') {
-			if (field.hasError('maxlength')) return 'Bio must not exceed 255 characters';
+			return this.bioValidationError || '';
 		}
 
 		return '';

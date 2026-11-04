@@ -151,8 +151,8 @@ class UserUISystemTest {
 
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("username")));
 
-		String uniqueUsername = "testuser" + System.currentTimeMillis();
-		String uniqueEmail = "test" + System.currentTimeMillis() + "@example.com";
+		String uniqueUsername = "testuser" + System.currentTimeMillis() % 100000000L;
+		String uniqueEmail = "test" + System.currentTimeMillis() % 100000000L + "@example.com";
 
 		// WHEN
 		WebElement usernameInput = driver.findElement(By.id("username"));
@@ -185,7 +185,7 @@ class UserUISystemTest {
 
 		// WHEN
 		driver.findElement(By.id("username")).sendKeys("martin");
-		driver.findElement(By.id("email")).sendKeys("unique" + System.currentTimeMillis() + "@example.com");
+		driver.findElement(By.id("email")).sendKeys("unique" + System.currentTimeMillis() % 100000000L + "@example.com");
 		driver.findElement(By.id("password")).sendKeys("password123");
 		driver.findElement(By.id("confirmPassword")).sendKeys("password123");
 
@@ -282,7 +282,7 @@ class UserUISystemTest {
 		// Fill password fields
 		driver.findElement(By.cssSelector("input[formControlName='oldPassword']")).sendKeys("user");
 
-		String newPassword = "newPassword" + System.currentTimeMillis();
+		String newPassword = "newPassword" + System.currentTimeMillis() % 100000000L;
 		driver.findElement(By.cssSelector("input[formControlName='newPassword']")).sendKeys(newPassword);
 		driver.findElement(By.cssSelector("input[formControlName='confirmPassword']")).sendKeys(newPassword);
 
@@ -306,8 +306,8 @@ class UserUISystemTest {
 
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("username")));
 
-		String uniqueUsername = "deletetest" + System.currentTimeMillis();
-		String uniqueEmail = "delete" + System.currentTimeMillis() + "@example.com";
+		String uniqueUsername = "deletetest" + System.currentTimeMillis() % 100000000L;
+		String uniqueEmail = "delete" + System.currentTimeMillis() % 100000000L + "@example.com";
 
 		driver.findElement(By.id("username")).sendKeys(uniqueUsername);
 		driver.findElement(By.id("email")).sendKeys(uniqueEmail);

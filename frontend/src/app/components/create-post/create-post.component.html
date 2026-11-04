@@ -64,7 +64,9 @@
 				<div *ngIf="createPostForm.get('title')?.invalid && createPostForm.get('title')?.touched"
 					class="error-text">
 					<span *ngIf="createPostForm.get('title')?.errors?.['required']">The title is required</span>
-					<span *ngIf="createPostForm.get('title')?.errors?.['maxlength']">Maximum 300 characters</span>
+				</div>
+				<div *ngIf="titleValidationError" class="error-text">
+					<span>{{ titleValidationError }}</span>
 				</div>
 				<input id="title" type="text" formControlName="title" placeholder="Write a title for your post"
 					class="form-input" maxlength="300" />
@@ -74,6 +76,9 @@
 			<!-- Content -->
 			<div class="form-group">
 				<label>Content (optional)</label>
+				<div *ngIf="contentValidationError" class="error-text">
+					<span>{{ contentValidationError }}</span>
+				</div>
 				<textarea id="content" formControlName="content" placeholder="Describe your post here..."
 					class="form-textarea" rows="8" maxlength="5000"></textarea>
 				<div class="char-count">{{ contentLength }}/5000</div>
@@ -117,7 +122,7 @@
 					Cancel
 				</button>
 				<button id="save-post-button" type="submit" class="btn btn-primary"
-					[disabled]="!createPostForm.valid || !selectedTopic || isLoading">
+					[disabled]="!createPostForm.valid || !selectedTopic || !!titleValidationError || !!contentValidationError || isLoading">
 					<span *ngIf="isLoading" class="spinner"></span>
 					{{ isEditMode ? (isLoading ? 'Updating...' : 'Update Post') : (isLoading ? 'Creating...' : 'Create
 					Post') }}

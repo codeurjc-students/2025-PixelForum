@@ -384,7 +384,7 @@ class UserServiceUnitTest {
 		assertEquals(resultDTO, result);
 		verify(userRepository).findByUsername("newuser");
 		verify(userRepository).findByEmail("new@example.com");
-		verify(passwordEncoder).encode("encodedPassword");
+		verify(passwordEncoder).encode("password");
 		verify(userRepository).save(any(User.class));
 	}
 
@@ -419,6 +419,112 @@ class UserServiceUnitTest {
 		});
 		verify(userRepository).findByUsername("newuser");
 		verify(userRepository).findByEmail("test@example.com");
+	}
+
+	@Test
+	@DisplayName("createUser should store email in lowercase and look it up normalized")
+	void createUserNormalizesEmailTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO("newuser", "New@Example.COM", "password", "My bio");
+		User created = new User();
+
+		when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+		when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+		when(userMapper.toDomain(userDTO)).thenReturn(created);
+		when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+		when(userRepository.save(any(User.class))).thenReturn(created);
+
+		// WHEN
+		userService.createUser(userDTO);
+
+		// THEN
+		assertEquals("new@example.com", created.getEmail());
+		verify(userRepository).findByEmail("new@example.com");
+	}
+
+	@Test
+	@DisplayName("createUser should normalize bio and save null when it is blank or null")
+	void createUserBioTest() {
+		// GIVEN
+		User withBio = new User();
+		User withoutBio = new User();
+		CreateUserDTO dirty = new CreateUserDTO("newuser", "new@example.com", "password",
+				"  Hello    world \n\n\n\n bye ");
+		CreateUserDTO blank = new CreateUserDTO("newuser2", "new2@example.com", "password", "   ");
+		CreateUserDTO nullBio = new CreateUserDTO("newuser3", "new3@example.com", "password", null);
+		User nullBioUser = new User();
+
+		when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+		when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+		when(userMapper.toDomain(dirty)).thenReturn(withBio);
+		when(userMapper.toDomain(blank)).thenReturn(withoutBio);
+		when(userMapper.toDomain(nullBio)).thenReturn(nullBioUser);
+		when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+		when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+		// WHEN
+		userService.createUser(dirty);
+		userService.createUser(blank);
+		userService.createUser(nullBio);
+
+		// THEN
+		assertEquals("Hello world\n\nbye", withBio.getBio());
+		assertNull(withoutBio.getBio());
+		assertNull(nullBioUser.getBio());
+	}
+
+	@Test
+	@DisplayName("createUser should throw IllegalArgumentException when username is invalid")
+	void createUserInvalidUsernameTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO("john doe", "new@example.com", "password", null);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
+		verify(userRepository, never()).findByUsername(anyString());
+		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("createUser should throw IllegalArgumentException when email is invalid")
+	void createUserInvalidEmailTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO("newuser", "not-an-email", "password", null);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
+		verify(userRepository, never()).findByEmail(anyString());
+		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("createUser should throw IllegalArgumentException when password is too short")
+	void createUserInvalidPasswordTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO("newuser", "new@example.com", "short", null);
+
+		when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+		when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+		when(userMapper.toDomain(userDTO)).thenReturn(new User());
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
+		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("createUser should throw IllegalArgumentException when bio exceeds 300 characters")
+	void createUserBioTooLongTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO("newuser", "new@example.com", "password", "a".repeat(301));
+
+		when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+		when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+		when(userMapper.toDomain(userDTO)).thenReturn(new User());
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(userDTO));
+		verify(userRepository, never()).save(any());
 	}
 
 	// =============== updateUser ===============
@@ -606,6 +712,129 @@ class UserServiceUnitTest {
 		});
 	}
 
+	@Test
+	@DisplayName("updateUser should not report 'already taken' when email only differs by case")
+	void updateUserEmailOnlyCaseDiffersTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO(null, "TEST@Example.com", null, null);
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		// WHEN
+		userService.updateUser(1L, userDTO, user);
+
+		// THEN
+		verify(userRepository, never()).findByEmail(anyString());
+		assertEquals("test@example.com", user.getEmail());
+	}
+
+	@Test
+	@DisplayName("updateUser should store the new email in lowercase")
+	void updateUserEmailLowercaseTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO(null, "New@Example.com", null, null);
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		// WHEN
+		userService.updateUser(1L, userDTO, user);
+
+		// THEN
+		assertEquals("new@example.com", user.getEmail());
+		verify(userRepository).findByEmail("new@example.com");
+	}
+
+	@Test
+	@DisplayName("updateUser should throw IllegalArgumentException when username is invalid")
+	void updateUserInvalidUsernameTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO("ab", null, null, null);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, userDTO, user));
+		assertEquals("testuser", user.getUsername());
+		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("updateUser should throw IllegalArgumentException when email has surrounding spaces")
+	void updateUserInvalidEmailTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO(null, "new@example.com ", null, null);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, userDTO, user));
+		assertEquals("test@example.com", user.getEmail());
+		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("updateUser should normalize bio before saving")
+	void updateUserNormalizesBioTest() {
+		// GIVEN
+		CreateUserDTO userDTO = new CreateUserDTO(null, null, null, "  Hello    world \r\n\r\n\r\n\r\n bye ");
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		// WHEN
+		userService.updateUser(1L, userDTO, user);
+
+		// THEN
+		assertEquals("Hello world\n\nbye", user.getBio());
+	}
+
+	@Test
+	@DisplayName("updateUser should clear bio when blank bio is provided")
+	void updateUserClearBioTest() {
+		// GIVEN
+		user.setBio("Old bio");
+		CreateUserDTO userDTO = new CreateUserDTO(null, null, null, "   ");
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		// WHEN
+		userService.updateUser(1L, userDTO, user);
+
+		// THEN
+		assertNull(user.getBio());
+	}
+
+	@Test
+	@DisplayName("updateUser should keep bio untouched when bio is null")
+	void updateUserNullBioKeepsBioTest() {
+		// GIVEN
+		user.setBio("Old bio");
+		CreateUserDTO userDTO = new CreateUserDTO("newusername", null, null, null);
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.findByUsername("newusername")).thenReturn(Optional.empty());
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		// WHEN
+		userService.updateUser(1L, userDTO, user);
+
+		// THEN
+		assertEquals("Old bio", user.getBio());
+	}
+
+	@Test
+	@DisplayName("updateUser should throw IllegalArgumentException when bio exceeds 300 characters")
+	void updateUserBioTooLongTest() {
+		// GIVEN
+		user.setBio("Old bio");
+		CreateUserDTO userDTO = new CreateUserDTO(null, null, null, "a".repeat(301));
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, userDTO, user));
+		assertEquals("Old bio", user.getBio());
+		verify(userRepository, never()).save(any());
+	}
+
 	// =============== changePassword ===============
 
 	@Test
@@ -685,6 +914,39 @@ class UserServiceUnitTest {
 		assertThrows(EntityNotFoundException.class, () -> {
 			userService.changePassword(999L, dto, admin);
 		});
+	}
+
+	@Test
+	@DisplayName("changePassword should throw IllegalArgumentException when new password is too short")
+	void changePasswordInvalidNewPasswordTest() {
+		// GIVEN
+		ChangePasswordDTO dto = new ChangePasswordDTO("oldPassword", "short");
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> userService.changePassword(1L, dto, user));
+		assertEquals("encodedPassword", user.getPassword());
+		verify(passwordEncoder, never()).encode(anyString());
+	}
+
+	@Test
+	@DisplayName("changePassword should keep spaces in the new password")
+	void changePasswordKeepsSpacesTest() {
+		// GIVEN
+		ChangePasswordDTO dto = new ChangePasswordDTO("oldPassword", "  my new pass  ");
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
+		when(passwordEncoder.encode("  my new pass  ")).thenReturn("encodedNew");
+
+		// WHEN
+		userService.changePassword(1L, dto, user);
+
+		// THEN
+		verify(passwordEncoder).encode("  my new pass  ");
+		assertEquals("encodedNew", user.getPassword());
 	}
 
 	// =============== deleteUser ===============

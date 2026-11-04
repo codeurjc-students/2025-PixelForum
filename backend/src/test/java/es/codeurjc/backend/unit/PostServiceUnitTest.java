@@ -317,6 +317,76 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("createPost should normalize title and content before saving")
+	void createPostNormalizesTest() {
+		// GIVEN
+		when(postDTO.title()).thenReturn("  My    title \n ");
+		when(postDTO.content()).thenReturn("  Hello   world  \r\n\r\n\r\n\r\n bye ");
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(postRepository.save(any(Post.class))).thenReturn(post);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		postService.createPost(postDTO, user);
+
+		// THEN
+		assertEquals("My title", post.getTitle());
+		assertEquals("Hello world\n\nbye", post.getContent());
+	}
+
+	@Test
+	@DisplayName("createPost should save null content when content is null or blank")
+	void createPostWithoutContentTest() {
+		// GIVEN
+		when(postDTO.content()).thenReturn("   ");
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(postRepository.save(any(Post.class))).thenReturn(post);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		postService.createPost(postDTO, user);
+
+		// THEN
+		assertNull(post.getContent());
+	}
+
+	@Test
+	@DisplayName("createPost should throw IllegalArgumentException when title is blank")
+	void createPostBlankTitleTest() {
+		// GIVEN
+		when(postDTO.title()).thenReturn("   ");
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> postService.createPost(postDTO, user));
+		verify(postRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("createPost should throw IllegalArgumentException when title exceeds 300 characters")
+	void createPostTitleTooLongTest() {
+		// GIVEN
+		when(postDTO.title()).thenReturn("a".repeat(301));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> postService.createPost(postDTO, user));
+		verify(postRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("createPost should throw IllegalArgumentException when content exceeds 5000 characters")
+	void createPostContentTooLongTest() {
+		// GIVEN
+		when(postDTO.content()).thenReturn("a".repeat(5001));
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> postService.createPost(postDTO, user));
+		verify(postRepository, never()).save(any());
+	}
+
+	@Test
 	@DisplayName("updatePost should update post when author edits")
 	void updatePostSuccessTest() {
 		// GIVEN
@@ -620,6 +690,70 @@ class PostServiceUnitTest {
 		assertThrows(IllegalArgumentException.class, () -> {
 			postService.updatePost(1L, postDTO, user);
 		});
+	}
+
+	@Test
+	@DisplayName("updatePost should normalize title and content before saving")
+	void updatePostNormalizesTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postRepository.save(post)).thenReturn(post);
+		when(postDTO.title()).thenReturn("  New    title ");
+		when(postDTO.content()).thenReturn("  New \r\n\r\n\r\n\r\n content  ");
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals("New title", post.getTitle());
+		assertEquals("New\n\ncontent", post.getContent());
+	}
+
+	@Test
+	@DisplayName("updatePost should not save when title and content only differ by whitespace")
+	void updatePostOnlyWhitespaceChangesTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+		when(postDTO.title()).thenReturn("  Title ");
+		when(postDTO.content()).thenReturn("  Content  ");
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		verify(postRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("updatePost should clear content when blank content is provided")
+	void updatePostClearContentTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postRepository.save(post)).thenReturn(post);
+		when(postDTO.content()).thenReturn("");
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertNull(post.getContent());
+		verify(postRepository).save(post);
+	}
+
+	@Test
+	@DisplayName("updatePost should validate before touching images")
+	void updatePostInvalidDoesNotTouchImagesTest() {
+		// GIVEN
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.title()).thenReturn("a".repeat(301));
+		when(postDTO.images()).thenReturn(List.of(5L));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> postService.updatePost(1L, postDTO, user));
+		verify(imageRepository, never()).findAllById(any());
+		verify(imageRepository, never()).deleteAllById(any());
+		verify(postRepository, never()).save(any());
 	}
 
 	@Test

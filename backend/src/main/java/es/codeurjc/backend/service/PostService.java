@@ -20,6 +20,7 @@ import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
+import es.codeurjc.backend.utils.TextRules;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -69,6 +70,8 @@ public class PostService {
 
 	public PostDTO createPost(PostDTO postDTO, User user) {
 		Post post = mapper.toDomain(postDTO);
+		post.setTitle(TextRules.singleLine("The title", postDTO.title(), 300));
+		post.setContent(TextRules.optionalMultiline("The post content", postDTO.content(), 5000, 50));
 		post.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		post.setLikes(0);
@@ -96,13 +99,16 @@ public class PostService {
 			throw new AccessDeniedException("You can only edit your own posts");
 		}
 
-		if (!hasChanges(post, postDTO)) {
+		String title = TextRules.singleLine("The title", postDTO.title(), 300);
+		String content = TextRules.optionalMultiline("The post content", postDTO.content(), 5000, 50);
+
+		if (!hasChanges(post, postDTO, title, content)) {
 			return toDTO(post, user);
 		}
 
 		manageImages(post, postDTO, user);
-		post.setTitle(postDTO.title());
-		post.setContent(postDTO.content());
+		post.setTitle(title);
+		post.setContent(content);
 		post.setTopic(postDTO.topic());
 		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
@@ -110,10 +116,10 @@ public class PostService {
 		return toDTO(updatedPost, user);
 	}
 
-	private boolean hasChanges(Post post, PostDTO dto) {
-		if (!Objects.equals(post.getTitle(), dto.title()))
+	private boolean hasChanges(Post post, PostDTO dto, String title, String content) {
+		if (!Objects.equals(post.getTitle(), title))
 			return true;
-		if (!Objects.equals(post.getContent(), dto.content()))
+		if (!Objects.equals(post.getContent(), content))
 			return true;
 
 		List<Long> currentImageIds = post.getImages().stream().map(Image::getId).toList();

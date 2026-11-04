@@ -279,13 +279,6 @@ describe('CommentListComponent', () => {
 		expect(snackBarSpy.open).toHaveBeenCalledWith('Comment posted', 'Close', { duration: 3000 });
 	});
 
-	it('should not submit if content is blank', () => {
-		fixture.detectChanges();
-		component.newCommentContent = '   ';
-		component.submitComment();
-		expect(commentServiceSpy.create).not.toHaveBeenCalled();
-	});
-
 	it('should not submit if already submitting', () => {
 		fixture.detectChanges();
 		component.newCommentContent = 'Some text';
@@ -308,6 +301,25 @@ describe('CommentListComponent', () => {
 		component.newCommentContent = 'Some text';
 		component.submitComment();
 		expect(commentServiceSpy.create).not.toHaveBeenCalled();
+	});
+
+	it('should not submit when content contains only whitespace', () => {
+		component.postId = 5;
+		component.newCommentContent = '   \n   ';
+		component.submitComment();
+
+		expect(commentServiceSpy.create).not.toHaveBeenCalled();
+	});
+
+	it('should normalize content before submitting', () => {
+		const createdComment: Comment = { ...mockComment, content: 'First line\nSecond line' };
+		commentServiceSpy.create.and.returnValue(of(createdComment));
+
+		component.postId = 5;
+		component.newCommentContent = '  First line  \n  Second line  ';
+		component.submitComment();
+
+		expect(commentServiceSpy.create).toHaveBeenCalledWith(5, { content: 'First line\nSecond line' });
 	});
 
 	// ---------- ON COMMENT DELETED ----------
