@@ -19,14 +19,14 @@ describe('PostListComponent - Unit Tests', () => {
 			id: 1,
 			title: 'Old post',
 			content: 'Old content',
-			createdAt: '2024-01-01T10:00:00Z',
+			createdAt: '2024-01-01T10:00:00',
 			topic: { id: 1, name: 'GTA VI' } as any,
 		},
 		{
 			id: 2,
 			title: 'New post',
 			content: 'New content',
-			createdAt: '2024-02-01T10:00:00Z',
+			createdAt: '2024-02-01T10:00:00',
 			topic: { id: 1, name: 'GTA VI' } as any
 		}
 	];

@@ -48,7 +48,7 @@
 						<div>
 							<h1 class="username">{{ user.username }}</h1>
 							<p class="join-date" *ngIf="user.createdAt">
-								Joined {{ user.createdAt | date: 'dd/MM/yyyy' }}
+								Joined {{ (user.createdAt + 'Z') | date: 'dd/MM/yyyy' }}
 							</p>
 						</div>
 						<div class="action-buttons">

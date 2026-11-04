@@ -19,7 +19,7 @@
 			</div>
 			<div class="author-meta">
 				<span class="username" id="post-author-username">{{ post.author?.username }}</span>
-				<span class="timestamp">{{ post.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+				<span class="timestamp">{{ post.createdAt ? (post.createdAt + 'Z' | date:'dd/MM/yyyy HH:mm') : '' }}</span>
 			</div>
 		</div>
 		<button *ngIf="post.topic" class="topic-tag" (click)="goToTopic(); $event.stopPropagation()">

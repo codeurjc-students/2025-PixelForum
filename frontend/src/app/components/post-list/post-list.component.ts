@@ -7,6 +7,7 @@ import { PostComponent } from '../post/post.component';
 import { PostService } from '../../services/post.service';
 import { PageResponse } from '../../models/pageResponse.model';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
 	selector: 'app-post-list',
@@ -41,11 +42,16 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 
 	constructor(
 		private postService: PostService,
-		private userService: UserService
+		private userService: UserService,
+		private authService: AuthService
 	) { }
 
 	ngOnInit(): void {
-		this.loadPosts();
+		this.authService.user$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.loadPosts();
+			});
 	}
 
 	ngOnChanges() {

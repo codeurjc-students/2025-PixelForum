@@ -12,7 +12,7 @@
 			</div>
 			<div class="author-meta">
 				<span class="username">{{ comment.author?.username }}</span>
-				<span class="timestamp">{{ comment.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+				<span class="timestamp">{{ comment.createdAt ? (comment.createdAt + 'Z' | date:'dd/MM/yyyy HH:mm') : '' }}</span>
 			</div>
 		</div>
 		<div class="comment-actions" *ngIf="isOwner$ | async">
