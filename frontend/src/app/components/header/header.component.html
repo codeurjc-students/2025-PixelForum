@@ -16,7 +16,14 @@
 			<path d="m21 21-4.34-4.34" />
 			<circle cx="11" cy="11" r="8" />
 		</svg>
-		<input type="text" placeholder="Search topic..." />
+		<input #searchInput type="text" placeholder="Search topic..." (input)="onSearch(searchInput.value)"
+			(keydown.enter)="results.length && goToTopic(results[0], searchInput)" (blur)="results = []" />
+
+		<ul class="search-results" *ngIf="results.length">
+			<li *ngFor="let t of results" (mousedown)="goToTopic(t, searchInput)">
+				{{ t.name }}
+			</li>
+		</ul>
 	</div>
 
 	<div class="right">
@@ -51,7 +58,7 @@
 			</button>
 		</ng-container>
 
-		<!-- NO LOGUEADO -->
+		<!-- NOT LOGGED IN -->
 		<ng-template #notLogged>
 			<a routerLink="/login" class="btn">
 				Login

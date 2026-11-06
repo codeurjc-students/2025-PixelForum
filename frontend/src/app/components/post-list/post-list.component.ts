@@ -1,13 +1,12 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs/internal/Subject';
-import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Post } from '../../models/post.model';
 import { PostComponent } from '../post/post.component';
 import { PostService } from '../../services/post.service';
 import { PageResponse } from '../../models/pageResponse.model';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
+import { concatMap, distinctUntilChanged, from, map, Subject, Subscription, takeUntil, toArray } from 'rxjs';
 
 @Component({
 	selector: 'app-post-list',
@@ -30,6 +29,7 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 	posts: Post[] = [];
 	isLoading = true;
 	isLoadingMore = false;
+	private isReloading = false;
 
 	// Pagination
 	currentPage = 0;
@@ -39,6 +39,7 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 
 	// RxJS
 	private destroy$ = new Subject<void>();
+	private loadSub?: Subscription;
 
 	constructor(
 		private postService: PostService,
@@ -48,14 +49,17 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 
 	ngOnInit(): void {
 		this.authService.user$
-			.pipe(takeUntil(this.destroy$))
-			.subscribe(() => {
-				this.loadPosts();
-			});
+			.pipe(
+				map(user => user?.id),
+				distinctUntilChanged(),
+				takeUntil(this.destroy$)
+			)
+			.subscribe(() => this.loadPosts());
 	}
 
-	ngOnChanges() {
-		if (this.refreshTrigger !== undefined) this.loadPosts();
+	ngOnChanges(changes: SimpleChanges): void {
+		const keys = ['filterUsername', 'filterTopic', 'sortBy', 'sortOrder', 'pageSize', 'likedByUserId', 'refreshTrigger'];
+		if (keys.some(key => changes[key] && !changes[key].firstChange)) this.loadPosts();
 	}
 
 	ngOnDestroy(): void {
@@ -64,54 +68,80 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	loadPosts(): void {
+		this.loadSub?.unsubscribe();
 		this.isLoading = true;
+		this.isLoadingMore = false;
+		this.isReloading = false;
 		this.currentPage = 0;
 		this.posts = [];
 		this.fetchPosts(true);
 	}
 
 	loadMorePosts(): void {
-		if (!this.hasMorePages || this.isLoadingMore) {
-			return;
-		}
+		if (!this.hasMorePages || this.isLoading || this.isLoadingMore || this.isReloading) return;
 
 		this.isLoadingMore = true;
 		this.currentPage++;
 		this.fetchPosts(false);
 	}
 
-	fetchPosts(isInitialLoad: boolean): void {
-		const request$ = this.likedByUserId
-			? this.userService.getLikedPosts(
-				this.likedByUserId,
-				this.currentPage,
-				this.pageSize
-			)
-			: this.postService.getPosts(
-				this.currentPage,
-				this.pageSize,
-				undefined,
-				this.filterUsername,
-				this.filterTopic,
-				this.sortBy,
-				this.sortOrder
-			);
+	private getPostsRequest(page: number) {
+		return this.likedByUserId
+			? this.userService.getLikedPosts(this.likedByUserId, page, this.pageSize)
+			: this.postService.getPosts(page, this.pageSize, undefined, this.filterUsername, this.filterTopic, this.sortBy, this.sortOrder);
+	}
 
-		request$
+	private fetchPosts(isInitialLoad: boolean): void {
+		this.loadSub?.unsubscribe();
+		this.loadSub = this.getPostsRequest(this.currentPage)
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response: PageResponse<Post>) => {
 					if (isInitialLoad) {
 						this.posts = response.content;
-						this.updatePaginationInfo(response);
 						this.isLoading = false;
 					} else {
 						this.posts.push(...response.content);
-						this.updatePaginationInfo(response);
 						this.isLoadingMore = false;
+					}
+					this.updatePaginationInfo(response);
+				},
+				error: () => {
+					if (isInitialLoad) {
+						this.isLoading = false;
+					} else {
+						this.isLoadingMore = false;
+						this.currentPage--;
 					}
 				}
 			});
+	}
+
+	private reloadLoadedPages(): void {
+		this.loadSub?.unsubscribe();
+		this.isReloading = true;
+		const pagesToFetch = Array.from({ length: this.currentPage + 1 }, (_, i) => i);
+
+		this.loadSub = from(pagesToFetch).pipe(
+			concatMap(page => this.getPostsRequest(page)),
+			toArray(),
+			takeUntil(this.destroy$)
+		).subscribe({
+			next: (responses: PageResponse<Post>[]) => {
+				this.posts = responses.flatMap(r => r.content);
+				this.updatePaginationInfo(responses[responses.length - 1]);
+				this.endReload();
+			},
+			error: () => {
+				this.endReload();
+			}
+		});
+	}
+
+	private endReload(): void {
+		this.isReloading = false;
+		this.isLoading = false;
+		this.isLoadingMore = false;
 	}
 
 	private updatePaginationInfo(response: PageResponse<Post>): void {
@@ -121,13 +151,11 @@ export class PostListComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	removePost(): void {
-		this.loadPosts();
+		this.reloadLoadedPages();
 	}
 
 	removeUnlikedPost(id: number | undefined): void {
-		if (!this.likedByUserId || !id || id != this.likedByUserId) {
-			return;
-		}
-		this.loadPosts();
+		if (!this.likedByUserId || !id || id != this.likedByUserId) return;
+		this.reloadLoadedPages();
 	}
 }

@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs/internal/Subject';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
-import { concatMap, from, take, toArray } from 'rxjs';
+import { concatMap, from, Subscription, toArray } from 'rxjs';
 import { Comment } from '../../models/comment.model';
 import { CommentComponent } from '../comment/comment.component';
 import { CommentService } from '../../services/comment.service';
@@ -20,7 +20,7 @@ import { normalizeMultiline, validateMultiline } from '../../utils/text-rules';
 	templateUrl: './comment-list.component.html',
 	styleUrls: ['./comment-list.component.scss']
 })
-export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
+export class CommentListComponent implements OnChanges, OnDestroy {
 	// ── Context ───────────────────────────────────────────────────────────────
 	@Input() postId?: number;           // required when mode = 'post'
 	@Input() userId?: number;           // required when mode = 'user' | 'liked'
@@ -37,6 +37,7 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 	isLoading = true;
 	isLoadingMore = false;
 	isSubmitting = false;
+	private isReloading = false;
 
 	currentPage = 0;
 	totalPages = 0;
@@ -49,22 +50,18 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 	isLoggedIn = false;
 
 	private destroy$ = new Subject<void>();
+	private loadSub?: Subscription;
 
 	constructor(
 		private commentService: CommentService,
 		private authService: AuthService,
 		private snackBar: MatSnackBar
-	) { }
+	) { this.authService.loggedIn$.pipe(takeUntil(this.destroy$)).subscribe(loggedIn => this.isLoggedIn = loggedIn); }
 
-	ngOnInit(): void {
-		this.authService.loggedIn$.pipe(takeUntil(this.destroy$)).subscribe(loggedIn => this.isLoggedIn = loggedIn);
-		this.loadComments();
-	}
-
-	ngOnChanges(): void {
-		if (this.refreshTrigger !== undefined) this.loadComments();
+	ngOnChanges(changes: SimpleChanges): void {
 		const hasContext = this.mode === 'post' ? !!this.postId : !!this.userId;
-		if (hasContext) this.loadComments();
+		const contextChanged = ['postId', 'userId', 'mode', 'refreshTrigger'].some(key => key in changes);
+		if (hasContext && contextChanged) this.loadComments();
 	}
 
 	ngOnDestroy(): void {
@@ -73,14 +70,17 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	loadComments(): void {
+		this.loadSub?.unsubscribe();
 		this.isLoading = true;
+		this.isLoadingMore = false;
+		this.isReloading = false;
 		this.currentPage = 0;
 		this.comments = [];
 		this.fetchPage(true);
 	}
 
 	loadMoreComments(): void {
-		if (!this.hasMorePages || this.isLoadingMore) return;
+		if (!this.hasMorePages || this.isLoading || this.isLoadingMore || this.isReloading) return;
 		this.isLoadingMore = true;
 		this.currentPage++;
 		this.fetchPage(false);
@@ -95,7 +95,8 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	private fetchPage(isInitial: boolean): void {
-		this.getCommentsRequest(this.currentPage).pipe(takeUntil(this.destroy$)).subscribe({
+		this.loadSub?.unsubscribe();
+		this.loadSub = this.getCommentsRequest(this.currentPage).pipe(takeUntil(this.destroy$)).subscribe({
 			next: (response: PageResponse<Comment>) => {
 				if (isInitial) {
 					this.comments = response.content;
@@ -107,14 +108,24 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 				this.totalPages = response.totalPages;
 				this.totalElements = response.totalElements;
 				this.hasMorePages = !response.last;
+			},
+			error: () => {
+				if (isInitial) {
+					this.isLoading = false;
+				} else {
+					this.isLoadingMore = false;
+					this.currentPage--;
+				}
 			}
 		});
 	}
 
 	private reloadLoadedPages(): void {
+		this.loadSub?.unsubscribe();
+		this.isReloading = true;
 		const pagesToFetch = Array.from({ length: this.currentPage + 1 }, (_, i) => i);
 
-		from(pagesToFetch).pipe(
+		this.loadSub = from(pagesToFetch).pipe(
 			concatMap(page => this.getCommentsRequest(page)),
 			toArray(),
 			takeUntil(this.destroy$)
@@ -125,8 +136,18 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 				this.totalPages = last.totalPages;
 				this.totalElements = last.totalElements;
 				this.hasMorePages = !last.last;
+				this.endReload();
+			},
+			error: () => {
+				this.endReload();
 			}
 		});
+	}
+
+	private endReload(): void {
+		this.isReloading = false;
+		this.isLoading = false;
+		this.isLoadingMore = false;
 	}
 
 	get commentValidationError(): string | null {
@@ -135,32 +156,27 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 	}
 
 	submitComment(): void {
-		if (this.isSubmitting || !this.postId || this.commentValidationError || !this.newCommentContent) return;
+		if (this.isSubmitting || !this.isLoggedIn || !this.postId || this.commentValidationError || !this.newCommentContent) return;
 
 		const content = normalizeMultiline(this.newCommentContent);
 
-		this.authService.loggedIn$.pipe(take(1)).subscribe(loggedIn => {
-			if (!loggedIn) return;
-
-			this.isSubmitting = true;
-			this.commentService.create(this.postId!, { content }).subscribe({
-				next: (created: Comment) => {
-					this.newCommentContent = '';
-					this.isSubmitting = false;
-					this.commentCountChanged.emit(+1);
-					this.snackBar.open('Comment posted', 'Close', { duration: 3000 });
-					this.reloadLoadedPages();
-				},
-				error: () => {
-					this.isSubmitting = false;
-				}
-			});
+		this.isSubmitting = true;
+		this.commentService.create(this.postId, { content }).pipe(takeUntil(this.destroy$)).subscribe({
+			next: () => {
+				this.newCommentContent = '';
+				this.isSubmitting = false;
+				this.commentCountChanged.emit(+1);
+				this.snackBar.open('Comment posted', 'Close', { duration: 3000 });
+				this.reloadLoadedPages();
+			},
+			error: () => {
+				this.isSubmitting = false;
+			}
 		});
 	}
 
 	onCommentDeleted(commentId: number): void {
 		this.comments = this.comments.filter(c => c.id !== commentId);
-		this.totalElements = Math.max(0, this.totalElements - 1);
 		this.commentCountChanged.emit(-1);
 		this.reloadLoadedPages();
 	}
@@ -174,7 +190,7 @@ export class CommentListComponent implements OnInit, OnChanges, OnDestroy {
 
 	onCommentUnliked(commentId: number): void {
 		if (this.mode === 'liked') {
-			this.loadComments();
+			this.reloadLoadedPages();
 		}
 	}
 }
