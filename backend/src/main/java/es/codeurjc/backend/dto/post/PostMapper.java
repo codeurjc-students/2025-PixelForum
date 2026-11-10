@@ -20,6 +20,7 @@ public interface PostMapper {
 	@Mapping(target = "author", ignore = true)
 	@Mapping(target = "usersThatLiked", ignore = true)
 	@Mapping(target = "comments", ignore = true)
+	@Mapping(target = "id", ignore = true)
 	Post toDomain(PostDTO postDTO);
 
 	default PostDTO toDTOWithLike(Post post, User currentUser) {

@@ -19,6 +19,8 @@ public interface CommentMapper {
 	@Mapping(target = "author", ignore = true)
 	@Mapping(target = "post", ignore = true)
 	@Mapping(target = "usersThatLiked", ignore = true)
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "parentComment", ignore = true) // TO BE REMOVED WHEN NESTED COMMENTS ARE IMPLEMENTED
 	Comment toDomain(CommentDTO commentDTO);
 
 	default CommentDTO toDTOWithLike(Comment comment, User currentUser) {

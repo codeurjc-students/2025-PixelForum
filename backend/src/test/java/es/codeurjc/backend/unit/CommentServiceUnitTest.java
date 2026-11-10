@@ -97,33 +97,6 @@ class CommentServiceUnitTest {
 				new BasicUserDTO(1L, "testuser", FIXED_TIME, "Bio", null), null, 0, false, 1L);
 	}
 
-	// =============== findById ===============
-
-	@Test
-	@DisplayName("findById should return comment when it exists")
-	void findByIdSuccessTest() {
-		// GIVEN
-		when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
-
-		// WHEN
-		Comment result = commentService.findById(1L);
-
-		// THEN
-		assertEquals(comment, result);
-		verify(commentRepository).findById(1L);
-	}
-
-	@Test
-	@DisplayName("findById should throw EntityNotFoundException when comment does not exist")
-	void findByIdNotFoundTest() {
-		// GIVEN
-		when(commentRepository.findById(999L)).thenReturn(Optional.empty());
-
-		// WHEN & THEN
-		assertThrows(EntityNotFoundException.class, () -> commentService.findById(999L));
-		verify(commentRepository).findById(999L);
-	}
-
 	// =============== save ===============
 
 	@Test

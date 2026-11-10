@@ -28,6 +28,7 @@ import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
+import es.codeurjc.backend.repository.TopicRepository;
 import es.codeurjc.backend.service.PostService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
@@ -42,6 +43,7 @@ class PostServiceUnitTest {
 	private PostRepository postRepository;
 	private ImageRepository imageRepository;
 	private CommentRepository commentRepository;
+	private TopicRepository topicRepository;
 
 	private Post post;
 	private PostDTO postDTO;
@@ -53,8 +55,9 @@ class PostServiceUnitTest {
 		postRepository = mock(PostRepository.class);
 		imageRepository = mock(ImageRepository.class);
 		commentRepository = mock(CommentRepository.class);
+		topicRepository = mock(TopicRepository.class);
 
-		postService = new PostService(mapper, postRepository, imageRepository, commentRepository);
+		postService = new PostService(mapper, postRepository, imageRepository, commentRepository, topicRepository);
 
 		user = new User();
 		user.setId(1L);
@@ -387,6 +390,39 @@ class PostServiceUnitTest {
 	}
 
 	@Test
+	@DisplayName("createPost should save post when images is null")
+	void createPostNullImagesTest() {
+		// GIVEN
+		when(postDTO.images()).thenReturn(null);
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(postRepository.save(any(Post.class))).thenReturn(post);
+		when(mapper.toDTOWithLike(post, user)).thenReturn(postDTO);
+
+		// WHEN
+		PostDTO result = postService.createPost(postDTO, user);
+
+		// THEN
+		assertEquals(postDTO, result);
+		verify(imageRepository, never()).findAllById(any());
+	}
+
+	@Test
+	@DisplayName("createPost should throw when topic does not exist")
+	void createPostTopicNotFoundTest() {
+		// GIVEN
+		Topic topic = new Topic();
+		topic.setId(2L);
+
+		when(postDTO.topic()).thenReturn(topic);
+		when(mapper.toDomain(postDTO)).thenReturn(post);
+		when(topicRepository.findById(2L)).thenReturn(Optional.empty());
+
+		// WHEN & THEN
+		assertThrows(EntityNotFoundException.class, () -> postService.createPost(postDTO, user));
+		verify(postRepository, never()).save(any());
+	}
+
+	@Test
 	@DisplayName("updatePost should update post when author edits")
 	void updatePostSuccessTest() {
 		// GIVEN
@@ -475,6 +511,7 @@ class PostServiceUnitTest {
 		topic.setId(2L);
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(topicRepository.findById(2L)).thenReturn(Optional.of(topic));
 		when(postRepository.save(post)).thenReturn(post);
 
 		when(postDTO.topic()).thenReturn(topic);
@@ -595,6 +632,7 @@ class PostServiceUnitTest {
 		post.setTopic(oldTopic);
 
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(topicRepository.findById(2L)).thenReturn(Optional.of(newTopic));
 		when(postDTO.topic()).thenReturn(newTopic);
 		when(postRepository.save(post)).thenReturn(post);
 
@@ -603,6 +641,43 @@ class PostServiceUnitTest {
 
 		// THEN
 		assertEquals(newTopic, post.getTopic());
+	}
+
+	@Test
+	@DisplayName("updatePost should keep existing images and only add/remove the differences")
+	void updatePostKeepsExistingImagesTest() {
+		// GIVEN
+		Image removed = new Image();
+		removed.setId(1L);
+		removed.setOwner(user);
+
+		Image kept = new Image();
+		kept.setId(2L);
+		kept.setOwner(user);
+		kept.setPost(post);
+
+		Image added = new Image();
+		added.setId(3L);
+		added.setOwner(user);
+
+		post.setImages(new ArrayList<>(List.of(removed, kept)));
+
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postDTO.images()).thenReturn(List.of(2L, 3L));
+		when(imageRepository.findAllById(List.of(1L))).thenReturn(List.of(removed));
+		when(imageRepository.findAllById(List.of(3L))).thenReturn(List.of(added));
+		when(postRepository.save(post)).thenReturn(post);
+
+		// WHEN
+		postService.updatePost(1L, postDTO, user);
+
+		// THEN
+		assertEquals(2, post.getImages().size());
+		assertTrue(post.getImages().contains(kept));
+		assertTrue(post.getImages().contains(added));
+		assertFalse(post.getImages().contains(removed));
+		verify(imageRepository).deleteAllById(List.of(1L));
+		verify(imageRepository, never()).deleteAllById(List.of(2L));
 	}
 
 	@Test

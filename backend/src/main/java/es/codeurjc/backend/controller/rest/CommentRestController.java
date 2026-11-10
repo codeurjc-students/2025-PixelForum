@@ -29,8 +29,6 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/v1/posts/{postId}/comments")
 public class CommentRestController {
 
-	private static final String USER_NOT_FOUND = "User not found";
-
 	private final CommentService commentService;
 	private final UserService userService;
 
@@ -41,17 +39,21 @@ public class CommentRestController {
 
 	private User getCurrentUser(Principal principal) {
 		return userService.findByUsername(principal.getName())
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+				.orElseThrow(() -> new EntityNotFoundException("User not found"));
+	}
+
+	private User getCurrentUserOrNull(Principal principal) {
+		if (principal == null) {
+			return null;
+		}
+		return userService.findByUsername(principal.getName()).orElse(null);
 	}
 
 	@GetMapping
 	public ResponseEntity<Page<CommentDTO>> getPostComments(@PathVariable Long postId,
 			@PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 			Principal principal) {
-		User user = null;
-		if (principal != null) {
-			user = userService.findByUsername(principal.getName()).orElse(null);
-		}
+		User user = getCurrentUserOrNull(principal);
 		Page<CommentDTO> page = commentService.getPostComments(postId, pageable, user);
 		return ResponseEntity.ok(page);
 	}
@@ -59,10 +61,7 @@ public class CommentRestController {
 	@GetMapping("/{commentId}")
 	public ResponseEntity<CommentDTO> getComment(@PathVariable Long postId, @PathVariable Long commentId,
 			Principal principal) {
-		User user = null;
-		if (principal != null) {
-			user = userService.findByUsername(principal.getName()).orElse(null);
-		}
+		User user = getCurrentUserOrNull(principal);
 		CommentDTO commentDTO = commentService.getComment(commentId, user);
 		return ResponseEntity.ok(commentDTO);
 	}

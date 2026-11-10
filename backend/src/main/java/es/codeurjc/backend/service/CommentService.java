@@ -34,7 +34,7 @@ public class CommentService {
 		this.postRepository = postRepository;
 	}
 
-	public Comment findById(Long id) {
+	private Comment findById(Long id) {
 		return commentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 	}
 
@@ -58,6 +58,7 @@ public class CommentService {
 		return commentsPage.map(comment -> toDTO(comment, currentUser));
 	}
 
+	@Transactional
 	public CommentDTO createComment(Long postId, CommentDTO commentDTO, User user) {
 		Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
 

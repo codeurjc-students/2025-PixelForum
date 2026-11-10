@@ -198,6 +198,7 @@ class ImageServiceIntegrationTest {
 
 	@Test
 	@DisplayName("Should fail when deleting image of another user")
+	@Transactional
 	void deleteImageAccessDeniedTest() {
 		// GIVEN
 		User owner = userService.findByUsername("martin").orElseThrow();

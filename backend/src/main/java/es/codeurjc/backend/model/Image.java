@@ -39,7 +39,7 @@ public class Image {
 	}
 
 	// Getters & Setters
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 

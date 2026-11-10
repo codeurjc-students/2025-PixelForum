@@ -34,8 +34,6 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/v1/users")
 public class UserRestController {
 
-	private static final String USER_NOT_FOUND = "User not found";
-
 	private final UserService userService;
 
 	public UserRestController(UserService userService) {
@@ -44,7 +42,14 @@ public class UserRestController {
 
 	private User getCurrentUser(Principal principal) {
 		return userService.findByUsername(principal.getName())
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+				.orElseThrow(() -> new EntityNotFoundException("User not found"));
+	}
+
+	private User getCurrentUserOrNull(Principal principal) {
+		if (principal == null) {
+			return null;
+		}
+		return userService.findByUsername(principal.getName()).orElse(null);
 	}
 
 	@GetMapping
@@ -96,12 +101,7 @@ public class UserRestController {
 	public ResponseEntity<UserDTO> setProfileImage(@PathVariable Long id, @RequestParam("imageId") Long imageId,
 			Principal principal) {
 		User currentUser = getCurrentUser(principal);
-		UserDTO updatedUserDTO = userService.setProfileImage(id, imageId, currentUser);
-		if (updatedUserDTO == null) {
-			throw new IllegalArgumentException(
-					"Profile pictures must be JPG or PNG format. WebP and other formats are not allowed.");
-		}
-		return ResponseEntity.ok(updatedUserDTO);
+		return ResponseEntity.ok(userService.setProfileImage(id, imageId, currentUser));
 	}
 
 	@DeleteMapping("/{id}/avatar")
@@ -131,10 +131,7 @@ public class UserRestController {
 	public ResponseEntity<Page<CommentDTO>> getUserComments(@PathVariable Long id,
 			@PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 			Principal principal) {
-		User currentUser = null;
-		if (principal != null) {
-			currentUser = userService.findByUsername(principal.getName()).orElse(null);
-		}
+		User currentUser = getCurrentUserOrNull(principal);
 		Page<CommentDTO> comments = userService.getUserComments(id, currentUser, pageable);
 		return ResponseEntity.ok(comments);
 	}

@@ -65,6 +65,7 @@ class PostServiceIntegrationTest {
 
 	@Test
 	@DisplayName("Should create a post successfully")
+	@Transactional
 	void createPostTest() {
 		// GIVEN
 		User user = userService.findByUsername("martin").orElseThrow();

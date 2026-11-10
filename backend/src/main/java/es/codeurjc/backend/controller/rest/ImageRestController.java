@@ -1,17 +1,26 @@
 package es.codeurjc.backend.controller.rest;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.service.ImageService;
 import es.codeurjc.backend.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.security.Principal;
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/images")
@@ -33,6 +42,15 @@ public class ImageRestController {
 	@GetMapping("/{id}")
 	public ResponseEntity<byte[]> getImage(@PathVariable long id, @RequestParam(required = false) Integer w,
 			@RequestParam(required = false) Integer h, @RequestParam(required = false, defaultValue = "95") int q) {
+
+		// Without resize -> return original with its real content type
+		if (w == null && h == null) {
+			Image image = imageService.getImageById(id);
+			return ResponseEntity.ok()
+					.contentType(MediaType.parseMediaType(image.getContentType()))
+					.header("Cache-Control", "public, max-age=31536000")
+					.body(image.getImageData());
+		}
 
 		byte[] imageData = imageService.getImage(id, w, h, q);
 
@@ -56,7 +74,7 @@ public class ImageRestController {
 		}
 
 		if (ids.isEmpty()) {
-			return ResponseEntity.badRequest().build();
+			throw new IllegalArgumentException("No valid files were provided");
 		}
 
 		return ResponseEntity.ok(ids);

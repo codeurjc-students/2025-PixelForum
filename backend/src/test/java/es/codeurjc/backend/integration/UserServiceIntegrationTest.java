@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import es.codeurjc.backend.dto.post.PostDTO;
@@ -36,6 +37,9 @@ class UserServiceIntegrationTest {
 
 	@Autowired
 	private ImageService imageService;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	// =============== getUser ===============
 
@@ -429,6 +433,7 @@ class UserServiceIntegrationTest {
 	void changePasswordSuccessTest() {
 		// GIVEN
 		User user = userService.findByUsername("martin").orElseThrow();
+		String oldHash = user.getPassword();
 		String oldPassword = "user";
 		String newPassword = "newPassword123";
 		ChangePasswordDTO dto = new ChangePasswordDTO(oldPassword, newPassword);
@@ -438,7 +443,9 @@ class UserServiceIntegrationTest {
 
 		// THEN
 		User updatedUser = userService.findByUsername("martin").orElseThrow();
-		assertNotNull(updatedUser.getPassword());
+		assertNotEquals(oldHash, updatedUser.getPassword());
+		assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
+		assertFalse(passwordEncoder.matches(oldPassword, updatedUser.getPassword()));
 	}
 
 	@Test
@@ -462,6 +469,7 @@ class UserServiceIntegrationTest {
 		// GIVEN
 		User targetUser = userService.findByUsername("martin").orElseThrow();
 		User adminUser = userService.findByUsername("admin").orElseThrow();
+		String oldHash = targetUser.getPassword();
 		String oldPassword = "user";
 		String newPassword = "adminChangedPassword123";
 		ChangePasswordDTO dto = new ChangePasswordDTO(oldPassword, newPassword);
@@ -471,7 +479,8 @@ class UserServiceIntegrationTest {
 
 		// THEN
 		User updatedUser = userService.findByUsername("martin").orElseThrow();
-		assertNotNull(updatedUser.getPassword());
+		assertNotEquals(oldHash, updatedUser.getPassword());
+		assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
 	}
 
 	@Test
@@ -631,6 +640,7 @@ class UserServiceIntegrationTest {
 
 	@Test
 	@DisplayName("Should deny access when trying to set image of another user")
+	@Transactional
 	void setProfileImageUnownedImageTest() {
 		// GIVEN
 		User martin = userService.findByUsername("martin").orElseThrow();
@@ -676,22 +686,21 @@ class UserServiceIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("Should reject image with invalid content type")
+	@DisplayName("Should throw IllegalArgumentException when setting profile image with invalid type")
 	@Transactional
 	void setProfileImageInvalidTypeTest() {
 		// GIVEN
 		User user = userService.findByUsername("martin").orElseThrow();
 		Image image = imageService.saveImage("data".getBytes(), "image.gif", "image/gif", user);
 
-		// WHEN
-		UserDTO result = userService.setProfileImage(user.getId(), image.getId(), user);
-
-		// THEN
-		assertNull(result);
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class,
+				() -> userService.setProfileImage(user.getId(), image.getId(), user));
 	}
 
 	@Test
 	@DisplayName("Should throw EntityNotFoundException when user does not exist")
+	@Transactional
 	void setProfileImageUserNotFoundTest() {
 		// GIVEN
 		User admin = userService.findByUsername("admin").orElseThrow();
@@ -739,6 +748,7 @@ class UserServiceIntegrationTest {
 
 	@Test
 	@DisplayName("Should not fail when user has no avatar")
+	@Transactional
 	void removeProfileImageNoAvatarTest() {
 		// GIVEN
 		User user = userService.findByUsername("martin").orElseThrow();

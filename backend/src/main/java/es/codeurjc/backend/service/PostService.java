@@ -2,6 +2,7 @@ package es.codeurjc.backend.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,34 +17,49 @@ import es.codeurjc.backend.dto.post.PostMapper;
 import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
 import es.codeurjc.backend.model.Post;
+import es.codeurjc.backend.model.Topic;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
+import es.codeurjc.backend.repository.TopicRepository;
 import es.codeurjc.backend.utils.TextRules;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class PostService {
 
-	private static final String POST_NOT_FOUND = "Post not found";
 	private static final String ADMIN = "ADMIN";
 
 	private final PostMapper mapper;
 	private final PostRepository postRepository;
 	private final ImageRepository imageRepository;
 	private final CommentRepository commentRepository;
+	private final TopicRepository topicRepository;
 
 	public PostService(PostMapper mapper, PostRepository postRepository, ImageRepository imageRepository,
-			CommentRepository commentRepository) {
+			CommentRepository commentRepository, TopicRepository topicRepository) {
 		this.mapper = mapper;
 		this.postRepository = postRepository;
 		this.imageRepository = imageRepository;
 		this.commentRepository = commentRepository;
+		this.topicRepository = topicRepository;
+	}
+
+	private Post findById(Long id) {
+		return postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Post not found"));
+	}
+
+	private Topic resolveTopic(Topic topic) {
+		if (topic == null) {
+			return null;
+		}
+		return topicRepository.findById(topic.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Topic not found"));
 	}
 
 	public PostDTO getPost(Long id, User user) {
-		return toDTO(postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND)), user);
+		return toDTO(findById(id), user);
 	}
 
 	public Page<PostDTO> searchAndFilterPosts(String title, String authorUsername, String topic, Pageable pageable,
@@ -68,10 +84,12 @@ public class PostService {
 		return mapper.toDTOWithLike(post, user);
 	}
 
+	@Transactional
 	public PostDTO createPost(PostDTO postDTO, User user) {
 		Post post = mapper.toDomain(postDTO);
 		post.setTitle(TextRules.singleLine("The title", postDTO.title(), 300));
 		post.setContent(TextRules.optionalMultiline("The post content", postDTO.content(), 5000, 50));
+		post.setTopic(resolveTopic(postDTO.topic()));
 		post.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		post.setLikes(0);
@@ -92,8 +110,7 @@ public class PostService {
 
 	@Transactional
 	public PostDTO updatePost(Long id, PostDTO postDTO, User user) {
-		Post post = postRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
+		Post post = findById(id);
 
 		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only edit your own posts");
@@ -109,7 +126,7 @@ public class PostService {
 		manageImages(post, postDTO, user);
 		post.setTitle(title);
 		post.setContent(content);
-		post.setTopic(postDTO.topic());
+		post.setTopic(resolveTopic(postDTO.topic()));
 		post.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
 		Post updatedPost = postRepository.save(post);
@@ -124,7 +141,7 @@ public class PostService {
 
 		List<Long> currentImageIds = post.getImages().stream().map(Image::getId).toList();
 		List<Long> newImagesIds = dto.images() != null ? dto.images() : List.of();
-		if (!Objects.equals(currentImageIds, newImagesIds))
+		if (!new HashSet<>(currentImageIds).equals(new HashSet<>(newImagesIds)))
 			return true;
 
 		return (!Objects.equals(
@@ -134,29 +151,15 @@ public class PostService {
 
 	public void checkImagesOwnership(List<Image> images, User user, Post post) {
 		for (Image img : images) {
-			if (post == null) {
-				validateOwnership(img, user);
-			} else {
-				validateOwnership(img, post, user);
-			}
-		}
-	}
-
-	private void validateOwnership(Image img, User user) {
-		if (img.getOwner().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
-			throw new AccessDeniedException("You can only add your own images to the post");
-		}
-		if (img.getPost() != null) {
-			throw new IllegalArgumentException(
-					"Image with id " + img.getId() + " is already associated with another post");
+			validateOwnership(img, post, user);
 		}
 	}
 
 	private void validateOwnership(Image img, Post post, User user) {
 		if (img.getOwner().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
-			throw new AccessDeniedException("You can only add your own images to the post");
+			throw new AccessDeniedException("You can only manage your own images");
 		}
-		if (img.getPost() != null && img.getPost().getId() != post.getId()) {
+		if (img.getPost() != null && (post == null || img.getPost().getId() != post.getId())) {
 			throw new IllegalArgumentException(
 					"Image with id " + img.getId() + " is already associated with another post");
 		}
@@ -198,8 +201,7 @@ public class PostService {
 
 	@Transactional
 	public void deletePost(Long id, User user) {
-		Post post = postRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
+		Post post = findById(id);
 		if (post.getAuthor().getId() != user.getId() && !user.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only delete your own posts");
 		}
@@ -210,8 +212,7 @@ public class PostService {
 
 	@Transactional
 	public PostDTO toggleLike(Long postId, User user) {
-		Post post = postRepository.findById(postId)
-				.orElseThrow(() -> new EntityNotFoundException(POST_NOT_FOUND));
+		Post post = findById(postId);
 
 		boolean hasLiked = user.getLikedPosts().contains(post);
 		if (hasLiked) {

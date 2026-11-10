@@ -30,8 +30,6 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/v1/posts")
 public class PostRestController {
 
-	private static final String USER_NOT_FOUND = "User not found";
-
 	private final PostService postService;
 	private final UserService userService;
 
@@ -42,7 +40,14 @@ public class PostRestController {
 
 	private User getCurrentUser(Principal principal) {
 		return userService.findByUsername(principal.getName())
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+				.orElseThrow(() -> new EntityNotFoundException("User not found"));
+	}
+
+	private User getCurrentUserOrNull(Principal principal) {
+		if (principal == null) {
+			return null;
+		}
+		return userService.findByUsername(principal.getName()).orElse(null);
 	}
 
 	@GetMapping
@@ -53,20 +58,14 @@ public class PostRestController {
 			@PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
 			Principal principal) {
 
-		User user = null;
-		if (principal != null) {
-			user = userService.findByUsername(principal.getName()).orElse(null);
-		}
+		User user = getCurrentUserOrNull(principal);
 		Page<PostDTO> page = postService.searchAndFilterPosts(title, authorUsername, topic, pageable, user);
 		return ResponseEntity.ok(page);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<PostDTO> getPostById(@PathVariable long id, Principal principal) {
-		User user = null;
-		if (principal != null) {
-			user = userService.findByUsername(principal.getName()).orElse(null);
-		}
+		User user = getCurrentUserOrNull(principal);
 		return ResponseEntity.ok(postService.getPost(id, user));
 	}
 

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,10 +17,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.backend.model.Image;
+import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.service.ImageService;
@@ -148,6 +151,53 @@ class ImageServiceUnitTest {
 
 		// THEN
 		assertArrayEquals(invalidData, result);
+	}
+
+	@Test
+	@DisplayName("getImage should throw when width is not positive")
+	void getImageInvalidWidthTest() {
+		// GIVEN
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			imageService.getImage(1L, 0, 100, 80);
+		});
+	}
+
+	@Test
+	@DisplayName("getImage should throw when height exceeds max dimension")
+	void getImageInvalidHeightTest() {
+		// GIVEN
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			imageService.getImage(1L, 100, 2001, 80);
+		});
+	}
+
+	@Test
+	@DisplayName("getImage should return original image when no JPEG writer is available")
+	void getImageNoJpegWriterTest() throws Exception {
+		// GIVEN
+		BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "png", baos);
+		byte[] data = baos.toByteArray();
+		image.setImageData(data);
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		try (MockedStatic<ImageIO> imageIO = mockStatic(ImageIO.class, CALLS_REAL_METHODS)) {
+			imageIO.when(() -> ImageIO.getImageWritersByFormatName("JPEG")).thenReturn(Collections.emptyIterator());
+
+			// WHEN
+			byte[] result = imageService.getImage(1L, 100, 100, 80);
+
+			// THEN
+			assertArrayEquals(data, result);
+		}
 	}
 
 	// ------------------- getImageById -------------------
@@ -308,6 +358,21 @@ class ImageServiceUnitTest {
 		});
 	}
 
+	@Test
+	@DisplayName("uploadImage should throw when content type is null")
+	void uploadImageNullContentTypeTest() {
+		// GIVEN
+		MultipartFile file = mock(MultipartFile.class);
+
+		when(file.isEmpty()).thenReturn(false);
+		when(file.getContentType()).thenReturn(null);
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			imageService.uploadImage(file, user);
+		});
+	}
+
 	// ------------------- deleteImage -------------------
 
 	@Test
@@ -320,7 +385,7 @@ class ImageServiceUnitTest {
 		imageService.deleteImage(1L, user);
 
 		// THEN
-		verify(imageRepository).deleteById(1L);
+		verify(imageRepository).delete(image);
 	}
 
 	@Test
@@ -337,7 +402,7 @@ class ImageServiceUnitTest {
 		imageService.deleteImage(1L, admin);
 
 		// THEN
-		verify(imageRepository).deleteById(1L);
+		verify(imageRepository).delete(image);
 	}
 
 	@Test
@@ -366,5 +431,70 @@ class ImageServiceUnitTest {
 		assertThrows(EntityNotFoundException.class, () -> {
 			imageService.deleteImage(1L, user);
 		});
+	}
+
+	@Test
+	@DisplayName("deleteImage should delete when owner has an id greater than 127")
+	void deleteImageOwnerLargeIdTest() {
+		// GIVEN
+		user.setId(1000L);
+		User sameUser = new User();
+		sameUser.setId(1000L);
+		sameUser.setRoles(List.of("USER"));
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN
+		imageService.deleteImage(1L, sameUser);
+
+		// THEN
+		verify(imageRepository).delete(image);
+	}
+
+	@Test
+	@DisplayName("deleteImage should throw when image is associated with a post")
+	void deleteImageWithPostTest() {
+		// GIVEN
+		image.setPost(new Post());
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			imageService.deleteImage(1L, user);
+		});
+		verify(imageRepository, never()).delete(any(Image.class));
+	}
+
+	@Test
+	@DisplayName("deleteImage should throw when image is the owner's avatar")
+	void deleteImageAvatarTest() {
+		// GIVEN
+		user.setAvatar(image);
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			imageService.deleteImage(1L, user);
+		});
+		verify(imageRepository, never()).delete(any(Image.class));
+	}
+
+	@Test
+	@DisplayName("deleteImage should delete when owner has a different avatar")
+	void deleteImageDifferentAvatarTest() {
+		// GIVEN
+		Image avatar = new Image();
+		avatar.setId(2L);
+		user.setAvatar(avatar);
+
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+
+		// WHEN
+		imageService.deleteImage(1L, user);
+
+		// THEN
+		verify(imageRepository).delete(image);
 	}
 }

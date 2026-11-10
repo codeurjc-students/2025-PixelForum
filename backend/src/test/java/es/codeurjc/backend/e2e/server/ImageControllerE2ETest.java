@@ -53,6 +53,20 @@ class ImageControllerE2ETest {
 		authToken = loginResponse.getCookie("AuthToken");
 	}
 
+	private Long uploadTestImage(String token) throws IOException {
+		byte[] bytes;
+		try (InputStream is = getClass().getResourceAsStream("/test.png")) {
+			bytes = is.readAllBytes();
+		}
+		return given()
+				.cookie("AuthToken", token)
+				.multiPart("files", "test.png", bytes, "image/png")
+				.post()
+				.then()
+				.statusCode(200)
+				.extract().jsonPath().getLong("[0]");
+	}
+
 	// ------------------- UPLOAD -------------------
 
 	@Test
@@ -120,6 +134,55 @@ class ImageControllerE2ETest {
 				.get("/99999")
 				.then()
 				.statusCode(404);
+	}
+
+	@Test
+	@DisplayName("Get image resized by width only should return JPEG")
+	void getImageResizeWidthSystemTest() throws IOException {
+		// GIVEN
+		Long imageId = uploadTestImage(authToken);
+
+		// WHEN & THEN
+		given()
+				.queryParam("w", 50)
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(200)
+				.contentType(containsString("image/jpeg"))
+				.header("Cache-Control", containsString("max-age=31536000"));
+	}
+
+	@Test
+	@DisplayName("Get image resized by height only and custom quality should return JPEG")
+	void getImageResizeHeightSystemTest() throws IOException {
+		// GIVEN
+		Long imageId = uploadTestImage(authToken);
+
+		// WHEN & THEN
+		given()
+				.queryParam("h", 50)
+				.queryParam("q", 60)
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(200)
+				.contentType(containsString("image/jpeg"));
+	}
+
+	@Test
+	@DisplayName("Get image with invalid dimensions should return 400")
+	void getImageInvalidDimensionSystemTest() throws IOException {
+		// GIVEN
+		Long imageId = uploadTestImage(authToken);
+
+		// WHEN & THEN
+		given()
+				.queryParam("w", 0)
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(400);
 	}
 
 	// ------------------- DELETE -------------------

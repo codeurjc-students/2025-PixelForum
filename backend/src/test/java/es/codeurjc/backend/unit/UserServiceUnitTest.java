@@ -1107,6 +1107,30 @@ class UserServiceUnitTest {
 		});
 	}
 
+	@Test
+	@DisplayName("deleteUser should remove the user from the likes of posts and comments")
+	void deleteUserRemovesGivenLikesTest() {
+		// GIVEN
+		post.setUsersThatLiked(new HashSet<>(List.of(user)));
+		comment.setUsersThatLiked(new HashSet<>(List.of(user)));
+		user.setLikedPosts(new HashSet<>(List.of(post)));
+		user.setLikedComments(new HashSet<>(List.of(comment)));
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(postRepository.findByAuthor(user)).thenReturn(List.of());
+		when(commentRepository.findByAuthor(user)).thenReturn(List.of());
+
+		// WHEN
+		userService.deleteUser(1L, user);
+
+		// THEN
+		assertTrue(post.getUsersThatLiked().isEmpty());
+		assertTrue(comment.getUsersThatLiked().isEmpty());
+		assertTrue(user.getLikedPosts().isEmpty());
+		assertTrue(user.getLikedComments().isEmpty());
+		assertEquals(0, post.getLikes());
+	}
+
 	// =============== setProfileImage ===============
 
 	@Test
@@ -1209,7 +1233,7 @@ class UserServiceUnitTest {
 	}
 
 	@Test
-	@DisplayName("setProfileImage should delete image and return null when content type not allowed")
+	@DisplayName("setProfileImage should delete image and throw IllegalArgumentException when content type not allowed")
 	void setProfileImageInvalidTypeTest() {
 		// GIVEN
 		image.setContentType("image/gif");
@@ -1218,11 +1242,10 @@ class UserServiceUnitTest {
 		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
 
-		// WHEN
-		UserDTO result = userService.setProfileImage(1L, 1L, user);
-
-		// THEN
-		assertNull(result);
+		// WHEN & THEN
+		assertThrows(IllegalArgumentException.class, () -> {
+			userService.setProfileImage(1L, 1L, user);
+		});
 		verify(imageRepository).delete(image);
 		verify(userRepository, never()).save(any());
 	}
@@ -1259,6 +1282,29 @@ class UserServiceUnitTest {
 		assertThrows(EntityNotFoundException.class, () -> {
 			userService.setProfileImage(1L, 999L, user);
 		});
+	}
+
+	@Test
+	@DisplayName("setProfileImage should return user untouched when image is already the avatar")
+	void setProfileImageAlreadyAvatarTest() {
+		// GIVEN
+		image.setPost(null);
+		user.setAvatar(image);
+		UserDTO userDTO = new UserDTO(1L, "testuser", "test@example.com", FIXED_TIME, "Bio", null, List.of(),
+				List.of("USER"));
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(imageRepository.findById(1L)).thenReturn(Optional.of(image));
+		when(userMapper.toDTO(user)).thenReturn(userDTO);
+
+		// WHEN
+		UserDTO result = userService.setProfileImage(1L, 1L, user);
+
+		// THEN
+		assertEquals(userDTO, result);
+		assertEquals(image, user.getAvatar());
+		verify(imageRepository, never()).delete(any());
+		verify(userRepository, never()).save(any());
 	}
 
 	// =============== removeProfileImage ===============
