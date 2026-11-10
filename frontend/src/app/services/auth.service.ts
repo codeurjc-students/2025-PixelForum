@@ -42,7 +42,8 @@ export class AuthService {
 
 	logout() {
 		return this.http.post(
-			this.baseUrl + 'logout', {}
+			this.baseUrl + 'logout', {},
+			{ headers: { 'skip-error': 'true' } }
 		).pipe(
 			tap(() => this.userSubject.next(null)),
 			catchError(() => {

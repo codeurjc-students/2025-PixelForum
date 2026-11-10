@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
-import {
-	HttpEvent,
-	HttpHandler,
-	HttpInterceptor,
-	HttpRequest,
-	HttpErrorResponse
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse } from '@angular/common/http';
+import { catchError, Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ErrorService } from '../services/error.service';
@@ -31,7 +24,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 				// Use backend response directly
 				const status = error.status;
 				if (status === 401) {
-					this.authService.logout();
+					this.authService.logout().subscribe();
 					this.router.navigate(['/login']);
 					return throwError(() => error);
 				}
