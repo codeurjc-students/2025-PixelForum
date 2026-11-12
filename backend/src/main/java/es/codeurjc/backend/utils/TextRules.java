@@ -6,15 +6,16 @@ import java.util.regex.Pattern;
 
 public final class TextRules {
 
+	private static final String INVALID_MAIL = "Please enter a valid email";
 	private static final Pattern CRLF = Pattern.compile("\\r\\n?");
 	private static final Pattern INLINE_SPACES = Pattern.compile("[^\\S\\n]+");
 	private static final Pattern SPACES_AROUND_NEWLINE = Pattern.compile(" *\\n *");
 	private static final Pattern EXTRA_NEWLINES = Pattern.compile("\\n{3,}");
 	private static final Pattern ANY_WHITESPACE = Pattern.compile("\\s+");
 	private static final Pattern USERNAME = Pattern.compile("^[a-zA-Z0-9_.-]{3,20}$");
-	private static final Pattern EMAIL = Pattern.compile(
-			"^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*"
-					+ "@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
+	private static final Pattern DOT = Pattern.compile("\\.");
+	private static final Pattern LOCAL_SEGMENT = Pattern.compile("[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+");
+	private static final Pattern DOMAIN_LABEL = Pattern.compile("[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?");
 
 	private TextRules() {
 	}
@@ -70,10 +71,29 @@ public final class TextRules {
 	}
 
 	public static String email(String value) {
-		if (value.length() > 254 || !EMAIL.matcher(value).matches()) {
-			throw new IllegalArgumentException("Please enter a valid email");
+		if (value == null || value.length() > 254) {
+			throw new IllegalArgumentException(INVALID_MAIL);
+		}
+		int at = value.lastIndexOf('@');
+		if (at < 1 || at > 64 || at == value.length() - 1) {
+			throw new IllegalArgumentException(INVALID_MAIL);
+		}
+		String local = value.substring(0, at);
+		String domain = value.substring(at + 1);
+
+		if (!allSegmentsMatch(local, LOCAL_SEGMENT) || !allSegmentsMatch(domain, DOMAIN_LABEL)) {
+			throw new IllegalArgumentException(INVALID_MAIL);
 		}
 		return value.toLowerCase(Locale.ROOT);
+	}
+
+	private static boolean allSegmentsMatch(String value, Pattern segmentPattern) {
+		for (String segment : DOT.split(value, -1)) {
+			if (!segmentPattern.matcher(segment).matches()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static String password(String value) {

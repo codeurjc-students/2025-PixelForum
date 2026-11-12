@@ -71,7 +71,7 @@ class ImageServiceIntegrationTest {
 		Image image = imageService.saveImage("data".getBytes(), "file.png", "image/png", user);
 
 		// THEN
-		assertNotNull(image.getId());
+		assertTrue(image.getId() > 0);
 		assertEquals("file.png", image.getFilename());
 		assertEquals("image/png", image.getContentType());
 		assertEquals(user.getId(), image.getOwner().getId());

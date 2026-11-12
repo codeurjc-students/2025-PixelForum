@@ -976,9 +976,6 @@ ul.nav-tabs {
       "type" : "integer",
       "format" : "int32"
     },
-    "sort" : {
-      "$ref" : "#/components/schemas/SortObject"
-    },
     "numberOfElements" : {
       "type" : "integer",
       "format" : "int32"
@@ -991,6 +988,9 @@ ul.nav-tabs {
     },
     "pageable" : {
       "$ref" : "#/components/schemas/PageableObject"
+    },
+    "sort" : {
+      "$ref" : "#/components/schemas/SortObject"
     },
     "empty" : {
       "type" : "boolean"
@@ -1021,9 +1021,6 @@ ul.nav-tabs {
       "type" : "integer",
       "format" : "int32"
     },
-    "sort" : {
-      "$ref" : "#/components/schemas/SortObject"
-    },
     "numberOfElements" : {
       "type" : "integer",
       "format" : "int32"
@@ -1036,6 +1033,9 @@ ul.nav-tabs {
     },
     "pageable" : {
       "$ref" : "#/components/schemas/PageableObject"
+    },
+    "sort" : {
+      "$ref" : "#/components/schemas/SortObject"
     },
     "empty" : {
       "type" : "boolean"
@@ -1066,9 +1066,6 @@ ul.nav-tabs {
       "type" : "integer",
       "format" : "int32"
     },
-    "sort" : {
-      "$ref" : "#/components/schemas/SortObject"
-    },
     "numberOfElements" : {
       "type" : "integer",
       "format" : "int32"
@@ -1081,6 +1078,9 @@ ul.nav-tabs {
     },
     "pageable" : {
       "$ref" : "#/components/schemas/PageableObject"
+    },
+    "sort" : {
+      "$ref" : "#/components/schemas/SortObject"
     },
     "empty" : {
       "type" : "boolean"
@@ -1113,12 +1113,6 @@ ul.nav-tabs {
       "type" : "integer",
       "format" : "int64"
     },
-    "sort" : {
-      "$ref" : "#/components/schemas/SortObject"
-    },
-    "unpaged" : {
-      "type" : "boolean"
-    },
     "paged" : {
       "type" : "boolean"
     },
@@ -1129,6 +1123,12 @@ ul.nav-tabs {
     "pageSize" : {
       "type" : "integer",
       "format" : "int32"
+    },
+    "sort" : {
+      "$ref" : "#/components/schemas/SortObject"
+    },
+    "unpaged" : {
+      "type" : "boolean"
     }
   }
 };
@@ -1183,10 +1183,10 @@ ul.nav-tabs {
     "empty" : {
       "type" : "boolean"
     },
-    "unsorted" : {
+    "sorted" : {
       "type" : "boolean"
     },
-    "sorted" : {
+    "unsorted" : {
       "type" : "boolean"
     }
   }

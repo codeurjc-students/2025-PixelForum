@@ -22,132 +22,134 @@ import jakarta.persistence.Table;
 @Table(name = &quot;users&quot;)
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    @Column(unique = true, nullable = false)
-    private String username;
+	@Column(unique = true, nullable = false)
+	private String username;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+	@Column(unique = true, nullable = false)
+	private String email;
 
-    @Column(nullable = false)
-    private String password;
+	@Column(nullable = false)
+	private String password;
 
-    private LocalDateTime createdAt;
-    private String bio;
+	private LocalDateTime createdAt;
 
-    @OneToOne
-    @JoinColumn(name = &quot;profile_image_id&quot;)
-    private Image avatar;
+	@Column(length = 300)
+	private String bio;
 
-<span class="fc" id="L45">    @ManyToMany</span>
-    @JoinTable(name = &quot;user_liked_posts&quot;, joinColumns = @JoinColumn(name = &quot;user_id&quot;), inverseJoinColumns = @JoinColumn(name = &quot;post_id&quot;))
-    private Set&lt;Post&gt; likedPosts = new HashSet&lt;&gt;();
+	@OneToOne
+	@JoinColumn(name = &quot;profile_image_id&quot;)
+	private Image avatar;
 
-<span class="fc" id="L49">    @ManyToMany</span>
-    @JoinTable(name = &quot;user_liked_comments&quot;, joinColumns = @JoinColumn(name = &quot;user_id&quot;), inverseJoinColumns = @JoinColumn(name = &quot;comment_id&quot;))
-    private Set&lt;Comment&gt; likedComments = new HashSet&lt;&gt;();
+<span class="fc" id="L47">	@ManyToMany</span>
+	@JoinTable(name = &quot;user_liked_posts&quot;, joinColumns = @JoinColumn(name = &quot;user_id&quot;), inverseJoinColumns = @JoinColumn(name = &quot;post_id&quot;))
+	private Set&lt;Post&gt; likedPosts = new HashSet&lt;&gt;();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List&lt;String&gt; roles;
+<span class="fc" id="L51">	@ManyToMany</span>
+	@JoinTable(name = &quot;user_liked_comments&quot;, joinColumns = @JoinColumn(name = &quot;user_id&quot;), inverseJoinColumns = @JoinColumn(name = &quot;comment_id&quot;))
+	private Set&lt;Comment&gt; likedComments = new HashSet&lt;&gt;();
 
-<span class="fc" id="L56">    public User() {</span>
-<span class="fc" id="L57">    }</span>
+	@ElementCollection(fetch = FetchType.EAGER)
+	private List&lt;String&gt; roles;
 
-<span class="fc" id="L59">    public User(String username, String email, String password, LocalDateTime createdAt, String bio, String... roles) {</span>
-<span class="fc" id="L60">        this.username = username;</span>
-<span class="fc" id="L61">        this.email = email;</span>
-<span class="fc" id="L62">        this.password = password;</span>
-<span class="fc" id="L63">        this.createdAt = createdAt;</span>
-<span class="fc" id="L64">        this.bio = bio;</span>
-<span class="fc" id="L65">        likedPosts = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L66">        likedComments = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L67">        this.roles = List.of(roles);</span>
-<span class="fc" id="L68">    }</span>
+<span class="fc" id="L58">	public User() {</span>
+<span class="fc" id="L59">	}</span>
 
-    // Getters
-    public long getId() {
-<span class="fc" id="L72">        return id;</span>
-    }
+<span class="fc" id="L61">	public User(String username, String email, String password, LocalDateTime createdAt, String bio, String... roles) {</span>
+<span class="fc" id="L62">		this.username = username;</span>
+<span class="fc" id="L63">		this.email = email;</span>
+<span class="fc" id="L64">		this.password = password;</span>
+<span class="fc" id="L65">		this.createdAt = createdAt;</span>
+<span class="fc" id="L66">		this.bio = bio;</span>
+<span class="fc" id="L67">		likedPosts = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L68">		likedComments = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L69">		this.roles = List.of(roles);</span>
+<span class="fc" id="L70">	}</span>
 
-    public String getUsername() {
-<span class="fc" id="L76">        return this.username;</span>
-    }
+	// Getters
+	public long getId() {
+<span class="fc" id="L74">		return id;</span>
+	}
 
-    public String getEmail() {
-<span class="fc" id="L80">        return this.email;</span>
-    }
+	public String getUsername() {
+<span class="fc" id="L78">		return this.username;</span>
+	}
 
-    public String getPassword() {
-<span class="fc" id="L84">        return this.password;</span>
-    }
+	public String getEmail() {
+<span class="fc" id="L82">		return this.email;</span>
+	}
 
-    public LocalDateTime getCreatedAt() {
-<span class="fc" id="L88">        return createdAt;</span>
-    }
+	public String getPassword() {
+<span class="fc" id="L86">		return this.password;</span>
+	}
 
-    public String getBio() {
-<span class="fc" id="L92">        return bio;</span>
-    }
+	public LocalDateTime getCreatedAt() {
+<span class="fc" id="L90">		return createdAt;</span>
+	}
 
-    public Image getAvatar() {
-<span class="fc" id="L96">        return avatar;</span>
-    }
+	public String getBio() {
+<span class="fc" id="L94">		return bio;</span>
+	}
 
-    public Set&lt;Post&gt; getLikedPosts() {
-<span class="fc" id="L100">        return likedPosts;</span>
-    }
+	public Image getAvatar() {
+<span class="fc" id="L98">		return avatar;</span>
+	}
 
-    public Set&lt;Comment&gt; getLikedComments() {
-<span class="fc" id="L104">        return likedComments;</span>
-    }
+	public Set&lt;Post&gt; getLikedPosts() {
+<span class="fc" id="L102">		return likedPosts;</span>
+	}
 
-    public List&lt;String&gt; getRoles() {
-<span class="fc" id="L108">        return roles;</span>
-    }
+	public Set&lt;Comment&gt; getLikedComments() {
+<span class="fc" id="L106">		return likedComments;</span>
+	}
 
-    // Setters
-    public void setId(long id) {
-<span class="fc" id="L113">        this.id = id;</span>
-<span class="fc" id="L114">    }</span>
+	public List&lt;String&gt; getRoles() {
+<span class="fc" id="L110">		return roles;</span>
+	}
 
-    public void setUsername(String username) {
-<span class="fc" id="L117">        this.username = username;</span>
-<span class="fc" id="L118">    }</span>
+	// Setters
+	public void setId(long id) {
+<span class="fc" id="L115">		this.id = id;</span>
+<span class="fc" id="L116">	}</span>
 
-    public void setEmail(String email) {
-<span class="fc" id="L121">        this.email = email;</span>
-<span class="fc" id="L122">    }</span>
+	public void setUsername(String username) {
+<span class="fc" id="L119">		this.username = username;</span>
+<span class="fc" id="L120">	}</span>
 
-    public void setPassword(String password) {
-<span class="fc" id="L125">        this.password = password;</span>
-<span class="fc" id="L126">    }</span>
+	public void setEmail(String email) {
+<span class="fc" id="L123">		this.email = email;</span>
+<span class="fc" id="L124">	}</span>
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-<span class="fc" id="L129">        this.createdAt = createdAt;</span>
-<span class="fc" id="L130">    }</span>
+	public void setPassword(String password) {
+<span class="fc" id="L127">		this.password = password;</span>
+<span class="fc" id="L128">	}</span>
 
-    public void setBio(String bio) {
-<span class="fc" id="L133">        this.bio = bio;</span>
-<span class="fc" id="L134">    }</span>
+	public void setCreatedAt(LocalDateTime createdAt) {
+<span class="fc" id="L131">		this.createdAt = createdAt;</span>
+<span class="fc" id="L132">	}</span>
 
-    public void setAvatar(Image avatar) {
-<span class="fc" id="L137">        this.avatar = avatar;</span>
-<span class="fc" id="L138">    }</span>
+	public void setBio(String bio) {
+<span class="fc" id="L135">		this.bio = bio;</span>
+<span class="fc" id="L136">	}</span>
 
-    public void setLikedPosts(Set&lt;Post&gt; likedPosts) {
-<span class="fc" id="L141">        this.likedPosts = likedPosts;</span>
-<span class="fc" id="L142">    }</span>
+	public void setAvatar(Image avatar) {
+<span class="fc" id="L139">		this.avatar = avatar;</span>
+<span class="fc" id="L140">	}</span>
 
-    public void setLikedComments(Set&lt;Comment&gt; likedComments) {
-<span class="fc" id="L145">        this.likedComments = likedComments;</span>
-<span class="fc" id="L146">    }</span>
+	public void setLikedPosts(Set&lt;Post&gt; likedPosts) {
+<span class="fc" id="L143">		this.likedPosts = likedPosts;</span>
+<span class="fc" id="L144">	}</span>
 
-    public void setRoles(List&lt;String&gt; roles) {
-<span class="fc" id="L149">        this.roles = roles;</span>
-<span class="fc" id="L150">    }</span>
+	public void setLikedComments(Set&lt;Comment&gt; likedComments) {
+<span class="fc" id="L147">		this.likedComments = likedComments;</span>
+<span class="fc" id="L148">	}</span>
+
+	public void setRoles(List&lt;String&gt; roles) {
+<span class="fc" id="L151">		this.roles = roles;</span>
+<span class="fc" id="L152">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

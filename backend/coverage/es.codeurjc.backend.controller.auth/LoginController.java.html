@@ -24,36 +24,36 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping(&quot;/api/v1/auth&quot;)
 public class LoginController {
 
-    private final UserLoginService userLoginService;
-    private final UserService userService;
+	private final UserLoginService userLoginService;
+	private final UserService userService;
 
-<span class="fc" id="L30">    public LoginController(UserLoginService userLoginService, UserService userService) {</span>
-<span class="fc" id="L31">        this.userLoginService = userLoginService;</span>
-<span class="fc" id="L32">        this.userService = userService;</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L30">	public LoginController(UserLoginService userLoginService, UserService userService) {</span>
+<span class="fc" id="L31">		this.userLoginService = userLoginService;</span>
+<span class="fc" id="L32">		this.userService = userService;</span>
+<span class="fc" id="L33">	}</span>
 
-    @PostMapping(&quot;/login&quot;)
-    public ResponseEntity&lt;AuthResponse&gt; login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-<span class="fc" id="L37">        return userLoginService.login(response, loginRequest);</span>
-    }
+	@PostMapping(&quot;/login&quot;)
+	public ResponseEntity&lt;AuthResponse&gt; login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+<span class="fc" id="L37">		return userLoginService.login(response, loginRequest);</span>
+	}
 
-    @PostMapping(&quot;/refresh&quot;)
-    public ResponseEntity&lt;AuthResponse&gt; refreshToken(
-            @CookieValue(name = &quot;RefreshToken&quot;, required = false) String refreshToken, HttpServletResponse response) {
-<span class="fc" id="L43">        return userLoginService.refresh(response, refreshToken);</span>
-    }
+	@PostMapping(&quot;/refresh&quot;)
+	public ResponseEntity&lt;AuthResponse&gt; refreshToken(
+			@CookieValue(name = &quot;RefreshToken&quot;, required = false) String refreshToken, HttpServletResponse response) {
+<span class="fc" id="L43">		return userLoginService.refresh(response, refreshToken);</span>
+	}
 
-    @PostMapping(&quot;/logout&quot;)
-    public ResponseEntity&lt;AuthResponse&gt; logout(HttpServletResponse response) {
-<span class="fc" id="L48">        return ResponseEntity.ok(new AuthResponse(Status.SUCCESS, userLoginService.logout(response)));</span>
-    }
+	@PostMapping(&quot;/logout&quot;)
+	public ResponseEntity&lt;AuthResponse&gt; logout(HttpServletResponse response) {
+<span class="fc" id="L48">		return ResponseEntity.ok(new AuthResponse(Status.SUCCESS, userLoginService.logout(response)));</span>
+	}
 
-    @GetMapping(&quot;/me&quot;)
-    public UserDTO me(Principal principal) {
-<span class="fc" id="L53">        User currentUser = userService.findByUsername(principal.getName())</span>
-<span class="pc" id="L54">                .orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
-<span class="fc" id="L55">        return userService.getUserDetails(currentUser.getId(), currentUser);</span>
-    }
+	@GetMapping(&quot;/me&quot;)
+	public UserDTO me(Principal principal) {
+<span class="fc" id="L53">		User currentUser = userService.findByUsername(principal.getName())</span>
+<span class="fc" id="L54">				.orElseThrow(() -&gt; new EntityNotFoundException(&quot;User not found&quot;));</span>
+<span class="fc" id="L55">		return userService.getUserDetails(currentUser.getId(), currentUser);</span>
+	}
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

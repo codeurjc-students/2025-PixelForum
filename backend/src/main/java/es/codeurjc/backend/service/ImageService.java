@@ -59,7 +59,7 @@ public class ImageService {
 		if (isInvalidDimension(width) || isInvalidDimension(height)) {
 			throw new IllegalArgumentException("Dimensions must be between 1 and " + MAX_DIMENSION);
 		}
-		int safeQuality = Math.max(1, Math.min(100, quality));
+		int safeQuality = Math.clamp(quality, 1, 100);
 
 		try {
 			return resizeImage(image.getImageData(), width, height, safeQuality);

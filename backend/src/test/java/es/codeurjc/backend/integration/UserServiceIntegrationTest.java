@@ -264,15 +264,17 @@ class UserServiceIntegrationTest {
 	@Test
 	@DisplayName("Should throw IllegalArgumentException when creating a user with invalid data")
 	void createUserInvalidDataTest() {
+		// GIVEN
+		CreateUserDTO invalidUsername = new CreateUserDTO("john doe", "john@example.com", "password123", null);
+		CreateUserDTO invalidEmail = new CreateUserDTO("johndoe", "not-an-email", "password123", null);
+		CreateUserDTO invalidPassword = new CreateUserDTO("johndoe", "john@example.com", "short", null);
+		CreateUserDTO invalidBio = new CreateUserDTO("johndoe", "john@example.com", "password123", "a".repeat(301));
+
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class,
-				() -> userService.createUser(new CreateUserDTO("john doe", "john@example.com", "password123", null)));
-		assertThrows(IllegalArgumentException.class,
-				() -> userService.createUser(new CreateUserDTO("johndoe", "not-an-email", "password123", null)));
-		assertThrows(IllegalArgumentException.class,
-				() -> userService.createUser(new CreateUserDTO("johndoe", "john@example.com", "short", null)));
-		assertThrows(IllegalArgumentException.class, () -> userService
-				.createUser(new CreateUserDTO("johndoe", "john@example.com", "password123", "a".repeat(301))));
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(invalidUsername));
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(invalidEmail));
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(invalidPassword));
+		assertThrows(IllegalArgumentException.class, () -> userService.createUser(invalidBio));
 	}
 
 	// =============== updateUser ===============
@@ -694,8 +696,9 @@ class UserServiceIntegrationTest {
 		Image image = imageService.saveImage("data".getBytes(), "image.gif", "image/gif", user);
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class,
-				() -> userService.setProfileImage(user.getId(), image.getId(), user));
+		Long userId = user.getId();
+		Long imageId = image.getId();
+		assertThrows(IllegalArgumentException.class, () -> userService.setProfileImage(userId, imageId, user));
 	}
 
 	@Test

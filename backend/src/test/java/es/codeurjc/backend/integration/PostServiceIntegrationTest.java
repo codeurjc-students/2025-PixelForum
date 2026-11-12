@@ -215,8 +215,8 @@ class PostServiceIntegrationTest {
 		Topic topic = topicService.findAll().get(0);
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class,
-				() -> postService.createPost(buildDTO("   ", "Content", topic), user));
+		PostDTO dto = buildDTO("   ", "Content", topic);
+		assertThrows(IllegalArgumentException.class, () -> postService.createPost(dto, user));
 	}
 
 	@Test
@@ -227,8 +227,8 @@ class PostServiceIntegrationTest {
 		Topic topic = topicService.findAll().get(0);
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class,
-				() -> postService.createPost(buildDTO("a".repeat(301), "Content", topic), user));
+		PostDTO dto = buildDTO("a".repeat(301), "Content", topic);
+		assertThrows(IllegalArgumentException.class, () -> postService.createPost(dto, user));
 	}
 
 	@Test
@@ -239,8 +239,8 @@ class PostServiceIntegrationTest {
 		Topic topic = topicService.findAll().get(0);
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class,
-				() -> postService.createPost(buildDTO("Title", "a".repeat(5001), topic), user));
+		PostDTO dto = buildDTO("Title", "a".repeat(5001), topic);
+		assertThrows(IllegalArgumentException.class, () -> postService.createPost(dto, user));
 	}
 
 	@Test
@@ -299,8 +299,9 @@ class PostServiceIntegrationTest {
 	@DisplayName("Should throw AccessDeniedException when updating post as non-author")
 	void updatePostAccessDeniedTest() {
 		// GIVEN
-		Post post = postService.findAll().get(0);
 		User nonAuthor = userService.findByUsername("robert").orElseThrow();
+		Post post = postService.findAll().stream().filter(p -> p.getAuthor().getId() != nonAuthor.getId()).findFirst()
+				.orElseThrow();
 
 		PostDTO dto = new PostDTO(
 				null,
@@ -469,8 +470,8 @@ class PostServiceIntegrationTest {
 		Long id = created.id();
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class,
-				() -> postService.updatePost(id, buildDTO("a".repeat(301), "Content", topic), user));
+		PostDTO dto = buildDTO("a".repeat(301), "Content", topic);
+		assertThrows(IllegalArgumentException.class, () -> postService.updatePost(id, dto, user));
 		assertEquals("Original", postService.getPost(id, user).title());
 	}
 
@@ -500,8 +501,9 @@ class PostServiceIntegrationTest {
 	@DisplayName("Should throw AccessDeniedException when non-author deletes post")
 	void deletePostAccessDeniedTest() {
 		// GIVEN
-		Post post = postService.findAll().get(0);
 		User nonAuthor = userService.findByUsername("robert").orElseThrow();
+		Post post = postService.findAll().stream().filter(p -> p.getAuthor().getId() != nonAuthor.getId()).findFirst()
+				.orElseThrow();
 
 		// WHEN & THEN
 		long postId = post.getId();

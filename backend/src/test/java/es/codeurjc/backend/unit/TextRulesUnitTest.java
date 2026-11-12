@@ -93,7 +93,8 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("multiline should throw when exceeding the maximum length")
 	void multilineTooLongTest() {
-		assertThrows(IllegalArgumentException.class, () -> multiline("a".repeat(MAX_LENGTH + 1)));
+		String tooLong = "a".repeat(MAX_LENGTH + 1);
+		assertThrows(IllegalArgumentException.class, () -> multiline(tooLong));
 	}
 
 	@Test
@@ -105,7 +106,8 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("multiline should throw when exceeding the maximum number of lines")
 	void multilineTooManyLinesTest() {
-		assertThrows(IllegalArgumentException.class, () -> multiline("a\n".repeat(MAX_LINES) + "a"));
+		String tooManyLines = "a\n".repeat(MAX_LINES) + "a";
+		assertThrows(IllegalArgumentException.class, () -> multiline(tooManyLines));
 	}
 
 	@Test
@@ -152,7 +154,8 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("singleLine should throw when exceeding the maximum length")
 	void singleLineTooLongTest() {
-		assertThrows(IllegalArgumentException.class, () -> TextRules.singleLine("Title", "a".repeat(101), 100));
+		String tooLong = "a".repeat(101);
+		assertThrows(IllegalArgumentException.class, () -> TextRules.singleLine("Title", tooLong, 100));
 	}
 
 	// =============== optionalMultiline ===============
@@ -174,10 +177,10 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("optionalMultiline should throw when a non-blank value exceeds the limits")
 	void optionalMultilineLimitsTest() {
-		assertThrows(IllegalArgumentException.class,
-				() -> TextRules.optionalMultiline("Bio", "a".repeat(301), 300, 5));
-		assertThrows(IllegalArgumentException.class,
-				() -> TextRules.optionalMultiline("Bio", "a\n".repeat(5) + "a", 300, 5));
+		String tooLong = "a".repeat(301);
+		String tooManyLines = "a\n".repeat(5) + "a";
+		assertThrows(IllegalArgumentException.class, () -> TextRules.optionalMultiline("Bio", tooLong, 300, 5));
+		assertThrows(IllegalArgumentException.class, () -> TextRules.optionalMultiline("Bio", tooManyLines, 300, 5));
 	}
 
 	// =============== username ===============
@@ -198,8 +201,9 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("username should throw when shorter than 3 or longer than 20 characters")
 	void usernameLengthTest() {
+		String tooLong = "a".repeat(21);
 		assertThrows(IllegalArgumentException.class, () -> TextRules.username("ab"));
-		assertThrows(IllegalArgumentException.class, () -> TextRules.username("a".repeat(21)));
+		assertThrows(IllegalArgumentException.class, () -> TextRules.username(tooLong));
 	}
 
 	@Test
@@ -249,7 +253,7 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("email should throw when null or empty")
 	void emailNullTest() {
-		assertThrows(NullPointerException.class, () -> TextRules.email(null));
+		assertThrows(IllegalArgumentException.class, () -> TextRules.email(null));
 		assertThrows(IllegalArgumentException.class, () -> TextRules.email(""));
 	}
 
@@ -267,7 +271,8 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("email should throw when the local part exceeds 64 characters")
 	void emailLocalPartTooLongTest() {
-		assertThrows(IllegalArgumentException.class, () -> TextRules.email("a".repeat(65) + "@mail.com"));
+		String tooLongLocal = "a".repeat(65);
+		assertThrows(IllegalArgumentException.class, () -> TextRules.email(tooLongLocal + "@mail.com"));
 	}
 
 	// =============== password ===============
@@ -282,8 +287,10 @@ class TextRulesUnitTest {
 	@Test
 	@DisplayName("password should throw when shorter than 8 or longer than 64 characters")
 	void passwordLengthTest() {
-		assertThrows(IllegalArgumentException.class, () -> TextRules.password("a".repeat(7)));
-		assertThrows(IllegalArgumentException.class, () -> TextRules.password("a".repeat(65)));
+		String tooShort = "a".repeat(7);
+		String tooLong = "a".repeat(65);
+		assertThrows(IllegalArgumentException.class, () -> TextRules.password(tooShort));
+		assertThrows(IllegalArgumentException.class, () -> TextRules.password(tooLong));
 	}
 
 	@Test
@@ -296,7 +303,8 @@ class TextRulesUnitTest {
 	@DisplayName("password should throw when it exceeds 72 bytes even if under 64 characters")
 	void passwordBytesTest() {
 		// 25 emojis = 50 chars (UTF-16), 100 bytes
-		assertThrows(IllegalArgumentException.class, () -> TextRules.password("😀".repeat(25)));
+		String tooManyBytes = "😀".repeat(25);
+		assertThrows(IllegalArgumentException.class, () -> TextRules.password(tooManyBytes));
 	}
 
 	@Test

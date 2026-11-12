@@ -12,49 +12,48 @@ import jakarta.persistence.OneToMany;
 @Entity
 public class Topic {
 
-    @Id
+	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-    @Column (unique = true)
-    private String name;
-    private String description;
+	@Column(unique = true)
+	private String name;
+	private String description;
 
-    @OneToMany(mappedBy = &quot;topic&quot;)
+	@OneToMany(mappedBy = &quot;topic&quot;)
 	private List&lt;Post&gt; posts;
 
-    
-<span class="fc" id="L27">    public Topic() {</span>
-<span class="fc" id="L28">    }</span>
+<span class="fc" id="L26">	public Topic() {</span>
+<span class="fc" id="L27">	}</span>
 
-<span class="fc" id="L30">    public Topic(String name, String description) {</span>
-<span class="fc" id="L31">        this.name = name;</span>
-<span class="fc" id="L32">        this.description = description;</span>
-<span class="fc" id="L33">    }</span>
+<span class="nc" id="L29">	public Topic(String name, String description) {</span>
+<span class="nc" id="L30">		this.name = name;</span>
+<span class="nc" id="L31">		this.description = description;</span>
+<span class="nc" id="L32">	}</span>
 
-    public long getId() {
-<span class="fc" id="L36">        return id;</span>
-    }
+	public long getId() {
+<span class="fc" id="L35">		return id;</span>
+	}
 
-    public void setId(long id) {
-<span class="fc" id="L40">        this.id = id;</span>
-<span class="fc" id="L41">    }</span>
+	public void setId(long id) {
+<span class="fc" id="L39">		this.id = id;</span>
+<span class="fc" id="L40">	}</span>
 
-    public String getName() {
-<span class="fc" id="L44">        return name;</span>
-    }
+	public String getName() {
+<span class="fc" id="L43">		return name;</span>
+	}
 
-    public void setName(String name) {
-<span class="fc" id="L48">        this.name = name;</span>
-<span class="fc" id="L49">    }</span>
+	public void setName(String name) {
+<span class="fc" id="L47">		this.name = name;</span>
+<span class="fc" id="L48">	}</span>
 
-    public String getDescription() {
-<span class="fc" id="L52">        return description;</span>
-    }
+	public String getDescription() {
+<span class="fc" id="L51">		return description;</span>
+	}
 
-    public void setDescription(String description) {
-<span class="fc" id="L56">        this.description = description;</span>
-<span class="fc" id="L57">    }</span>
+	public void setDescription(String description) {
+<span class="fc" id="L55">		this.description = description;</span>
+<span class="fc" id="L56">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

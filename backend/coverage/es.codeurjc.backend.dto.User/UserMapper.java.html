@@ -11,14 +11,15 @@ import es.codeurjc.backend.model.User;
 @Mapper(componentModel = &quot;spring&quot;)
 public interface UserMapper {
 
-    UserDTO toDTO(User user);
+	UserDTO toDTO(User user);
+
 	BasicUserDTO toBasicDTO(User user);
 
-    List&lt;UserDTO&gt; toDTOs(Collection&lt;User&gt; users);
+	List&lt;UserDTO&gt; toDTOs(Collection&lt;User&gt; users);
 
-    @Mapping(target = &quot;password&quot;, ignore = true)
-    @Mapping(target = &quot;likedComments&quot;, ignore = true)
-    User toDomain(UserDTO userDTO);
+	@Mapping(target = &quot;password&quot;, ignore = true)
+	@Mapping(target = &quot;likedComments&quot;, ignore = true)
+	User toDomain(UserDTO userDTO);
 
 	@Mapping(target = &quot;id&quot;, ignore = true)
 	@Mapping(target = &quot;createdAt&quot;, ignore = true)
@@ -28,30 +29,32 @@ public interface UserMapper {
 	@Mapping(target = &quot;roles&quot;, ignore = true)
 	User toDomain(CreateUserDTO userDTO);
 
-    // Image -&gt; Long
+	// Image -&gt; Long
 	default Long mapImage(Image image) {
-<span class="fc bfc" id="L33" title="All 2 branches covered.">		return image != null ? image.getId() : null;</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">		return image != null ? image.getId() : null;</span>
 	}
 
 	// Long -&gt; Image
 	default Image mapImage(Long id) {
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">		if (id == null) return null;</span>
-<span class="fc" id="L39">		Image image = new Image();</span>
-<span class="fc" id="L40">		image.setId(id);</span>
-<span class="fc" id="L41">		return image;</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">		if (id == null)</span>
+<span class="nc" id="L40">			return null;</span>
+<span class="fc" id="L41">		Image image = new Image();</span>
+<span class="fc" id="L42">		image.setId(id);</span>
+<span class="fc" id="L43">		return image;</span>
 	}
 
 	// Post -&gt; Long
 	default Long mapPost(Post post) {
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">		return post != null ? post.getId() : null;</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">		return post != null ? post.getId() : null;</span>
 	}
 
 	// Long -&gt; Post
 	default Post mapPost(Long id) {
-<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (id == null) return null;</span>
-<span class="nc" id="L52">		Post post = new Post();</span>
-<span class="nc" id="L53">		post.setId(id);</span>
-<span class="nc" id="L54">		return post;</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		if (id == null)</span>
+<span class="nc" id="L54">			return null;</span>
+<span class="nc" id="L55">		Post post = new Post();</span>
+<span class="nc" id="L56">		post.setId(id);</span>
+<span class="nc" id="L57">		return post;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

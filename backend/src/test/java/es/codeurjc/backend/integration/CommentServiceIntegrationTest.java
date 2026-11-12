@@ -111,7 +111,8 @@ class CommentServiceIntegrationTest {
 		CommentDTO dto = buildCommentDTO("a".repeat(2001));
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(post.getId(), dto, user));
+		Long postId = post.getId();
+		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(postId, dto, user));
 	}
 
 	@Test
@@ -121,7 +122,8 @@ class CommentServiceIntegrationTest {
 		CommentDTO dto = buildCommentDTO("a\n".repeat(30) + "a");
 
 		// WHEN & THEN
-		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(post.getId(), dto, user));
+		Long postId = post.getId();
+		assertThrows(IllegalArgumentException.class, () -> commentService.createComment(postId, dto, user));
 	}
 
 	@Test

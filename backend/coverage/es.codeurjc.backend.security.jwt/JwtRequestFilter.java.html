@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-	
+
 <span class="fc" id="L22">	private static final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);</span>
 
 	private final UserDetailsService userDetailsService;
@@ -31,22 +31,24 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 <span class="fc" id="L31">	}</span>
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
 		try {
-<span class="fc" id="L37">			var claims = jwtTokenProvider.validateToken(request, true);</span>
-<span class="fc" id="L38">			var userDetails = userDetailsService.loadUserByUsername(claims.getSubject());</span>
+<span class="fc" id="L38">			var claims = jwtTokenProvider.validateToken(request, true);</span>
+<span class="fc" id="L39">			var userDetails = userDetailsService.loadUserByUsername(claims.getSubject());</span>
 
-<span class="fc" id="L40">			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());</span>
-				
-<span class="fc" id="L42">			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
-<span class="fc" id="L43">			SecurityContextHolder.getContext().setAuthentication(authentication);</span>
-<span class="fc" id="L44">		} catch (Exception ex) {</span>
-<span class="fc" id="L45">			log.debug(&quot;Exception processing JWT Token: &quot;, ex);</span>
-<span class="fc" id="L46">		}</span>
+<span class="fc" id="L41">			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,</span>
+<span class="fc" id="L42">					null, userDetails.getAuthorities());</span>
 
-<span class="fc" id="L48">		filterChain.doFilter(request, response);</span>
-<span class="fc" id="L49">	}</span>
-    
+<span class="fc" id="L44">			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+<span class="fc" id="L45">			SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="fc" id="L46">		} catch (Exception ex) {</span>
+<span class="fc" id="L47">			log.debug(&quot;Exception processing JWT Token: &quot;, ex);</span>
+<span class="fc" id="L48">		}</span>
+
+<span class="fc" id="L50">		filterChain.doFilter(request, response);</span>
+<span class="fc" id="L51">	}</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,112 +16,114 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Comment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	@Column(length = 2000)
+	private String content;
 
-    @ManyToOne
-    @JoinColumn(name = &quot;user_id&quot;)
-    private User author;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = &quot;post_id&quot;)
-    private Post post;
+	@ManyToOne
+	@JoinColumn(name = &quot;user_id&quot;)
+	private User author;
 
-    @ManyToOne
-    @JoinColumn(name = &quot;parent_comment_id&quot;)
-    private Comment parentComment;
+	@ManyToOne
+	@JoinColumn(name = &quot;post_id&quot;)
+	private Post post;
 
-    private int likes;
+	@ManyToOne
+	@JoinColumn(name = &quot;parent_comment_id&quot;)
+	private Comment parentComment;
 
-<span class="fc" id="L40">    @ManyToMany(mappedBy = &quot;likedComments&quot;)</span>
-    private Set&lt;User&gt; usersThatLiked = new HashSet&lt;&gt;();
+	private int likes;
 
-<span class="fc" id="L43">    public Comment() {</span>
-<span class="fc" id="L44">    }</span>
+<span class="fc" id="L43">	@ManyToMany(mappedBy = &quot;likedComments&quot;)</span>
+	private Set&lt;User&gt; usersThatLiked = new HashSet&lt;&gt;();
 
-<span class="fc" id="L46">    public Comment(String content, LocalDateTime createdAt, User author, Post post) {</span>
-<span class="fc" id="L47">        this.content = content;</span>
-<span class="fc" id="L48">        this.createdAt = createdAt;</span>
-<span class="fc" id="L49">        this.author = author;</span>
-<span class="fc" id="L50">        this.post = post;</span>
-<span class="fc" id="L51">    }</span>
+<span class="fc" id="L46">	public Comment() {</span>
+<span class="fc" id="L47">	}</span>
 
-    public long getId() {
-<span class="fc" id="L54">        return id;</span>
-    }
+<span class="fc" id="L49">	public Comment(String content, LocalDateTime createdAt, User author, Post post) {</span>
+<span class="fc" id="L50">		this.content = content;</span>
+<span class="fc" id="L51">		this.createdAt = createdAt;</span>
+<span class="fc" id="L52">		this.author = author;</span>
+<span class="fc" id="L53">		this.post = post;</span>
+<span class="fc" id="L54">	}</span>
 
-    public void setId(long id) {
-<span class="fc" id="L58">        this.id = id;</span>
-<span class="fc" id="L59">    }</span>
+	public long getId() {
+<span class="fc" id="L57">		return id;</span>
+	}
 
-    public String getContent() {
-<span class="fc" id="L62">        return content;</span>
-    }
+	public void setId(long id) {
+<span class="fc" id="L61">		this.id = id;</span>
+<span class="fc" id="L62">	}</span>
 
-    public void setContent(String content) {
-<span class="fc" id="L66">        this.content = content;</span>
-<span class="fc" id="L67">    }</span>
+	public String getContent() {
+<span class="fc" id="L65">		return content;</span>
+	}
 
-    public LocalDateTime getCreatedAt() {
-<span class="fc" id="L70">        return createdAt;</span>
-    }
+	public void setContent(String content) {
+<span class="fc" id="L69">		this.content = content;</span>
+<span class="fc" id="L70">	}</span>
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-<span class="fc" id="L74">        this.createdAt = createdAt;</span>
-<span class="fc" id="L75">    }</span>
+	public LocalDateTime getCreatedAt() {
+<span class="fc" id="L73">		return createdAt;</span>
+	}
 
-    public LocalDateTime getUpdatedAt() {
-<span class="fc" id="L78">        return updatedAt;</span>
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+<span class="fc" id="L77">		this.createdAt = createdAt;</span>
+<span class="fc" id="L78">	}</span>
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-<span class="fc" id="L82">        this.updatedAt = updatedAt;</span>
-<span class="fc" id="L83">    }</span>
+	public LocalDateTime getUpdatedAt() {
+<span class="fc" id="L81">		return updatedAt;</span>
+	}
 
-    public User getAuthor() {
-<span class="fc" id="L86">        return author;</span>
-    }
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="fc" id="L85">		this.updatedAt = updatedAt;</span>
+<span class="fc" id="L86">	}</span>
 
-    public void setAuthor(User author) {
-<span class="fc" id="L90">        this.author = author;</span>
-<span class="fc" id="L91">    }</span>
+	public User getAuthor() {
+<span class="fc" id="L89">		return author;</span>
+	}
 
-    public Post getPost() {
-<span class="fc" id="L94">        return post;</span>
-    }
+	public void setAuthor(User author) {
+<span class="fc" id="L93">		this.author = author;</span>
+<span class="fc" id="L94">	}</span>
 
-    public void setPost(Post post) {
-<span class="fc" id="L98">        this.post = post;</span>
-<span class="fc" id="L99">    }</span>
+	public Post getPost() {
+<span class="fc" id="L97">		return post;</span>
+	}
 
-    public Comment getParentComment() {
-<span class="fc" id="L102">        return parentComment;</span>
-    }
+	public void setPost(Post post) {
+<span class="fc" id="L101">		this.post = post;</span>
+<span class="fc" id="L102">	}</span>
 
-    public void setParentComment(Comment parentComment) {
-<span class="fc" id="L106">        this.parentComment = parentComment;</span>
-<span class="fc" id="L107">    }</span>
+	public Comment getParentComment() {
+<span class="fc" id="L105">		return parentComment;</span>
+	}
 
-    public int getLikes() {
-<span class="fc" id="L110">        return likes;</span>
-    }
+	public void setParentComment(Comment parentComment) {
+<span class="nc" id="L109">		this.parentComment = parentComment;</span>
+<span class="nc" id="L110">	}</span>
 
-    public void setLikes(int likes) {
-<span class="fc" id="L114">        this.likes = likes;</span>
-<span class="fc" id="L115">    }</span>
+	public int getLikes() {
+<span class="fc" id="L113">		return likes;</span>
+	}
 
-    public Set&lt;User&gt; getUsersThatLiked() {
-<span class="fc" id="L118">        return usersThatLiked;</span>
-    }
+	public void setLikes(int likes) {
+<span class="fc" id="L117">		this.likes = likes;</span>
+<span class="fc" id="L118">	}</span>
 
-    public void setUsersThatLiked(Set&lt;User&gt; usersThatLiked) {
-<span class="fc" id="L122">        this.usersThatLiked = usersThatLiked;</span>
-<span class="fc" id="L123">    }</span>
+	public Set&lt;User&gt; getUsersThatLiked() {
+<span class="fc" id="L121">		return usersThatLiked;</span>
+	}
+
+	public void setUsersThatLiked(Set&lt;User&gt; usersThatLiked) {
+<span class="fc" id="L125">		this.usersThatLiked = usersThatLiked;</span>
+<span class="fc" id="L126">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -22,7 +22,7 @@ public class TopicService {
 <span class="fc" id="L22">		this.mapper = mapper;</span>
 <span class="fc" id="L23">		this.topicRepository = topicRepository;</span>
 <span class="fc" id="L24">	}</span>
-	
+
 	public Optional&lt;Topic&gt; findById(long id) {
 <span class="nc" id="L27">		return topicRepository.findById(id);</span>
 	}
@@ -35,30 +35,30 @@ public class TopicService {
 <span class="fc" id="L35">		return topicRepository.findAll();</span>
 	}
 
-	public Topic save(Topic topic){
+	public Topic save(Topic topic) {
 <span class="fc" id="L39">		return topicRepository.save(topic);</span>
 	}
 
-    @Transactional 
-    public void deleteById(Long id) {
-<span class="nc" id="L44">        Optional&lt;Topic&gt; topicOptional = topicRepository.findById(id);</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (topicOptional.isPresent()) {</span>
-<span class="nc" id="L46">            Topic topic = topicOptional.get();</span>
+	@Transactional
+	public void deleteById(Long id) {
+<span class="nc" id="L44">		Optional&lt;Topic&gt; topicOptional = topicRepository.findById(id);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		if (topicOptional.isPresent()) {</span>
+<span class="nc" id="L46">			Topic topic = topicOptional.get();</span>
 <span class="nc" id="L47">			topicRepository.delete(topic);</span>
-        }
-<span class="nc" id="L49">    }</span>
+		}
+<span class="nc" id="L49">	}</span>
 
-	private TopicDTO toDTO (Topic topic) {
-<span class="nc" id="L52">        return mapper.toDTO(topic);</span>
-    }
+	private TopicDTO toDTO(Topic topic) {
+<span class="nc" id="L52">		return mapper.toDTO(topic);</span>
+	}
 
-    private Topic toDomain (TopicDTO topicDTO) {
-<span class="nc" id="L56">        return mapper.toDomain(topicDTO);</span>
-    }
+	private Topic toDomain(TopicDTO topicDTO) {
+<span class="nc" id="L56">		return mapper.toDomain(topicDTO);</span>
+	}
 
-    private List&lt;TopicDTO&gt; toDTOs(Collection&lt;Topic&gt; topics){
-<span class="nc" id="L60">        return mapper.toDTOs(topics);</span>
-    }
+	private List&lt;TopicDTO&gt; toDTOs(Collection&lt;Topic&gt; topics) {
+<span class="nc" id="L60">		return mapper.toDTOs(topics);</span>
+	}
 
 	public Collection&lt;TopicDTO&gt; getTopics() {
 <span class="nc" id="L64">		return toDTOs(topicRepository.findAll());</span>
@@ -70,8 +70,8 @@ public class TopicService {
 
 	public TopicDTO createTopic(TopicDTO topicDTO) {
 <span class="nc" id="L72">		Topic topic = toDomain(topicDTO);</span>
-<span class="nc" id="L73"> 		this.save(topic);</span>
-<span class="nc" id="L74"> 		return toDTO(topic);</span>
+<span class="nc" id="L73">		this.save(topic);</span>
+<span class="nc" id="L74">		return toDTO(topic);</span>
 	}
 
 }

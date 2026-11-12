@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ErrorService } from '../error.service';
 import { AuthService } from '../auth.service';
 import { ErrorInterceptor } from '../../interceptors/error.interceptor';
+import { of } from 'rxjs';
 
 
 describe('ErrorService/Interceptor - Integration Tests', () => {
@@ -19,6 +20,7 @@ describe('ErrorService/Interceptor - Integration Tests', () => {
 	beforeEach(() => {
 		routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 		authServiceSpy = jasmine.createSpyObj('AuthService', ['logout']);
+		authServiceSpy.logout.and.returnValue(of(null));
 
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule],

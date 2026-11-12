@@ -323,7 +323,7 @@ class UserControllerE2ETest {
 	@DisplayName("Set profile image should succeed")
 	void setProfileImageSystemTest() {
 		// GIVEN: Upload an image first
-		byte[] imageData = new byte[] { 1, 2, 3, 4, 5 };
+		byte[] imageData = { 1, 2, 3, 4, 5 };
 
 		Response uploadResponse = given()
 				.cookie("AuthToken", authToken)
@@ -351,7 +351,7 @@ class UserControllerE2ETest {
 	@DisplayName("Set profile image with WebP should fail")
 	void setProfileImageWebPSystemTest() {
 		// GIVEN: upload a WebP image
-		byte[] webpData = new byte[] { 1, 2, 3, 4, 5 };
+		byte[] webpData = { 1, 2, 3, 4, 5 };
 
 		Response uploadResponse = given()
 				.cookie("AuthToken", authToken)
@@ -378,7 +378,7 @@ class UserControllerE2ETest {
 	@DisplayName("Remove profile image should succeed")
 	void removeProfileImageSystemTest() {
 		// GIVEN: Set an image first
-		byte[] imageData = new byte[] { 1, 2, 3, 4, 5 };
+		byte[] imageData = { 1, 2, 3, 4, 5 };
 
 		Response uploadResponse = given()
 				.cookie("AuthToken", authToken)

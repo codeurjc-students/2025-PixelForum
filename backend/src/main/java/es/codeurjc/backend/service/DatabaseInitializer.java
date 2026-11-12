@@ -4,10 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.codeurjc.backend.model.Comment;
 import es.codeurjc.backend.model.Image;
@@ -54,85 +62,93 @@ public class DatabaseInitializer {
 		userService.addUser(user3);
 		userService.addUser(user4);
 
-		addAvatar(user1, "/images/avatar.png");
+		addAvatar(user1, "/images/avatar1.png");
+		addAvatar(user2, "/images/avatar2.png");
+		addAvatar(user3, "/images/avatar3.jpg");
 
-		List<Topic> topics = List.of(
-				new Topic("GTA VI", "All news about Grand Theft Auto VI"),
-				new Topic("Cyberpunk", "All news about Cyberpunk"),
-				new Topic("The Witcher", "All news about The Witcher"),
-				new Topic("Stardew Valley", "All news about Stardew Valley"),
-				new Topic("Halo", "All news about Halo"),
-				new Topic("Call of duty", "All news about Call of duty"),
-				new Topic("Minecraft", "All news about Minecraft"),
-				new Topic("Cuphead", "All news about Cuphead"),
-				new Topic("This is a very long topic only for testing", "test"));
+		Map<String, Topic> topicsByName = loadTopics();
 
-		topics.forEach(topicService::save);
+		List<User> userList = List.of(user1, user2, user3, user4, admin);
+		Map<String, User> users = Map.of("martin", user1, "robert", user2, "daniel", user3, "alvaro", user4);
 
-		Post post1 = new Post("GTA VI Massive leak",
-				"A massive leak has revealed extensive details about Grand Theft Auto VI, including character information, gameplay mechanics, and storyline elements. The leak has sparked significant discussion among fans eagerly anticipating the game's release.",
-				LocalDateTime.of(2026, Month.FEBRUARY, 20, 18, 43), new ArrayList<>(), user1, topics.get(0));
-		postService.save(post1);
-		addImages(post1, List.of("/images/gta_poster.jpeg", "/images/gta_map.webp"), user1);
+		List<Comment> comments = new ArrayList<>();
+		List<Post> posts = loadSeedPosts(users, topicsByName, comments);
 
-		Post post2 = new Post("GTA VI official 2nd trailer",
-				"Rockstar Games has released the official second trailer for Grand Theft Auto VI, showcasing new gameplay footage, story elements, and features of the highly anticipated game.",
-				LocalDateTime.of(2026, Month.FEBRUARY, 18, 19, 15), null, user2, topics.get(0));
-		postService.save(post2);
+		Post leak = posts.get(posts.size() - 1);
 
-		Post post3 = new Post("GTA VI release date rumors",
-				"Rumors are swirling about the potential release date for Grand Theft Auto VI, with speculation pointing towards a launch in late 2024 or early 2025. Fans are eagerly awaiting official confirmation from Rockstar Games.",
-				LocalDateTime.of(2026, Month.JANUARY, 12, 15, 04), null, user1, topics.get(0));
-		postService.save(post3);
+		for (int u = 0; u < userList.size(); u++) {
+			Set<Post> liked = new LinkedHashSet<>(pick(posts, u, u + 2));
+			liked.add(leak);
 
-		Post post4 = new Post("GTA VI map details",
-				"New details about the map of Grand Theft Auto VI have emerged, suggesting a vast and diverse open world that includes multiple cities and rural areas, offering players a rich and immersive gaming experience.",
-				LocalDateTime.of(2026, Month.FEBRUARY, 2, 8, 30), null, user1, topics.get(0));
-		postService.save(post4);
+			addCommentLikes(userList.get(u), pick(comments, u, u + 3));
+			addPostLikes(userList.get(u), new ArrayList<>(liked));
+		}
+	}
 
-		for (int i = 0; i < 20; i++) {
-			Post post = new Post();
-			post.setTitle("Example post " + i);
-			post.setContent(
-					"This is a test post to populate the database with sample data. It is only for testing purposes and does not contain any meaningful information.");
-			post.setTopic(topics.get(2));
-			post.setAuthor(user2);
-			post.setCreatedAt(LocalDateTime.of(2025, Month.DECEMBER, 22, 22, 02 + i));
-			post.setLikes(0);
+	private Map<String, Topic> loadTopics() throws IOException {
+		List<Topic> topics;
+		try (InputStream is = getClass().getResourceAsStream("/seed-topics.json")) {
+			topics = new ObjectMapper().readValue(is, new TypeReference<>() {
+			});
+		}
 
+		Map<String, Topic> byName = new LinkedHashMap<>();
+		topics.forEach(t -> {
+			topicService.save(t);
+			byName.put(t.getName(), t);
+		});
+		return byName;
+	}
+
+	private record SeedComment(String author, String text) {
+	}
+
+	private record SeedPost(String topic, String title, String content, String author, List<String> images,
+			List<SeedComment> comments) {
+	}
+
+	private List<Post> loadSeedPosts(Map<String, User> users, Map<String, Topic> topics, List<Comment> allComments)
+			throws IOException {
+
+		List<SeedPost> seed;
+		try (InputStream is = getClass().getResourceAsStream("/seed-data.json")) {
+			seed = new ObjectMapper().readValue(is, new TypeReference<>() {
+			});
+		}
+
+		LocalDateTime start = LocalDateTime.now(ZoneOffset.UTC).minusDays(seed.size());
+		List<Post> posts = new ArrayList<>();
+
+		for (int i = 0; i < seed.size(); i++) {
+			SeedPost p = seed.get(i);
+			LocalDateTime created = start.plusDays(i);
+			User author = users.get(p.author());
+
+			Post post = new Post(p.title(), p.content(), created, new ArrayList<>(), author, topics.get(p.topic()));
 			postService.save(post);
+			if (p.images() != null && !p.images().isEmpty()) {
+				addImages(post, p.images(), author);
+			}
+
+			int h = 1;
+			for (SeedComment c : p.comments()) {
+				Comment comment = new Comment(c.text(), created.plusMinutes(20L * h++), users.get(c.author()), post);
+				commentService.save(comment);
+				allComments.add(comment);
+			}
+			posts.add(post);
 		}
+		return posts;
+	}
 
-		Comment comment1 = new Comment("I can't wait to play GTA VI!",
-				LocalDateTime.of(2026, Month.FEBRUARY, 23, 10, 15), user2, post1);
-		commentService.save(comment1);
-		Comment comment2 = new Comment("Yeah, I'm excited too!", LocalDateTime.of(2026, Month.FEBRUARY, 23, 12, 30),
-				user1, post1);
-		commentService.save(comment2);
-		Comment comment3 = new Comment("I hope the release date rumors are true!",
-				LocalDateTime.of(2026, Month.FEBRUARY, 21, 19, 45), user3, post1);
-		commentService.save(comment3);
-		Comment comment4 = new Comment("The map details sound incredible!",
-				LocalDateTime.of(2026, Month.FEBRUARY, 3, 14, 20), user2, post4);
-		commentService.save(comment4);
-
-		for (int i = 0; i < 20; i++) {
-			Comment comment = new Comment("This is a test comment " + i,
-					LocalDateTime.of(2026, Month.FEBRUARY, 22, 10, 00 + i), user2, post1);
-			commentService.save(comment);
+	private <T> List<T> pick(List<T> items, int offset, int step) {
+		List<T> result = new ArrayList<>();
+		for (int i = 0; i < items.size(); i++) {
+			if ((i + offset) % step == 0) {
+				result.add(items.get(i));
+			}
 		}
-
-		addCommentLikes(user1, List.of(comment1, comment3, comment4));
-		addCommentLikes(user2, List.of(comment1, comment2, comment3, comment4));
-		addCommentLikes(user3, List.of(comment1, comment2, comment3));
-		addCommentLikes(user4, List.of(comment1, comment2, comment3, comment4));
-		addCommentLikes(admin, List.of(comment1));
-
-		addPostLikes(user1, List.of(post1, post2, post3, post4));
-		addPostLikes(user2, List.of(post1, post2, post3, post4));
-		addPostLikes(user3, List.of(post1, post2, post4));
-		addPostLikes(user4, List.of(post1, post2, post3, post4));
-		addPostLikes(admin, List.of(post1));
+		return result;
 	}
 
 	private Image uploadImage(String route, User user) throws IOException {
