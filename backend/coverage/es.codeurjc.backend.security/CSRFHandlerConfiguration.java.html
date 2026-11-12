@@ -22,15 +22,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 <span class="fc" id="L22">class CSRFHandlerInterceptor implements HandlerInterceptor {</span>
 
 	@Override
-	public void postHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler, final ModelAndView modelAndView) throws Exception {
+	public void postHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler,
+			final ModelAndView modelAndView) throws Exception {
 
-<span class="pc bpc" id="L27" title="1 of 2 branches missed.">		if (modelAndView != null) {</span>
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">		if (modelAndView != null) {</span>
 
-<span class="nc" id="L29">			CsrfToken token = (CsrfToken) request.getAttribute(&quot;_csrf&quot;);</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">			if (token != null) {</span>
-<span class="nc" id="L31">				modelAndView.addObject(&quot;token&quot;, token.getToken());</span>
+<span class="nc" id="L30">			CsrfToken token = (CsrfToken) request.getAttribute(&quot;_csrf&quot;);</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">			if (token != null) {</span>
+<span class="nc" id="L32">				modelAndView.addObject(&quot;token&quot;, token.getToken());</span>
 			}
 		}
-<span class="fc" id="L34">	}</span>
+<span class="fc" id="L35">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

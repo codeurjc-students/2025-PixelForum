@@ -26,169 +26,232 @@ import java.util.Map;
 @ActiveProfiles("test")
 class ImageControllerE2ETest {
 
-    @LocalServerPort
-    private int port;
+	@LocalServerPort
+	private int port;
 
-    private String authToken;
+	private String authToken;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.basePath = "/api/v1/images";
+	@BeforeEach
+	void setUp() {
+		RestAssured.port = port;
+		RestAssured.baseURI = "http://localhost";
+		RestAssured.basePath = "/api/v1/images";
 
-        // LOGIN
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("username", "martin");
-        loginData.put("password", "user");
+		// LOGIN
+		Map<String, String> loginData = new HashMap<>();
+		loginData.put("username", "martin");
+		loginData.put("password", "user");
 
-        Response loginResponse = given()
-                .contentType(ContentType.JSON)
-                .body(loginData)
-                .post("http://localhost:" + port + "/api/v1/auth/login")
-                .then()
-                .statusCode(200)
-                .extract().response();
+		Response loginResponse = given()
+				.contentType(ContentType.JSON)
+				.body(loginData)
+				.post("http://localhost:" + port + "/api/v1/auth/login")
+				.then()
+				.statusCode(200)
+				.extract().response();
 
-        authToken = loginResponse.getCookie("AuthToken");
-    }
+		authToken = loginResponse.getCookie("AuthToken");
+	}
 
-    // ------------------- UPLOAD -------------------
+	private Long uploadTestImage(String token) throws IOException {
+		byte[] bytes;
+		try (InputStream is = getClass().getResourceAsStream("/test.png")) {
+			bytes = is.readAllBytes();
+		}
+		return given()
+				.cookie("AuthToken", token)
+				.multiPart("files", "test.png", bytes, "image/png")
+				.post()
+				.then()
+				.statusCode(200)
+				.extract().jsonPath().getLong("[0]");
+	}
 
-    @Test
-    @DisplayName("Upload image should succeed")
-    void uploadImageSystemTest() throws IOException {
-        InputStream is = getClass().getResourceAsStream("/test.png");
-        byte[] bytes = is.readAllBytes();
+	// ------------------- UPLOAD -------------------
 
-        given()
-                .cookie("AuthToken", authToken)
-                .contentType("multipart/form-data")
-                .multiPart("files", "test.png", bytes, "image/png")
-                .when()
-                .post()
-                .then()
-                .statusCode(200)
-                .body("size()", greaterThan(0));
-    }
+	@Test
+	@DisplayName("Upload image should succeed")
+	void uploadImageSystemTest() throws IOException {
+		InputStream is = getClass().getResourceAsStream("/test.png");
+		byte[] bytes = is.readAllBytes();
 
-    @Test
-    @DisplayName("Upload empty files should fail")
-    void uploadEmptySystemTest() {
-        byte[] empty = new byte[0];
-        given()
-                .cookie("AuthToken", authToken)
-                .multiPart("files", "empty.png", empty, "image/png")
-                .when()
-                .post()
-                .then()
-                .statusCode(400);
-    }
+		given()
+				.cookie("AuthToken", authToken)
+				.contentType("multipart/form-data")
+				.multiPart("files", "test.png", bytes, "image/png")
+				.when()
+				.post()
+				.then()
+				.statusCode(200)
+				.body("size()", greaterThan(0));
+	}
 
-    // ------------------- GET -------------------
+	@Test
+	@DisplayName("Upload empty files should fail")
+	void uploadEmptySystemTest() {
+		byte[] empty = new byte[0];
+		given()
+				.cookie("AuthToken", authToken)
+				.multiPart("files", "empty.png", empty, "image/png")
+				.when()
+				.post()
+				.then()
+				.statusCode(400);
+	}
 
-    @Test
-    @DisplayName("Get image should return binary data")
-    void getImageSystemTest() throws IOException {
-        // STEP 1: upload image
-        InputStream is = getClass().getResourceAsStream("/test.png");
-        byte[] bytes = is.readAllBytes();
+	// ------------------- GET -------------------
 
-        Response uploadResponse = given()
-                .cookie("AuthToken", authToken)
-                .multiPart("files", "test.png", bytes, "image/png")
-                .post();
+	@Test
+	@DisplayName("Get image should return binary data")
+	void getImageSystemTest() throws IOException {
+		// STEP 1: upload image
+		InputStream is = getClass().getResourceAsStream("/test.png");
+		byte[] bytes = is.readAllBytes();
 
-        Long imageId = uploadResponse.jsonPath().getLong("[0]");
+		Response uploadResponse = given()
+				.cookie("AuthToken", authToken)
+				.multiPart("files", "test.png", bytes, "image/png")
+				.post();
 
-        // STEP 2: get image
-        given()
-                .when()
-                .get("/" + imageId)
-                .then()
-                .statusCode(200)
-                .contentType(anyOf(
-                        containsString("image/png"),
-                        containsString("image/jpeg")));
-    }
+		Long imageId = uploadResponse.jsonPath().getLong("[0]");
 
-    @Test
-    @DisplayName("Get non-existing image should fail")
-    void getImageNotFoundSystemTest() {
-        given()
-                .when()
-                .get("/99999")
-                .then()
-                .statusCode(404);
-    }
+		// STEP 2: get image
+		given()
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(200)
+				.contentType(anyOf(
+						containsString("image/png"),
+						containsString("image/jpeg")));
+	}
 
-    // ------------------- DELETE -------------------
+	@Test
+	@DisplayName("Get non-existing image should fail")
+	void getImageNotFoundSystemTest() {
+		given()
+				.when()
+				.get("/99999")
+				.then()
+				.statusCode(404);
+	}
 
-    @Test
-    @DisplayName("Delete own image should succeed")
-    void deleteImageSystemTest() throws IOException {
-        // STEP 1: upload image
-        InputStream is = getClass().getResourceAsStream("/test.png");
-        byte[] bytes = is.readAllBytes();
+	@Test
+	@DisplayName("Get image resized by width only should return JPEG")
+	void getImageResizeWidthSystemTest() throws IOException {
+		// GIVEN
+		Long imageId = uploadTestImage(authToken);
 
-        Response uploadResponse = given()
-                .cookie("AuthToken", authToken)
-                .multiPart("files", "test.png", bytes, "image/png")
-                .post();
+		// WHEN & THEN
+		given()
+				.queryParam("w", 50)
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(200)
+				.contentType(containsString("image/jpeg"))
+				.header("Cache-Control", containsString("max-age=31536000"));
+	}
 
-        Long imageId = uploadResponse.jsonPath().getLong("[0]");
+	@Test
+	@DisplayName("Get image resized by height only and custom quality should return JPEG")
+	void getImageResizeHeightSystemTest() throws IOException {
+		// GIVEN
+		Long imageId = uploadTestImage(authToken);
 
-        // STEP 2: delete image
-        given()
-                .cookie("AuthToken", authToken)
-                .when()
-                .delete("/" + imageId)
-                .then()
-                .statusCode(204);
-    }
+		// WHEN & THEN
+		given()
+				.queryParam("h", 50)
+				.queryParam("q", 60)
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(200)
+				.contentType(containsString("image/jpeg"));
+	}
 
-    @Test
-    @DisplayName("Delete image of another user should fail")
-    void deleteImageOtherUserSystemTest() throws IOException {
-        // STEP 1: login as other user
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("username", "robert");
-        loginData.put("password", "user");
+	@Test
+	@DisplayName("Get image with invalid dimensions should return 400")
+	void getImageInvalidDimensionSystemTest() throws IOException {
+		// GIVEN
+		Long imageId = uploadTestImage(authToken);
 
-        Response loginResponse = given()
-                .contentType(ContentType.JSON)
-                .body(loginData)
-                .post("http://localhost:" + port + "/api/v1/auth/login");
+		// WHEN & THEN
+		given()
+				.queryParam("w", 0)
+				.when()
+				.get("/" + imageId)
+				.then()
+				.statusCode(400);
+	}
 
-        String otherToken = loginResponse.getCookie("AuthToken");
+	// ------------------- DELETE -------------------
 
-        // STEP 2: robert uploads image
-        InputStream is = getClass().getResourceAsStream("/test.png");
-        byte[] bytes = is.readAllBytes();
+	@Test
+	@DisplayName("Delete own image should succeed")
+	void deleteImageSystemTest() throws IOException {
+		// STEP 1: upload image
+		InputStream is = getClass().getResourceAsStream("/test.png");
+		byte[] bytes = is.readAllBytes();
 
-        Response uploadResponse = given()
-                .cookie("AuthToken", otherToken)
-                .multiPart("files", "test.png", bytes, "image/png")
-                .post();
+		Response uploadResponse = given()
+				.cookie("AuthToken", authToken)
+				.multiPart("files", "test.png", bytes, "image/png")
+				.post();
 
-        Long imageId = uploadResponse.jsonPath().getLong("[0]");
+		Long imageId = uploadResponse.jsonPath().getLong("[0]");
 
-        // STEP 3: martin tries to delete
-        given()
-                .cookie("AuthToken", authToken)
-                .when()
-                .delete("/" + imageId)
-                .then()
-                .statusCode(403);
-    }
+		// STEP 2: delete image
+		given()
+				.cookie("AuthToken", authToken)
+				.when()
+				.delete("/" + imageId)
+				.then()
+				.statusCode(204);
+	}
 
-    @Test
-    @DisplayName("Delete image without auth should fail")
-    void deleteImageWithoutAuthSystemTest() {
-        given()
-                .when()
-                .delete("/1")
-                .then()
-                .statusCode(401);
-    }
+	@Test
+	@DisplayName("Delete image of another user should fail")
+	void deleteImageOtherUserSystemTest() throws IOException {
+		// STEP 1: login as other user
+		Map<String, String> loginData = new HashMap<>();
+		loginData.put("username", "robert");
+		loginData.put("password", "user");
+
+		Response loginResponse = given()
+				.contentType(ContentType.JSON)
+				.body(loginData)
+				.post("http://localhost:" + port + "/api/v1/auth/login");
+
+		String otherToken = loginResponse.getCookie("AuthToken");
+
+		// STEP 2: robert uploads image
+		InputStream is = getClass().getResourceAsStream("/test.png");
+		byte[] bytes = is.readAllBytes();
+
+		Response uploadResponse = given()
+				.cookie("AuthToken", otherToken)
+				.multiPart("files", "test.png", bytes, "image/png")
+				.post();
+
+		Long imageId = uploadResponse.jsonPath().getLong("[0]");
+
+		// STEP 3: martin tries to delete
+		given()
+				.cookie("AuthToken", authToken)
+				.when()
+				.delete("/" + imageId)
+				.then()
+				.statusCode(403);
+	}
+
+	@Test
+	@DisplayName("Delete image without auth should fail")
+	void deleteImageWithoutAuthSystemTest() {
+		given()
+				.when()
+				.delete("/1")
+				.then()
+				.statusCode(401);
+	}
 }

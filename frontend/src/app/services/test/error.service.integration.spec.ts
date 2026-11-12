@@ -5,80 +5,80 @@ import { Router } from '@angular/router';
 import { ErrorService } from '../error.service';
 import { AuthService } from '../auth.service';
 import { ErrorInterceptor } from '../../interceptors/error.interceptor';
+import { of } from 'rxjs';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 
 describe('ErrorService/Interceptor - Integration Tests', () => {
 
-    let http: HttpClient;
-    let httpMock: HttpTestingController;
+	let http: HttpClient;
+	let httpMock: HttpTestingController;
 
-    let routerSpy: jasmine.SpyObj<Router>;
-    let authServiceSpy: jasmine.SpyObj<AuthService>;
-    let errorService: ErrorService;
+	let routerSpy: jasmine.SpyObj<Router>;
+	let authServiceSpy: jasmine.SpyObj<AuthService>;
+	let errorService: ErrorService;
 
-    beforeEach(() => {
-        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-        authServiceSpy = jasmine.createSpyObj('AuthService', ['logout']);
+	beforeEach(() => {
+		routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+		authServiceSpy = jasmine.createSpyObj('AuthService', ['logout']);
+		authServiceSpy.logout.and.returnValue(of(null));
 
-        TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-            providers: [
-                ErrorService,
-                { provide: Router, useValue: routerSpy },
-                { provide: AuthService, useValue: authServiceSpy },
-                {
-                    provide: HTTP_INTERCEPTORS,
-                    useClass: ErrorInterceptor,
-                    multi: true
-                }
-            ]
-        });
+		TestBed.configureTestingModule({
+			imports: [HttpClientTestingModule],
+			providers: [
+				ErrorService,
+				{ provide: Router, useValue: routerSpy },
+				{ provide: AuthService, useValue: authServiceSpy },
+				{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+				{ provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }
+			]
+		});
 
-        http = TestBed.inject(HttpClient);
-        httpMock = TestBed.inject(HttpTestingController);
-        errorService = TestBed.inject(ErrorService);
-    });
+		http = TestBed.inject(HttpClient);
+		httpMock = TestBed.inject(HttpTestingController);
+		errorService = TestBed.inject(ErrorService);
+	});
 
-    afterEach(() => {
-        httpMock.verify();
-    });
+	afterEach(() => {
+		httpMock.verify();
+	});
 
-    it('should handle 404 error and redirect to error page', () => {
-        http.get('/test').subscribe({ error: () => { } });
+	it('should handle 404 error and redirect to error page', () => {
+		http.get('/test').subscribe({ error: () => { } });
 
-        const req = httpMock.expectOne('/test');
+		const req = httpMock.expectOne('/test');
 
-        req.flush({ error: 'Page not found', message: 'Resource not found' }, { status: 404, statusText: 'Page not Found' });
+		req.flush({ error: 'Page not found', message: 'Resource not found' }, { status: 404, statusText: 'Page not Found' });
 
-        const error = errorService.getError();
+		const error = errorService.getError();
 
-        expect(error?.status).toBe(404);
-        expect(error?.errorName).toBe('Page not found');
-        expect(error?.message).toBe('Resource not found');
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/error']);
-    });
+		expect(error?.status).toBe(404);
+		expect(error?.errorName).toBe('Page not found');
+		expect(error?.message).toBe('Resource not found');
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/error']);
+	});
 
-    it('should logout and redirect on 401', () => {
-        http.get('/test').subscribe({ error: () => { } });
+	it('should logout and redirect on 401', () => {
+		http.get('/test').subscribe({ error: () => { } });
 
-        const req = httpMock.expectOne('/test');
+		const req = httpMock.expectOne('/test');
 
-        req.flush({}, { status: 401, statusText: 'Unauthorized' });
+		req.flush({}, { status: 401, statusText: 'Unauthorized' });
 
-        expect(authServiceSpy.logout).toHaveBeenCalled();
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
-    });
+		expect(authServiceSpy.logout).toHaveBeenCalled();
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+	});
 
-    it('should ignore requests with skip-error header', () => {
-        http.get('/me', { headers: { 'skip-error': 'true' } }).subscribe({ error: () => { } });
+	it('should ignore requests with skip-error header', () => {
+		http.get('/me', { headers: { 'skip-error': 'true' } }).subscribe({ error: () => { } });
 
-        const req = httpMock.expectOne('/me');
+		const req = httpMock.expectOne('/me');
 
-        req.flush({}, { status: 401, statusText: 'Unauthorized' });
+		req.flush({}, { status: 401, statusText: 'Unauthorized' });
 
-        expect(authServiceSpy.logout).not.toHaveBeenCalled();
-        expect(routerSpy.navigate).not.toHaveBeenCalled();
-        expect(errorService.getError()).toBeNull();
-    });
+		expect(authServiceSpy.logout).not.toHaveBeenCalled();
+		expect(routerSpy.navigate).not.toHaveBeenCalled();
+		expect(errorService.getError()).toBeNull();
+	});
 
 });

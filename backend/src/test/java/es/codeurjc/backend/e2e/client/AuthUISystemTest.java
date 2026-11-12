@@ -32,189 +32,189 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class AuthUISystemTest {
 
-    @LocalServerPort
-    int port;
+	@LocalServerPort
+	int port;
 
-    private WebDriver driver;
-    private WebDriverWait wait;
+	private WebDriver driver;
+	private WebDriverWait wait;
 
-    @BeforeEach
-    void setUp() {
-        port = 4200;
-        String browser = System.getenv("BROWSER");
-        if ("firefox".equalsIgnoreCase(browser)) {
-            FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("--headless");
-            options.setAcceptInsecureCerts(true);
-            driver = new FirefoxDriver(options);
-        } else if ("edge".equalsIgnoreCase(browser)) {
-            EdgeOptions options = new EdgeOptions();
-            options.addArguments("--headless");
-            options.setAcceptInsecureCerts(true);
-            driver = new EdgeDriver(options);
-        } else {
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--ignore-certificate-errors");
-            options.setAcceptInsecureCerts(true);
-            driver = new ChromeDriver(options);
-        }
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    }
+	@BeforeEach
+	void setUp() {
+		port = 4200;
+		String browser = System.getenv("BROWSER");
+		if ("firefox".equalsIgnoreCase(browser)) {
+			FirefoxOptions options = new FirefoxOptions();
+			options.addArguments("--headless");
+			options.setAcceptInsecureCerts(true);
+			driver = new FirefoxDriver(options);
+		} else if ("edge".equalsIgnoreCase(browser)) {
+			EdgeOptions options = new EdgeOptions();
+			options.addArguments("--headless");
+			options.setAcceptInsecureCerts(true);
+			driver = new EdgeDriver(options);
+		} else {
+			ChromeOptions options = new ChromeOptions();
+			options.addArguments("--headless");
+			options.addArguments("--ignore-certificate-errors");
+			options.setAcceptInsecureCerts(true);
+			driver = new ChromeDriver(options);
+		}
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
 
-    @AfterEach
-    void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
+	@AfterEach
+	void tearDown() {
+		if (driver != null) {
+			driver.quit();
+		}
+	}
 
-    @Test
-    @DisplayName("Complete login flow should work correctly")
-    void loginFlowSeleniumTest() {
-        // Navigate to login page
-        driver.get("https://localhost:" + port + "/login");
+	@Test
+	@DisplayName("Complete login flow should work correctly")
+	void loginFlowSeleniumTest() {
+		// Navigate to login page
+		driver.get("https://localhost:" + port + "/login");
 
-        // Wait for page load
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
+		// Wait for page load
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
 
-        // Fill login form
-        WebElement usernameInput = driver.findElement(By.id("username"));
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        WebElement loginButton = driver.findElement(By.id("login-button"));
+		// Fill login form
+		WebElement usernameInput = driver.findElement(By.id("username"));
+		WebElement passwordInput = driver.findElement(By.id("password"));
+		WebElement loginButton = driver.findElement(By.id("login-button"));
 
-        usernameInput.sendKeys("admin");
-        passwordInput.sendKeys("admin0");
-        loginButton.click();
+		usernameInput.sendKeys("admin");
+		passwordInput.sendKeys("admin0");
+		loginButton.click();
 
-        // Verify redirect to posts
-        wait.until(ExpectedConditions.urlContains("/posts"));
-        assertTrue(driver.getCurrentUrl().contains("/posts"));
+		// Verify redirect to posts
+		wait.until(ExpectedConditions.urlContains("/posts"));
+		assertTrue(driver.getCurrentUrl().contains("/posts"));
 
-        // Verify cookies exist
-        Cookie authToken = driver.manage().getCookieNamed("AuthToken");
-        Cookie refreshToken = driver.manage().getCookieNamed("RefreshToken");
+		// Verify cookies exist
+		Cookie authToken = driver.manage().getCookieNamed("AuthToken");
+		Cookie refreshToken = driver.manage().getCookieNamed("RefreshToken");
 
-        assertNotNull(authToken, "AuthToken cookie should exist");
-        assertNotNull(refreshToken, "RefreshToken cookie should exist");
-        assertTrue(authToken.isHttpOnly(), "AuthToken should be HttpOnly");
-        assertTrue(refreshToken.isHttpOnly(), "RefreshToken should be HttpOnly");
-    }
+		assertNotNull(authToken, "AuthToken cookie should exist");
+		assertNotNull(refreshToken, "RefreshToken cookie should exist");
+		assertTrue(authToken.isHttpOnly(), "AuthToken should be HttpOnly");
+		assertTrue(refreshToken.isHttpOnly(), "RefreshToken should be HttpOnly");
+	}
 
-    @Test
-    @DisplayName("Login with invalid credentials should show error and not set cookies")
-    void loginInvalidSeleniumTest() {
-        // Navigate to login
-        driver.get("https://localhost:" + port + "/login");
+	@Test
+	@DisplayName("Login with invalid credentials should show error and not set cookies")
+	void loginInvalidSeleniumTest() {
+		// Navigate to login
+		driver.get("https://localhost:" + port + "/login");
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
 
-        // Fill with invalid credentials
-        WebElement usernameInput = driver.findElement(By.id("username"));
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        WebElement loginButton = driver.findElement(By.id("login-button"));
+		// Fill with invalid credentials
+		WebElement usernameInput = driver.findElement(By.id("username"));
+		WebElement passwordInput = driver.findElement(By.id("password"));
+		WebElement loginButton = driver.findElement(By.id("login-button"));
 
-        usernameInput.sendKeys("invalid");
-        passwordInput.sendKeys("wrong");
-        loginButton.click();
+		usernameInput.sendKeys("invalid");
+		passwordInput.sendKeys("wrong");
+		loginButton.click();
 
-        // Verify error message appears
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.className("server-error")));
-        WebElement errorMessage = driver.findElement(By.className("server-error"));
-        assertTrue(errorMessage.isDisplayed());
+		// Verify error message appears
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.className("server-error")));
+		WebElement errorMessage = driver.findElement(By.className("server-error"));
+		assertTrue(errorMessage.isDisplayed());
 
-        // Verify no cookies
-        assertNull(driver.manage().getCookieNamed("AuthToken"));
-        assertNull(driver.manage().getCookieNamed("RefreshToken"));
-    }
+		// Verify no cookies
+		assertNull(driver.manage().getCookieNamed("AuthToken"));
+		assertNull(driver.manage().getCookieNamed("RefreshToken"));
+	}
 
-    @Test
-    @DisplayName("Access protected route without auth should redirect to login")
-    void accessProtectedWithoutAuthTest() {
-        // Try to access protected route directly
-        driver.get("https://localhost:" + port + "/create-post");
+	@Test
+	@DisplayName("Access protected route without auth should redirect to login")
+	void accessProtectedWithoutAuthTest() {
+		// Try to access protected route directly
+		driver.get("https://localhost:" + port + "/create-post");
 
-        // Verify redirect to login
-        wait.until(ExpectedConditions.urlContains("/login"));
-        assertTrue(driver.getCurrentUrl().contains("/login"));
-    }
+		// Verify redirect to login
+		wait.until(ExpectedConditions.urlContains("/login"));
+		assertTrue(driver.getCurrentUrl().contains("/login"));
+	}
 
-    @Test
-    @DisplayName("Access protected route with auth should work correctly")
-    void accessProtectedWithAuthTest() {
-        // Login first
-        driver.get("https://localhost:" + port + "/login");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
+	@Test
+	@DisplayName("Access protected route with auth should work correctly")
+	void accessProtectedWithAuthTest() {
+		// Login first
+		driver.get("https://localhost:" + port + "/login");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
 
-        driver.findElement(By.id("username")).sendKeys("admin");
-        driver.findElement(By.id("password")).sendKeys("admin0");
-        driver.findElement(By.id("login-button")).click();
+		driver.findElement(By.id("username")).sendKeys("admin");
+		driver.findElement(By.id("password")).sendKeys("admin0");
+		driver.findElement(By.id("login-button")).click();
 
-        wait.until(ExpectedConditions.urlContains("/posts"));
+		wait.until(ExpectedConditions.urlContains("/posts"));
 
-        // Navigate to protected route
-        driver.get("https://localhost:" + port + "/create-post");
+		// Navigate to protected route
+		driver.get("https://localhost:" + port + "/create-post");
 
-        // Should access profile page
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-create-post")));
-        assertTrue(driver.getCurrentUrl().contains("/create-post"));
+		// Should access profile page
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-create-post")));
+		assertTrue(driver.getCurrentUrl().contains("/create-post"));
 
-        // Verify content loaded
-        WebElement profileContent = driver.findElement(By.cssSelector("app-create-post"));
-        assertTrue(profileContent.isDisplayed());
-    }
+		// Verify content loaded
+		WebElement profileContent = driver.findElement(By.cssSelector("app-create-post"));
+		assertTrue(profileContent.isDisplayed());
+	}
 
-    @Test
-    @DisplayName("Logout should clear cookies")
-    void logoutSeleniumTest() {
-        // Login first
-        driver.get("https://localhost:" + port + "/login");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
+	@Test
+	@DisplayName("Logout should clear cookies")
+	void logoutSeleniumTest() {
+		// Login first
+		driver.get("https://localhost:" + port + "/login");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
 
-        driver.findElement(By.id("username")).sendKeys("admin");
-        driver.findElement(By.id("password")).sendKeys("admin0");
-        driver.findElement(By.id("login-button")).click();
+		driver.findElement(By.id("username")).sendKeys("admin");
+		driver.findElement(By.id("password")).sendKeys("admin0");
+		driver.findElement(By.id("login-button")).click();
 
-        wait.until(ExpectedConditions.urlContains("/posts"));
+		wait.until(ExpectedConditions.urlContains("/posts"));
 
-        // Verify cookies exist
-        assertNotNull(driver.manage().getCookieNamed("AuthToken"));
+		// Verify cookies exist
+		assertNotNull(driver.manage().getCookieNamed("AuthToken"));
 
-        // Click logout
-        WebElement logoutButton = wait.until(
-                ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
+		// Click logout
+		WebElement logoutButton = wait.until(
+				ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
 
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].click();", logoutButton);
+		((JavascriptExecutor) driver).executeScript(
+				"arguments[0].click();", logoutButton);
 
-        // Verify redirect to login/posts
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains("/login"),
-                ExpectedConditions.urlContains("/posts")));
+		// Verify redirect to login/posts
+		wait.until(ExpectedConditions.or(
+				ExpectedConditions.urlContains("/login"),
+				ExpectedConditions.urlContains("/posts")));
 
-        // Verify cookies removed
-        assertNull(driver.manage().getCookieNamed("AuthToken"));
-        assertNull(driver.manage().getCookieNamed("RefreshToken"));
-    }
+		// Verify cookies removed
+		assertNull(driver.manage().getCookieNamed("AuthToken"));
+		assertNull(driver.manage().getCookieNamed("RefreshToken"));
+	}
 
-    @Test
-    @DisplayName("Session persistence on reload system test")
-    void sessionPersistenceTest() {
-        // Login
-        driver.get("https://localhost:" + port + "/login");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
+	@Test
+	@DisplayName("Session persistence on reload system test")
+	void sessionPersistenceTest() {
+		// Login
+		driver.get("https://localhost:" + port + "/login");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
 
-        driver.findElement(By.id("username")).sendKeys("admin");
-        driver.findElement(By.id("password")).sendKeys("admin0");
-        driver.findElement(By.id("login-button")).click();
+		driver.findElement(By.id("username")).sendKeys("admin");
+		driver.findElement(By.id("password")).sendKeys("admin0");
+		driver.findElement(By.id("login-button")).click();
 
-        wait.until(ExpectedConditions.urlContains("/posts"));
+		wait.until(ExpectedConditions.urlContains("/posts"));
 
-        // Reload page
-        driver.navigate().refresh();
+		// Reload page
+		driver.navigate().refresh();
 
-        // Should stay authenticated
-        wait.until(ExpectedConditions.urlContains("/posts"));
-        assertNotNull(driver.manage().getCookieNamed("AuthToken"));
-    }
+		// Should stay authenticated
+		wait.until(ExpectedConditions.urlContains("/posts"));
+		assertNotNull(driver.manage().getCookieNamed("AuthToken"));
+	}
 }

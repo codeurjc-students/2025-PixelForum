@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,111 +16,113 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Comment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	@Column(length = 2000)
+	private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User author;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User author;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_comment_id")
-    private Comment parentComment;
+	@ManyToOne
+	@JoinColumn(name = "post_id")
+	private Post post;
 
-    private int likes;
+	@ManyToOne
+	@JoinColumn(name = "parent_comment_id")
+	private Comment parentComment;
 
-    @ManyToMany(mappedBy = "likedComments")
-    private Set<User> usersThatLiked = new HashSet<>();
+	private int likes;
 
-    public Comment() {
-    }
+	@ManyToMany(mappedBy = "likedComments")
+	private Set<User> usersThatLiked = new HashSet<>();
 
-    public Comment(String content, LocalDateTime createdAt, User author, Post post) {
-        this.content = content;
-        this.createdAt = createdAt;
-        this.author = author;
-        this.post = post;
-    }
+	public Comment() {
+	}
 
-    public long getId() {
-        return id;
-    }
+	public Comment(String content, LocalDateTime createdAt, User author, Post post) {
+		this.content = content;
+		this.createdAt = createdAt;
+		this.author = author;
+		this.post = post;
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public String getContent() {
-        return content;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+	public String getContent() {
+		return content;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public void setContent(String content) {
+		this.content = content;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
 
-    public User getAuthor() {
-        return author;
-    }
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 
-    public void setAuthor(User author) {
-        this.author = author;
-    }
+	public User getAuthor() {
+		return author;
+	}
 
-    public Post getPost() {
-        return post;
-    }
+	public void setAuthor(User author) {
+		this.author = author;
+	}
 
-    public void setPost(Post post) {
-        this.post = post;
-    }
+	public Post getPost() {
+		return post;
+	}
 
-    public Comment getParentComment() {
-        return parentComment;
-    }
+	public void setPost(Post post) {
+		this.post = post;
+	}
 
-    public void setParentComment(Comment parentComment) {
-        this.parentComment = parentComment;
-    }
+	public Comment getParentComment() {
+		return parentComment;
+	}
 
-    public int getLikes() {
-        return likes;
-    }
+	public void setParentComment(Comment parentComment) {
+		this.parentComment = parentComment;
+	}
 
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
+	public int getLikes() {
+		return likes;
+	}
 
-    public Set<User> getUsersThatLiked() {
-        return usersThatLiked;
-    }
+	public void setLikes(int likes) {
+		this.likes = likes;
+	}
 
-    public void setUsersThatLiked(Set<User> usersThatLiked) {
-        this.usersThatLiked = usersThatLiked;
-    }
+	public Set<User> getUsersThatLiked() {
+		return usersThatLiked;
+	}
+
+	public void setUsersThatLiked(Set<User> usersThatLiked) {
+		this.usersThatLiked = usersThatLiked;
+	}
 
 }

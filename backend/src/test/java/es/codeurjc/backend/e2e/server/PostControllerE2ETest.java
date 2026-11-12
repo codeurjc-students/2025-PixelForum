@@ -67,6 +67,19 @@ class PostControllerE2ETest {
 	}
 
 	@Test
+	@DisplayName("Get all posts should work when authenticated")
+	void getAllPostsAuthenticatedSystemTest() {
+		// WHEN & THEN
+		given()
+				.cookie("AuthToken", authToken)
+				.when()
+				.get()
+				.then()
+				.statusCode(200)
+				.body("content", not(empty()));
+	}
+
+	@Test
 	@DisplayName("Create post should succeed with authentication")
 	void createPostSystemTest() {
 		// GIVEN
@@ -123,6 +136,30 @@ class PostControllerE2ETest {
 				.statusCode(200)
 				.body("id", equalTo(postId.intValue()))
 				.body("title", equalTo("Post for get"));
+	}
+
+	@Test
+	@DisplayName("Get post by id should work when authenticated")
+	void getPostByIdAuthenticatedSystemTest() {
+		// GIVEN
+		Long postId = given()
+				.cookie("AuthToken", authToken)
+				.contentType(ContentType.JSON)
+				.body(Map.of("title", "Auth get", "topic", Map.of("id", 1)))
+				.when()
+				.post()
+				.then()
+				.statusCode(201)
+				.extract().jsonPath().getLong("id");
+
+		// WHEN & THEN
+		given()
+				.cookie("AuthToken", authToken)
+				.when()
+				.get("/" + postId)
+				.then()
+				.statusCode(200)
+				.body("id", equalTo(postId.intValue()));
 	}
 
 	@Test

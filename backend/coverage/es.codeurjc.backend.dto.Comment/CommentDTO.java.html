@@ -4,15 +4,15 @@ import java.time.LocalDateTime;
 
 import es.codeurjc.backend.dto.user.BasicUserDTO;
 
-<span class="fc" id="L7">public record CommentDTO (</span>
-    Long id,
-    String content,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    BasicUserDTO author,
-    CommentDTO parentComment,
-    Integer likes,
-    Boolean hasUserLiked,
-    Long post) {
+<span class="fc" id="L7">public record CommentDTO(</span>
+		Long id,
+		String content,
+		LocalDateTime createdAt,
+		LocalDateTime updatedAt,
+		BasicUserDTO author,
+		CommentDTO parentComment,
+		Integer likes,
+		Boolean hasUserLiked,
+		Long post) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

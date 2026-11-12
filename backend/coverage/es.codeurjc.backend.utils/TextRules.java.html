@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextRules.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">PixelForum</a> &gt; <a href="index.source.html" class="el_package">es.codeurjc.backend.utils</a> &gt; <span class="el_source">TextRules.java</span></div><h1>TextRules.java</h1><pre class="source lang-java linenums">package es.codeurjc.backend.utils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
+public final class TextRules {
+
+	private static final String INVALID_MAIL = &quot;Please enter a valid email&quot;;
+<span class="fc" id="L10">	private static final Pattern CRLF = Pattern.compile(&quot;\\r\\n?&quot;);</span>
+<span class="fc" id="L11">	private static final Pattern INLINE_SPACES = Pattern.compile(&quot;[^\\S\\n]+&quot;);</span>
+<span class="fc" id="L12">	private static final Pattern SPACES_AROUND_NEWLINE = Pattern.compile(&quot; *\\n *&quot;);</span>
+<span class="fc" id="L13">	private static final Pattern EXTRA_NEWLINES = Pattern.compile(&quot;\\n{3,}&quot;);</span>
+<span class="fc" id="L14">	private static final Pattern ANY_WHITESPACE = Pattern.compile(&quot;\\s+&quot;);</span>
+<span class="fc" id="L15">	private static final Pattern USERNAME = Pattern.compile(&quot;^[a-zA-Z0-9_.-]{3,20}$&quot;);</span>
+<span class="fc" id="L16">	private static final Pattern DOT = Pattern.compile(&quot;\\.&quot;);</span>
+<span class="fc" id="L17">	private static final Pattern LOCAL_SEGMENT = Pattern.compile(&quot;[a-zA-Z0-9!#$%&amp;'*+/=?^_`{|}~-]+&quot;);</span>
+<span class="fc" id="L18">	private static final Pattern DOMAIN_LABEL = Pattern.compile(&quot;[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?&quot;);</span>
+
+	private TextRules() {
+	}
+
+	public static String multiline(String field, String value, int maxLength, int maxLines) {
+<span class="fc" id="L24">		String normalized = requireNonBlank(field, value);</span>
+<span class="fc" id="L25">		normalized = CRLF.matcher(normalized).replaceAll(&quot;\n&quot;);</span>
+<span class="fc" id="L26">		normalized = INLINE_SPACES.matcher(normalized).replaceAll(&quot; &quot;);</span>
+<span class="fc" id="L27">		normalized = SPACES_AROUND_NEWLINE.matcher(normalized).replaceAll(&quot;\n&quot;);</span>
+<span class="fc" id="L28">		normalized = EXTRA_NEWLINES.matcher(normalized).replaceAll(&quot;\n\n&quot;).trim();</span>
+
+<span class="fc" id="L30">		checkLength(field, normalized, maxLength);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">		if (normalized.split(&quot;\n&quot;, -1).length &gt; maxLines) {</span>
+<span class="fc" id="L32">			throw new IllegalArgumentException(field + &quot; cannot exceed &quot; + maxLines + &quot; lines&quot;);</span>
+		}
+<span class="fc" id="L34">		return normalized;</span>
+	}
+
+	public static String optionalMultiline(String field, String value, int maxLength, int maxLines) {
+<span class="fc bfc" id="L38" title="All 4 branches covered.">		if (value == null || value.isBlank()) {</span>
+<span class="fc" id="L39">			return null;</span>
+		}
+<span class="fc" id="L41">		return multiline(field, value, maxLength, maxLines);</span>
+	}
+
+	public static String singleLine(String field, String value, int maxLength) {
+<span class="fc" id="L45">		requireNonBlank(field, value);</span>
+<span class="fc" id="L46">		String normalized = ANY_WHITESPACE.matcher(value).replaceAll(&quot; &quot;).trim();</span>
+
+<span class="fc" id="L48">		checkLength(field, normalized, maxLength);</span>
+<span class="fc" id="L49">		return normalized;</span>
+	}
+
+	private static String requireNonBlank(String field, String value) {
+<span class="fc bfc" id="L53" title="All 4 branches covered.">		if (value == null || value.isBlank()) {</span>
+<span class="fc" id="L54">			throw new IllegalArgumentException(field + &quot; is required&quot;);</span>
+		}
+<span class="fc" id="L56">		return value;</span>
+	}
+
+	private static void checkLength(String field, String value, int maxLength) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">		if (value.length() &gt; maxLength) {</span>
+<span class="fc" id="L61">			throw new IllegalArgumentException(field + &quot; cannot exceed &quot; + maxLength + &quot; characters&quot;);</span>
+		}
+<span class="fc" id="L63">	}</span>
+
+	public static String username(String value) {
+<span class="fc bfc" id="L66" title="All 4 branches covered.">		if (value == null || !USERNAME.matcher(value).matches()) {</span>
+<span class="fc" id="L67">			throw new IllegalArgumentException(</span>
+					&quot;Username must be 3-20 characters: letters, numbers, underscores, dots and hyphens only&quot;);
+		}
+<span class="fc" id="L70">		return value;</span>
+	}
+
+	public static String email(String value) {
+<span class="fc bfc" id="L74" title="All 4 branches covered.">		if (value == null || value.length() &gt; 254) {</span>
+<span class="fc" id="L75">			throw new IllegalArgumentException(INVALID_MAIL);</span>
+		}
+<span class="fc" id="L77">		int at = value.lastIndexOf('@');</span>
+<span class="fc bfc" id="L78" title="All 6 branches covered.">		if (at &lt; 1 || at &gt; 64 || at == value.length() - 1) {</span>
+<span class="fc" id="L79">			throw new IllegalArgumentException(INVALID_MAIL);</span>
+		}
+<span class="fc" id="L81">		String local = value.substring(0, at);</span>
+<span class="fc" id="L82">		String domain = value.substring(at + 1);</span>
+
+<span class="fc bfc" id="L84" title="All 4 branches covered.">		if (!allSegmentsMatch(local, LOCAL_SEGMENT) || !allSegmentsMatch(domain, DOMAIN_LABEL)) {</span>
+<span class="fc" id="L85">			throw new IllegalArgumentException(INVALID_MAIL);</span>
+		}
+<span class="fc" id="L87">		return value.toLowerCase(Locale.ROOT);</span>
+	}
+
+	private static boolean allSegmentsMatch(String value, Pattern segmentPattern) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">		for (String segment : DOT.split(value, -1)) {</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">			if (!segmentPattern.matcher(segment).matches()) {</span>
+<span class="fc" id="L93">				return false;</span>
+			}
+		}
+<span class="fc" id="L96">		return true;</span>
+	}
+
+	public static String password(String value) {
+<span class="fc bfc" id="L100" title="All 6 branches covered.">		if (value == null || value.length() &lt; 8 || value.length() &gt; 64) {</span>
+<span class="fc" id="L101">			throw new IllegalArgumentException(&quot;Password must be between 8 and 64 characters&quot;);</span>
+		}
+<span class="fc bfc" id="L103" title="All 2 branches covered.">		if (value.getBytes(StandardCharsets.UTF_8).length &gt; 72) {</span>
+<span class="fc" id="L104">			throw new IllegalArgumentException(&quot;Password is too long&quot;);</span>
+		}
+<span class="fc" id="L106">		return value;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -30,27 +30,27 @@ export class CommentService {
 			.set('size', size.toString())
 			.set('sort', `${sortBy},${sortDir}`);
 
-		return this.http.get<PageResponse<Comment>>(this.baseUrl(postId), { params, withCredentials: true });
+		return this.http.get<PageResponse<Comment>>(this.baseUrl(postId), { params });
 	}
 
 	getById(postId: number, commentId: number): Observable<Comment> {
-		return this.http.get<Comment>(`${this.baseUrl(postId)}/${commentId}`, { withCredentials: true });
+		return this.http.get<Comment>(`${this.baseUrl(postId)}/${commentId}`);
 	}
 
 	create(postId: number, comment: Comment): Observable<Comment> {
-		return this.http.post<Comment>(this.baseUrl(postId), comment, { withCredentials: true });
+		return this.http.post<Comment>(this.baseUrl(postId), comment);
 	}
 
 	update(postId: number, commentId: number, comment: Comment): Observable<Comment> {
-		return this.http.put<Comment>(`${this.baseUrl(postId)}/${commentId}`, comment, { withCredentials: true });
+		return this.http.put<Comment>(`${this.baseUrl(postId)}/${commentId}`, comment);
 	}
 
 	delete(postId: number, commentId: number): Observable<void> {
-		return this.http.delete<void>(`${this.baseUrl(postId)}/${commentId}`, { withCredentials: true });
+		return this.http.delete<void>(`${this.baseUrl(postId)}/${commentId}`);
 	}
 
 	toggleLike(postId: number, commentId: number): Observable<Comment> {
-		return this.http.post<Comment>(`${this.baseUrl(postId)}/${commentId}/like`, {}, { withCredentials: true });
+		return this.http.post<Comment>(`${this.baseUrl(postId)}/${commentId}/like`, {});
 	}
 
 	// ── Profile tabs ──────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export class CommentService {
 			.set('size', size.toString())
 			.set('sort', 'createdAt,desc');
 
-		return this.http.get<PageResponse<Comment>>(`${this.userCommentsUrl(userId)}/comments`, { params, withCredentials: true });
+		return this.http.get<PageResponse<Comment>>(`${this.userCommentsUrl(userId)}/comments`, { params });
 	}
 
 	getLikedComments(
@@ -78,6 +78,6 @@ export class CommentService {
 			.set('size', size.toString())
 			.set('sort', 'createdAt,desc');
 
-		return this.http.get<PageResponse<Comment>>(`${this.userCommentsUrl(userId)}/liked-comments`, { params, withCredentials: true });
+		return this.http.get<PageResponse<Comment>>(`${this.userCommentsUrl(userId)}/liked-comments`, { params });
 	}
 }

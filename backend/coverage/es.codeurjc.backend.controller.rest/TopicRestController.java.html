@@ -16,22 +16,22 @@ import es.codeurjc.backend.service.TopicService;
 @RequestMapping(&quot;/api/v1/topics&quot;)
 public class TopicRestController {
 
-    private final TopicService topicService;
+	private final TopicService topicService;
 
-<span class="fc" id="L21">    public TopicRestController(TopicService topicService) {</span>
-<span class="fc" id="L22">        this.topicService = topicService;</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L21">	public TopicRestController(TopicService topicService) {</span>
+<span class="fc" id="L22">		this.topicService = topicService;</span>
+<span class="fc" id="L23">	}</span>
 
-    @GetMapping(&quot;/&quot;)
-    public List&lt;Topic&gt; getAllTopics() {
-<span class="fc" id="L27">        return topicService.findAll();</span>
-    }
+	@GetMapping(&quot;/&quot;)
+	public List&lt;Topic&gt; getAllTopics() {
+<span class="fc" id="L27">		return topicService.findAll();</span>
+	}
 
-    @GetMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;Topic&gt; getTopicById(@PathVariable long id) {
-<span class="nc" id="L32">        Optional&lt;Topic&gt; topic = topicService.findById(id);</span>
-<span class="nc" id="L33">        return topic.map(ResponseEntity::ok)</span>
-<span class="nc" id="L34">                .orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
-    }
+	@GetMapping(&quot;/{id}&quot;)
+	public ResponseEntity&lt;Topic&gt; getTopicById(@PathVariable long id) {
+<span class="nc" id="L32">		Optional&lt;Topic&gt; topic = topicService.findById(id);</span>
+<span class="nc" id="L33">		return topic.map(ResponseEntity::ok)</span>
+<span class="nc" id="L34">				.orElseGet(() -&gt; ResponseEntity.notFound().build());</span>
+	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

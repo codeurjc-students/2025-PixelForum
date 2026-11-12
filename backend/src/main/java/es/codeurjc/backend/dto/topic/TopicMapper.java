@@ -10,10 +10,10 @@ import es.codeurjc.backend.model.Topic;
 @Mapper(componentModel = "spring")
 public interface TopicMapper {
 
-    TopicDTO toDTO(Topic topic);
+	TopicDTO toDTO(Topic topic);
 
-    List<TopicDTO> toDTOs(Collection<Topic> topics);
+	List<TopicDTO> toDTOs(Collection<Topic> topics);
 
-    Topic toDomain(TopicDTO topicDTO);
-    
+	Topic toDomain(TopicDTO topicDTO);
+
 }

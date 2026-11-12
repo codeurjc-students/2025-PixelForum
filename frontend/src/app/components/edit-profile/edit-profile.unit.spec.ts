@@ -10,279 +10,312 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 describe('EditProfileComponent - Unit Tests', () => {
 
-    let component: EditProfileComponent;
-    let fixture: ComponentFixture<EditProfileComponent>;
-    let userService: jasmine.SpyObj<UserService>;
-    let authService: jasmine.SpyObj<AuthService>;
-    let router: jasmine.SpyObj<Router>;
-    let snackBar: jasmine.SpyObj<MatSnackBar>;
-    let dialog: jasmine.SpyObj<MatDialog>;
-
-    const mockUser: User = {
-        id: 1,
-        username: 'testuser',
-        email: 'test@test.com',
-        bio: 'bio'
-    } as any;
-
-    let routeParams$: Subject<any>;
-
-    beforeEach(async () => {
-        userService = jasmine.createSpyObj('UserService', ['getUserDetails', 'updateProfile', 'changePassword']);
-        authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
-        router = jasmine.createSpyObj('Router', ['navigate']);
-        snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
-        dialog = jasmine.createSpyObj('MatDialog', ['open']);
-
-        routeParams$ = new Subject();
-
-        const activatedRouteMock = {
-            params: routeParams$.asObservable()
-        };
-
-        await TestBed.configureTestingModule({
-            imports: [EditProfileComponent],
-            providers: [
-                { provide: UserService, useValue: userService },
-                { provide: AuthService, useValue: authService },
-                { provide: Router, useValue: router },
-                { provide: ActivatedRoute, useValue: activatedRouteMock },
-                { provide: MatSnackBar, useValue: snackBar },
-                { provide: MatDialog, useValue: dialog }
-            ]
-        }).compileComponents();
-
-        fixture = TestBed.createComponent(EditProfileComponent);
-        component = fixture.componentInstance;
-    });
-
-    // ---------- INIT ----------
-
-    it('should create component', () => {
-        expect(component).toBeTruthy();
-    });
-
-    it('should load user profile on init when userId exists', () => {
-        spyOn(component as any, 'loadUserProfile');
-
-        component.ngOnInit();
-        routeParams$.next({ userId: 1 });
-
-        expect((component as any).loadUserProfile).toHaveBeenCalledWith(1);
-    });
-
-    // ---------- LOAD USER ----------
-
-    it('should load user and patch form', () => {
-        userService.getUserDetails.and.returnValue(of(mockUser));
-
-        (component as any).loadUserProfile(1);
-
-        expect(userService.getUserDetails).toHaveBeenCalledWith(1);
-        expect(component.user).toEqual(mockUser);
-        expect(component.profileForm.value.username).toBe('testuser');
-        expect(component.profileForm.value.email).toBe('test@test.com');
-        expect(component.profileForm.value.bio).toBe('bio');
-    });
-
-    // ---------- PROFILE SUBMIT ----------
-
-    it('should update profile directly when only bio changes', () => {
-        component.userId = 1;
-        component['originalProfileData'] = {
-            username: 'testuser',
-            email: 'test@test.com',
-            bio: 'old bio'
-        };
-
-        component.profileForm.patchValue({
-            username: 'testuser',
-            email: 'test@test.com',
-            bio: 'new bio'
-        });
-
-        spyOn(component as any, 'updateProfile');
-        spyOn(component as any, 'openConfirmDialog');
-
-        component.onSubmitProfile();
-
-        expect((component as any).updateProfile).toHaveBeenCalled();
-        expect((component as any).openConfirmDialog).not.toHaveBeenCalled();
-    });
-
-    it('should open confirm dialog when username changes', () => {
-        component.userId = 1;
-        component['originalProfileData'] = {
-            username: 'testuser',
-            email: 'test@test.com',
-            bio: 'bio'
-        };
+	let component: EditProfileComponent;
+	let fixture: ComponentFixture<EditProfileComponent>;
+	let userService: jasmine.SpyObj<UserService>;
+	let authService: jasmine.SpyObj<AuthService>;
+	let router: jasmine.SpyObj<Router>;
+	let snackBar: jasmine.SpyObj<MatSnackBar>;
+	let dialog: jasmine.SpyObj<MatDialog>;
+
+	const mockUser: User = {
+		id: 1,
+		username: 'testuser',
+		email: 'test@test.com',
+		bio: 'bio'
+	} as any;
+
+	let routeParams$: Subject<any>;
+
+	beforeEach(async () => {
+		userService = jasmine.createSpyObj('UserService', ['getUserDetails', 'updateProfile', 'changePassword']);
+		authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
+		router = jasmine.createSpyObj('Router', ['navigate']);
+		snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
+		dialog = jasmine.createSpyObj('MatDialog', ['open']);
+
+		routeParams$ = new Subject();
+
+		const activatedRouteMock = {
+			params: routeParams$.asObservable()
+		};
+
+		await TestBed.configureTestingModule({
+			imports: [EditProfileComponent],
+			providers: [
+				{ provide: UserService, useValue: userService },
+				{ provide: AuthService, useValue: authService },
+				{ provide: Router, useValue: router },
+				{ provide: ActivatedRoute, useValue: activatedRouteMock },
+				{ provide: MatSnackBar, useValue: snackBar },
+				{ provide: MatDialog, useValue: dialog }
+			]
+		}).compileComponents();
+
+		fixture = TestBed.createComponent(EditProfileComponent);
+		component = fixture.componentInstance;
+	});
+
+	// ---------- INIT ----------
+
+	it('should create component', () => {
+		expect(component).toBeTruthy();
+	});
+
+	it('should load user profile on init when userId exists', () => {
+		spyOn(component as any, 'loadUserProfile');
+
+		component.ngOnInit();
+		routeParams$.next({ userId: 1 });
+
+		expect((component as any).loadUserProfile).toHaveBeenCalledWith(1);
+	});
+
+	// ---------- LOAD USER ----------
+
+	it('should load user and patch form', () => {
+		userService.getUserDetails.and.returnValue(of(mockUser));
+
+		(component as any).loadUserProfile(1);
+
+		expect(userService.getUserDetails).toHaveBeenCalledWith(1);
+		expect(component.user).toEqual(mockUser);
+		expect(component.profileForm.value.username).toBe('testuser');
+		expect(component.profileForm.value.email).toBe('test@test.com');
+		expect(component.profileForm.value.bio).toBe('bio');
+	});
+
+	// ---------- VALIDATION ----------
+
+	it('should mark the form invalid and expose the error when the bio exceeds the limits', () => {
+		component.profileForm.patchValue({ bio: 'a\n'.repeat(component.bioRules.maxLines) + 'a' });
+		component.profileForm.get('bio')?.markAsTouched();
+
+		expect(component.profileForm.get('bio')?.invalid).toBeTrue();
+		expect(component.isProfileFieldInvalid('bio')).toBeTrue();
+		expect(component.getProfileErrorMessage('bio')).toBe(`Maximum ${component.bioRules.maxLines} lines allowed.`);
+	});
+
+	it('should send the normalized bio', () => {
+		component.userId = 1;
+		component.profileForm.patchValue({
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: '  Hello   world  \r\n\r\n\r\n\r\n bye '
+		});
+		userService.updateProfile.and.returnValue(of(mockUser));
+		authService.checkAuth.and.returnValue(of(null));
+
+		(component as any).updateProfile();
+
+		expect(userService.updateProfile).toHaveBeenCalledWith(1, jasmine.objectContaining({ bio: 'Hello world\n\nbye' }));
+	});
+
+	it('should reject an invalid username and an invalid email', () => {
+		component.profileForm.patchValue({ username: 'john doe', email: 'not-an-email' });
+
+		expect(component.profileForm.get('username')?.hasError('pattern')).toBeTrue();
+		expect(component.profileForm.get('email')?.hasError('email')).toBeTrue();
+	});
 
-        component.profileForm.patchValue({
-            username: 'newuser',
-            email: 'test@test.com',
-            bio: 'bio'
-        });
+	// ---------- PROFILE SUBMIT ----------
+
+	it('should update profile directly when only bio changes', () => {
+		component.userId = 1;
+		component['originalProfileData'] = {
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: 'old bio'
+		};
 
-        spyOn(component as any, 'openConfirmDialog');
+		component.profileForm.patchValue({
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: 'new bio'
+		});
 
-        component.onSubmitProfile();
-
-        expect((component as any).openConfirmDialog).toHaveBeenCalled();
-    });
+		spyOn(component as any, 'updateProfile');
+		spyOn(component as any, 'openConfirmDialog');
 
-    it('should update profile successfully', () => {
-        component.userId = 1;
-
-        component.profileForm.patchValue({
-            username: 'testuser',
-            email: 'test@test.com',
-            bio: 'bio'
-        });
-
-        userService.updateProfile.and.returnValue(of(mockUser));
-        authService.checkAuth.and.returnValue(of(null));
+		component.onSubmitProfile();
 
-        (component as any).updateProfile();
+		expect((component as any).updateProfile).toHaveBeenCalled();
+		expect((component as any).openConfirmDialog).not.toHaveBeenCalled();
+	});
 
-        expect(userService.updateProfile).toHaveBeenCalledWith(1, {
-            username: 'testuser',
-            email: 'test@test.com',
-            bio: 'bio'
-        });
+	it('should open confirm dialog when username changes', () => {
+		component.userId = 1;
+		component['originalProfileData'] = {
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: 'bio'
+		};
 
-        expect(authService.checkAuth).toHaveBeenCalled();
-        expect(snackBar.open).toHaveBeenCalled();
-        expect(router.navigate).toHaveBeenCalledWith(['/users', 1]);
-        expect(component.isLoadingProfile).toBeFalse();
-    });
+		component.profileForm.patchValue({
+			username: 'newuser',
+			email: 'test@test.com',
+			bio: 'bio'
+		});
 
-    it('should set username error when update profile fails', () => {
-        component.userId = 1;
+		spyOn(component as any, 'openConfirmDialog');
 
-        component.profileForm.patchValue({
-            username: 'testuser',
-            email: 'test@test.com',
-            bio: 'bio'
-        });
+		component.onSubmitProfile();
 
-        userService.updateProfile.and.returnValue(
-            throwError(() => ({
-                status: 400,
-                error: { message: 'Username already taken' }
-            }))
-        );
+		expect((component as any).openConfirmDialog).toHaveBeenCalled();
+	});
 
-        (component as any).updateProfile();
+	it('should update profile successfully', () => {
+		component.userId = 1;
 
-        expect(component.profileErrorMessage).toBe('Username already taken');
-        expect(component.isLoadingProfile).toBeFalse();
-    });
+		component.profileForm.patchValue({
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: 'bio'
+		});
 
-    // ---------- PASSWORD ----------
+		userService.updateProfile.and.returnValue(of(mockUser));
+		authService.checkAuth.and.returnValue(of(null));
 
-    it('should open confirm dialog on valid password submit', () => {
-        component.userId = 1;
+		(component as any).updateProfile();
 
-        component.passwordForm.patchValue({
-            oldPassword: 'oldpassword',
-            newPassword: 'newpassword123',
-            confirmPassword: 'newpassword123'
-        });
+		expect(userService.updateProfile).toHaveBeenCalledWith(1, {
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: 'bio'
+		});
 
-        spyOn(component as any, 'openConfirmDialog');
+		expect(authService.checkAuth).toHaveBeenCalled();
+		expect(snackBar.open).toHaveBeenCalled();
+		expect(router.navigate).toHaveBeenCalledWith(['/users', 1]);
+		expect(component.isLoadingProfile).toBeFalse();
+	});
 
-        component.onSubmitPassword();
+	it('should set username error when update profile fails', () => {
+		component.userId = 1;
 
-        expect((component as any).openConfirmDialog).toHaveBeenCalled();
-    });
+		component.profileForm.patchValue({
+			username: 'testuser',
+			email: 'test@test.com',
+			bio: 'bio'
+		});
 
-    it('should change password successfully', () => {
-        component.userId = 1;
+		userService.updateProfile.and.returnValue(
+			throwError(() => ({
+				status: 400,
+				error: { message: 'Username already taken' }
+			}))
+		);
 
-        component.passwordForm.patchValue({
-            oldPassword: 'oldpassword',
-            newPassword: 'newpassword123',
-            confirmPassword: 'newpassword123'
-        });
+		(component as any).updateProfile();
 
-        userService.changePassword.and.returnValue(of(void 0));
+		expect(component.profileErrorMessage).toBe('Username already taken');
+		expect(component.isLoadingProfile).toBeFalse();
+	});
 
-        (component as any).updatePassword();
+	// ---------- PASSWORD ----------
 
-        expect(userService.changePassword).toHaveBeenCalledWith(1, {
-            oldPassword: 'oldpassword',
-            newPassword: 'newpassword123'
-        });
+	it('should open confirm dialog on valid password submit', () => {
+		component.userId = 1;
 
-        expect(snackBar.open).toHaveBeenCalled();
-        expect(router.navigate).toHaveBeenCalledWith(['/users', 1]);
-        expect(component.isLoadingPassword).toBeFalse();
-    });
+		component.passwordForm.patchValue({
+			oldPassword: 'oldpassword',
+			newPassword: 'newpassword123',
+			confirmPassword: 'newpassword123'
+		});
 
-    it('should set password error when current password is incorrect', () => {
-        component.userId = 1;
+		spyOn(component as any, 'openConfirmDialog');
 
-        component.passwordForm.patchValue({
-            oldPassword: 'wrong',
-            newPassword: 'newpassword123',
-            confirmPassword: 'newpassword123'
-        });
+		component.onSubmitPassword();
 
-        userService.changePassword.and.returnValue(
-            throwError(() => ({
-                status: 400,
-                error: { message: 'Current password is incorrect' }
-            }))
-        );
+		expect((component as any).openConfirmDialog).toHaveBeenCalled();
+	});
 
-        (component as any).updatePassword();
+	it('should change password successfully', () => {
+		component.userId = 1;
 
-        expect(component.passwordErrorMessage).toBe('Current password is incorrect');
-        expect(component.isLoadingPassword).toBeFalse();
-    });
+		component.passwordForm.patchValue({
+			oldPassword: 'oldpassword',
+			newPassword: 'newpassword123',
+			confirmPassword: 'newpassword123'
+		});
 
-    // ---------- DIALOG ----------
+		userService.changePassword.and.returnValue(of(void 0));
 
-    it('should call callback when dialog is confirmed', () => {
-        const callback = jasmine.createSpy('callback');
+		(component as any).updatePassword();
 
-        dialog.open.and.returnValue({
-            afterClosed: () => of(true)
-        } as any);
+		expect(userService.changePassword).toHaveBeenCalledWith(1, {
+			oldPassword: 'oldpassword',
+			newPassword: 'newpassword123'
+		});
 
-        (component as any).openConfirmDialog('Title', 'Message', callback);
+		expect(snackBar.open).toHaveBeenCalled();
+		expect(router.navigate).toHaveBeenCalledWith(['/users', 1]);
+		expect(component.isLoadingPassword).toBeFalse();
+	});
 
-        expect(callback).toHaveBeenCalled();
-    });
+	it('should set password error when current password is incorrect', () => {
+		component.userId = 1;
 
-    // ---------- TOGGLES ----------
+		component.passwordForm.patchValue({
+			oldPassword: 'wrong',
+			newPassword: 'newpassword123',
+			confirmPassword: 'newpassword123'
+		});
 
-    it('should toggle old password visibility', () => {
-        component.toggleOldPasswordVisibility();
-        expect(component.hideOldPassword).toBeFalse();
-    });
+		userService.changePassword.and.returnValue(
+			throwError(() => ({
+				status: 400,
+				error: { message: 'Current password is incorrect' }
+			}))
+		);
 
-    it('should toggle new password visibility', () => {
-        component.toggleNewPasswordVisibility();
-        expect(component.hideNewPassword).toBeFalse();
-    });
+		(component as any).updatePassword();
 
-    it('should toggle confirm password visibility', () => {
-        component.toggleConfirmPasswordVisibility();
-        expect(component.hideConfirmPassword).toBeFalse();
-    });
+		expect(component.passwordErrorMessage).toBe('Current password is incorrect');
+		expect(component.isLoadingPassword).toBeFalse();
+	});
 
-    // ---------- DESTROY ----------
+	// ---------- DIALOG ----------
 
-    it('should complete destroy$ on ngOnDestroy', () => {
-        spyOn(component['destroy$'], 'next');
-        spyOn(component['destroy$'], 'complete');
+	it('should call callback when dialog is confirmed', () => {
+		const callback = jasmine.createSpy('callback');
 
-        component.ngOnDestroy();
+		dialog.open.and.returnValue({
+			afterClosed: () => of(true)
+		} as any);
 
-        expect(component['destroy$'].next).toHaveBeenCalled();
-        expect(component['destroy$'].complete).toHaveBeenCalled();
-    });
+		(component as any).openConfirmDialog('Title', 'Message', callback);
+
+		expect(callback).toHaveBeenCalled();
+	});
+
+	// ---------- TOGGLES ----------
+
+	it('should toggle old password visibility', () => {
+		component.toggleOldPasswordVisibility();
+		expect(component.hideOldPassword).toBeFalse();
+	});
+
+	it('should toggle new password visibility', () => {
+		component.toggleNewPasswordVisibility();
+		expect(component.hideNewPassword).toBeFalse();
+	});
+
+	it('should toggle confirm password visibility', () => {
+		component.toggleConfirmPasswordVisibility();
+		expect(component.hideConfirmPassword).toBeFalse();
+	});
+
+	// ---------- DESTROY ----------
+
+	it('should complete destroy$ on ngOnDestroy', () => {
+		spyOn(component['destroy$'], 'next');
+		spyOn(component['destroy$'], 'complete');
+
+		component.ngOnDestroy();
+
+		expect(component['destroy$'].next).toHaveBeenCalled();
+		expect(component['destroy$'].complete).toHaveBeenCalled();
+	});
 
 });

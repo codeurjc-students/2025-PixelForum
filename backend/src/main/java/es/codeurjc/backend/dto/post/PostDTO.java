@@ -6,16 +6,16 @@ import java.util.List;
 import es.codeurjc.backend.dto.user.BasicUserDTO;
 import es.codeurjc.backend.model.Topic;
 
-public record PostDTO (
-    Long id,
-    String title,
-    String content,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    BasicUserDTO author,
-    Topic topic,
-    Integer likes,
-    Boolean hasUserLiked,
-    Integer commentsCount,
-    List<Long> images) {
+public record PostDTO(
+		Long id,
+		String title,
+		String content,
+		LocalDateTime createdAt,
+		LocalDateTime updatedAt,
+		BasicUserDTO author,
+		Topic topic,
+		Integer likes,
+		Boolean hasUserLiked,
+		Integer commentsCount,
+		List<Long> images) {
 }

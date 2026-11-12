@@ -32,12 +32,12 @@ import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.ImageRepository;
 import es.codeurjc.backend.repository.PostRepository;
 import es.codeurjc.backend.repository.UserRepository;
+import es.codeurjc.backend.utils.TextRules;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UserService {
 
-	private static final String USER_NOT_FOUND = "User not found";
 	private static final String ADMIN = "ADMIN";
 	private static final Set<String> ALLOWED_AVATAR_TYPES = Set.of("image/jpeg", "image/png");
 
@@ -63,10 +63,12 @@ public class UserService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
+	private User findById(Long id) {
+		return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+	}
+
 	public BasicUserDTO getUser(Long id) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-		return mapper.toBasicDTO(user);
+		return mapper.toBasicDTO(findById(id));
 	}
 
 	public Page<BasicUserDTO> getUsers(Pageable pageable) {
@@ -77,9 +79,7 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only view your own secret details");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
-		return mapper.toDTO(user);
+		return mapper.toDTO(findById(id));
 	}
 
 	public Optional<User> findByUsername(String username) {
@@ -102,16 +102,23 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
+	@Transactional
 	public UserDTO createUser(CreateUserDTO userDTO) {
-		if (userRepository.findByUsername(userDTO.username()).isPresent()) {
+		String username = TextRules.username(userDTO.username());
+		String email = TextRules.email(userDTO.email());
+
+		if (userRepository.findByUsername(username).isPresent()) {
 			throw new IllegalArgumentException("Username already taken");
 		}
-		if (userRepository.findByEmail(userDTO.email()).isPresent()) {
+		if (userRepository.findByEmail(email).isPresent()) {
 			throw new IllegalArgumentException("Email already taken");
 		}
 		User user = mapper.toDomain(userDTO);
 
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setBio(TextRules.optionalMultiline("The bio", userDTO.bio(), 300, 5));
+		user.setPassword(passwordEncoder.encode(TextRules.password(userDTO.password())));
 		user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		user.setRoles(List.of("USER"));
 
@@ -123,28 +130,33 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only edit your own profile");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 
 		// USERNAME
-		if (userDTO.username() != null && !user.getUsername().equals(userDTO.username())) {
-			if (userRepository.findByUsername(userDTO.username()).isPresent()) {
-				throw new IllegalArgumentException("Username already taken");
+		if (userDTO.username() != null) {
+			String username = TextRules.username(userDTO.username());
+			if (!user.getUsername().equals(username)) {
+				if (userRepository.findByUsername(username).isPresent()) {
+					throw new IllegalArgumentException("Username already taken");
+				}
+				user.setUsername(username);
 			}
-			user.setUsername(userDTO.username());
 		}
 
 		// EMAIL
-		if (userDTO.email() != null && !user.getEmail().equals(userDTO.email())) {
-			if (userRepository.findByEmail(userDTO.email()).isPresent()) {
-				throw new IllegalArgumentException("Email already taken");
+		if (userDTO.email() != null) {
+			String email = TextRules.email(userDTO.email());
+			if (!user.getEmail().equals(email)) {
+				if (userRepository.findByEmail(email).isPresent()) {
+					throw new IllegalArgumentException("Email already taken");
+				}
+				user.setEmail(email);
 			}
-			user.setEmail(userDTO.email());
 		}
 
 		// BIO
 		if (userDTO.bio() != null) {
-			user.setBio(userDTO.bio());
+			user.setBio(TextRules.optionalMultiline("The bio", userDTO.bio(), 300, 5));
 		}
 
 		return mapper.toDTO(userRepository.save(user));
@@ -155,14 +167,13 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only change your own password");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 
 		if (!passwordEncoder.matches(dto.oldPassword(), user.getPassword())) {
 			throw new IllegalArgumentException("Invalid current password");
 		}
 
-		user.setPassword(passwordEncoder.encode(dto.newPassword()));
+		user.setPassword(passwordEncoder.encode(TextRules.password(dto.newPassword())));
 	}
 
 	@Transactional
@@ -170,8 +181,7 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only delete your own account");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 
 		removeLikes(user);
 		commentRepository.deleteByAuthor(user);
@@ -182,15 +192,31 @@ public class UserService {
 			user.setAvatar(null);
 			imageRepository.delete(avatar);
 		}
+		imageRepository.deleteByOwner(user);
 
 		userRepository.delete(user);
 	}
 
 	private void removeLikes(User user) {
+		// Delete likes given from this user
+		user.getLikedPosts().forEach(p -> {
+			p.getUsersThatLiked().remove(user);
+			p.setLikes(p.getUsersThatLiked().size());
+		});
+		user.getLikedComments().forEach(c -> {
+			c.getUsersThatLiked().remove(user);
+			c.setLikes(c.getUsersThatLiked().size());
+		});
+		user.getLikedPosts().clear();
+		user.getLikedComments().clear();
+
+		// Delete likes from posts owned by this user
 		List<Post> posts = postRepository.findByAuthor(user);
 		List<Long> postIds = posts.stream().map(Post::getId).toList();
 		postRepository.deleteLikesByPostIds(postIds);
 
+		// Delete likes from comments owned by this user and comments on posts owned by
+		// this user
 		List<Comment> comments = commentRepository.findByAuthor(user);
 		Set<Long> commentIds = new HashSet<>();
 		commentIds.addAll(posts.stream().flatMap(p -> p.getComments().stream()).map(Comment::getId).toList());
@@ -198,13 +224,12 @@ public class UserService {
 		commentRepository.deleteLikesByCommentIds(new ArrayList<>(commentIds));
 	}
 
-	@Transactional
+	@Transactional(noRollbackFor = IllegalArgumentException.class)
 	public UserDTO setProfileImage(Long id, Long imageId, User currentUser) {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only set your own profile image");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 
 		Image image = imageRepository.findById(imageId)
 				.orElseThrow(() -> new EntityNotFoundException("Image not found"));
@@ -218,10 +243,17 @@ public class UserService {
 			throw new IllegalArgumentException("Image is associated with a post and cannot be used as profile picture");
 		}
 
+		// Already the current avatar
+		if (user.getAvatar() != null && user.getAvatar().getId() == image.getId()) {
+			return mapper.toDTO(user);
+		}
+
 		// Validate image type
 		if (!ALLOWED_AVATAR_TYPES.contains(image.getContentType())) {
 			imageRepository.delete(image);
-			return null;
+			throw new IllegalArgumentException(
+					"Profile pictures must be JPG or PNG format. WebP and other formats are not allowed.");
+
 		}
 
 		// Remove old avatar if exists
@@ -243,8 +275,7 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only remove your own profile image");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 
 		if (user.getAvatar() != null) {
 			Image avatar = user.getAvatar();
@@ -258,8 +289,7 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only view your own liked posts");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 		return postRepository.findByUsersThatLikedContains(user, pageable)
 				.map(post -> postMapper.toDTOWithLike(post, currentUser));
 	}
@@ -268,15 +298,13 @@ public class UserService {
 		if (id != currentUser.getId() && !currentUser.getRoles().contains(ADMIN)) {
 			throw new AccessDeniedException("You can only view your own liked comments");
 		}
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 		return commentRepository.findByUsersThatLikedContains(user, pageable)
 				.map(comment -> commentMapper.toDTOWithLike(comment, currentUser));
 	}
 
 	public Page<CommentDTO> getUserComments(Long id, User currentUser, Pageable pageable) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+		User user = findById(id);
 		return commentRepository.findByAuthor(user, pageable)
 				.map(comment -> commentMapper.toDTOWithLike(comment, currentUser));
 	}

@@ -14,411 +14,442 @@ import { ErrorService } from '../../services/error.service';
 
 describe('CreatePostComponent', () => {
 
-    let component: CreatePostComponent;
-    let fixture: ComponentFixture<CreatePostComponent>;
-
-    let postServiceSpy: jasmine.SpyObj<PostService>;
-    let topicServiceSpy: jasmine.SpyObj<TopicService>;
-    let imageServiceSpy: jasmine.SpyObj<ImageService>;
-    let authService: jasmine.SpyObj<AuthService>;
-    let errorService: jasmine.SpyObj<ErrorService>;
-    let routerSpy: jasmine.SpyObj<Router>;
-    let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
-
-    const mockTopic: Topic = {
-        id: 1,
-        name: 'Angular'
-    } as Topic;
-
-    const mockPost: Post = {
-        id: 1,
-        title: 'Test Post',
-        content: 'Test Content',
-        topic: mockTopic,
-        images: [],
-        author: {
-            id: 1,
-            username: '',
-            roles: ['USER']
-        }
-    };
-
-    beforeEach(async () => {
-        postServiceSpy = jasmine.createSpyObj('PostService', ['create', 'update', 'getById']);
-        topicServiceSpy = jasmine.createSpyObj('TopicService', ['getAll']);
-        imageServiceSpy = jasmine.createSpyObj('ImageService', ['uploadImages']);
-        authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
-        errorService = jasmine.createSpyObj('ErrorService', ['setError']);
-        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-        snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
-
-        topicServiceSpy.getAll.and.returnValue(of([mockTopic]));
-        authService.checkAuth.and.returnValue(of(null));
-
-        await TestBed.configureTestingModule({
-            imports: [CreatePostComponent],
-            providers: [
-                FormBuilder,
-                { provide: PostService, useValue: postServiceSpy },
-                { provide: TopicService, useValue: topicServiceSpy },
-                { provide: ImageService, useValue: imageServiceSpy },
-                { provide: AuthService, useValue: authService },
-                { provide: ErrorService, useValue: errorService },
-                { provide: Router, useValue: routerSpy },
-                { provide: MatSnackBar, useValue: snackBarSpy },
-                {
-                    provide: ActivatedRoute,
-                    useValue: { params: of({}) }
-                }
-            ]
-        }).compileComponents();
-
-        spyOn(console, 'error');
-        fixture = TestBed.createComponent(CreatePostComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    });
-
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
-
-    // ---------- INIT ----------
-
-    it('should initialize form and load topics', () => {
-        component.ngOnInit();
-
-        expect(component.createPostForm).toBeDefined();
-        expect(topicServiceSpy.getAll).toHaveBeenCalled();
-    });
+	let component: CreatePostComponent;
+	let fixture: ComponentFixture<CreatePostComponent>;
+
+	let postServiceSpy: jasmine.SpyObj<PostService>;
+	let topicServiceSpy: jasmine.SpyObj<TopicService>;
+	let imageServiceSpy: jasmine.SpyObj<ImageService>;
+	let authService: jasmine.SpyObj<AuthService>;
+	let errorService: jasmine.SpyObj<ErrorService>;
+	let routerSpy: jasmine.SpyObj<Router>;
+	let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
+
+	const mockTopic: Topic = {
+		id: 1,
+		name: 'Angular'
+	} as Topic;
+
+	const mockPost: Post = {
+		id: 1,
+		title: 'Test Post',
+		content: 'Test Content',
+		topic: mockTopic,
+		images: [],
+		author: {
+			id: 1,
+			username: '',
+			roles: ['USER']
+		}
+	};
+
+	beforeEach(async () => {
+		postServiceSpy = jasmine.createSpyObj('PostService', ['create', 'update', 'getById']);
+		topicServiceSpy = jasmine.createSpyObj('TopicService', ['getAll']);
+		imageServiceSpy = jasmine.createSpyObj('ImageService', ['uploadImages']);
+		authService = jasmine.createSpyObj('AuthService', ['checkAuth']);
+		errorService = jasmine.createSpyObj('ErrorService', ['setError']);
+		routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+		snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+
+		topicServiceSpy.getAll.and.returnValue(of([mockTopic]));
+		authService.checkAuth.and.returnValue(of(null));
+
+		await TestBed.configureTestingModule({
+			imports: [CreatePostComponent],
+			providers: [
+				FormBuilder,
+				{ provide: PostService, useValue: postServiceSpy },
+				{ provide: TopicService, useValue: topicServiceSpy },
+				{ provide: ImageService, useValue: imageServiceSpy },
+				{ provide: AuthService, useValue: authService },
+				{ provide: ErrorService, useValue: errorService },
+				{ provide: Router, useValue: routerSpy },
+				{ provide: MatSnackBar, useValue: snackBarSpy },
+				{
+					provide: ActivatedRoute,
+					useValue: { params: of({}) }
+				}
+			]
+		}).compileComponents();
+
+		spyOn(console, 'error');
+		fixture = TestBed.createComponent(CreatePostComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
+
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
+
+	// ---------- INIT ----------
+
+	it('should initialize form and load topics', () => {
+		component.ngOnInit();
+
+		expect(component.createPostForm).toBeDefined();
+		expect(topicServiceSpy.getAll).toHaveBeenCalled();
+	});
 
-    // ---------- TOPIC SEARCH ----------
+	// ---------- TOPIC SEARCH ----------
 
-    it('should filter topics on search', () => {
-        component.allTopics = [
-            { id: 1, name: 'Angular' },
-            { id: 2, name: 'Java' }
-        ] as Topic[];
+	it('should filter topics on search', () => {
+		component.allTopics = [
+			{ id: 1, name: 'Angular' },
+			{ id: 2, name: 'Java' }
+		] as Topic[];
 
-        const event = { target: { value: 'ang' } } as any;
+		const event = { target: { value: 'ang' } } as any;
 
-        component.onTopicSearchChange(event);
+		component.onTopicSearchChange(event);
 
-        expect(component.filteredTopics.length).toBe(1);
-    });
+		expect(component.filteredTopics.length).toBe(1);
+	});
 
-    it('should detect invalid topic', () => {
-        component.createPostForm.patchValue({ topicSearch: 'Angular' });
-        component.createPostForm.get('topicSearch')?.markAsTouched();
-        component.selectedTopic = null;
-        component.showTopicDropdown = false;
+	it('should detect invalid topic', () => {
+		component.createPostForm.patchValue({ topicSearch: 'Angular' });
+		component.createPostForm.get('topicSearch')?.markAsTouched();
+		component.selectedTopic = null;
+		component.showTopicDropdown = false;
 
-        expect(component.isTopicInvalid).toBeTrue();
-    });
+		expect(component.isTopicInvalid).toBeTrue();
+	});
 
-    it('should show dropdown on focus', () => {
-        component.allTopics = [mockTopic];
+	it('should show dropdown on focus', () => {
+		component.allTopics = [mockTopic];
 
-        component.onTopicFocus();
+		component.onTopicFocus();
 
-        expect(component.showTopicDropdown).toBeTrue();
-    });
+		expect(component.showTopicDropdown).toBeTrue();
+	});
 
-    it('should hide dropdown on blur', (done) => {
-        component.showTopicDropdown = true;
+	it('should hide dropdown on blur', (done) => {
+		component.showTopicDropdown = true;
 
-        component.onTopicBlur();
+		component.onTopicBlur();
 
-        setTimeout(() => {
-            expect(component.showTopicDropdown).toBeFalse();
-            done();
-        }, 200);
-    });
+		setTimeout(() => {
+			expect(component.showTopicDropdown).toBeFalse();
+			done();
+		}, 200);
+	});
 
-    it('should select topic', () => {
-        component.selectTopic(mockTopic);
+	it('should select topic', () => {
+		component.selectTopic(mockTopic);
 
-        expect(component.selectedTopic).toEqual(mockTopic);
-        expect(component.showTopicDropdown).toBeFalse();
-    });
+		expect(component.selectedTopic).toEqual(mockTopic);
+		expect(component.showTopicDropdown).toBeFalse();
+	});
 
-    it('should clear selected topic', () => {
-        component.selectedTopic = mockTopic;
+	it('should clear selected topic', () => {
+		component.selectedTopic = mockTopic;
 
-        component.clearSelectedTopic();
+		component.clearSelectedTopic();
 
-        expect(component.selectedTopic).toBeNull();
-    });
+		expect(component.selectedTopic).toBeNull();
+	});
 
-    // ---------- DRAG & DROP ----------
+	// ---------- DRAG & DROP ----------
 
-    it('should set drag state on drag over', () => {
-        const event = new DragEvent('dragover');
+	it('should set drag state on drag over', () => {
+		const event = new DragEvent('dragover');
 
-        component.onDragOver(event);
+		component.onDragOver(event);
 
-        expect(component.isDragOver).toBeTrue();
-    });
+		expect(component.isDragOver).toBeTrue();
+	});
 
-    it('should remove drag state on drag leave', () => {
-        const event = new DragEvent('dragleave');
+	it('should remove drag state on drag leave', () => {
+		const event = new DragEvent('dragleave');
 
-        component.onDragLeave(event);
+		component.onDragLeave(event);
 
-        expect(component.isDragOver).toBeFalse();
-    });
+		expect(component.isDragOver).toBeFalse();
+	});
 
-    it('should call handleFiles on drop', () => {
-        const file = new File(['test'], 'test.png', { type: 'image/png' });
+	it('should call handleFiles on drop', () => {
+		const file = new File(['test'], 'test.png', { type: 'image/png' });
 
-        const event = {
-            preventDefault() { },
-            stopPropagation() { },
-            dataTransfer: { files: [file] }
-        } as any;
+		const event = {
+			preventDefault() { },
+			stopPropagation() { },
+			dataTransfer: { files: [file] }
+		} as any;
 
-        spyOn<any>(component, 'handleFiles');
+		spyOn<any>(component, 'handleFiles');
 
-        component.onDrop(event);
+		component.onDrop(event);
 
-        expect(component['handleFiles']).toHaveBeenCalled();
-    });
+		expect(component['handleFiles']).toHaveBeenCalled();
+	});
 
-    // ---------- IMAGE HANDLING ----------
+	// ---------- IMAGE HANDLING ----------
 
-    it('should add valid image files', () => {
-        const file = new File(['test'], 'img.png', { type: 'image/png' });
+	it('should add valid image files', () => {
+		const file = new File(['test'], 'img.png', { type: 'image/png' });
 
-        component['handleFiles']([file]);
+		component['handleFiles']([file]);
 
-        expect(component.selectedImages.length).toBe(1);
-    });
+		expect(component.selectedImages.length).toBe(1);
+	});
 
-    it('should remove image from preview list', () => {
-        component.previewImages = ['data:image/png'];
-        component.selectedImages = [new File(['test'], 'test.png', { type: 'image/png' })];
+	it('should remove image from preview list', () => {
+		component.previewImages = ['data:image/png'];
+		component.selectedImages = [new File(['test'], 'test.png', { type: 'image/png' })];
 
-        component.removeImage(0);
+		component.removeImage(0);
 
-        expect(component.previewImages.length).toBe(0);
-        expect(component.selectedImages.length).toBe(0);
-    });
+		expect(component.previewImages.length).toBe(0);
+		expect(component.selectedImages.length).toBe(0);
+	});
 
-    it('should not allow more than 10 images', () => {
-        component.previewImages = new Array(10).fill('data:image/png');
+	it('should not allow more than 10 images', () => {
+		component.previewImages = new Array(10).fill('data:image/png');
 
-        const newFile = new File(['test'], 'img.png', { type: 'image/png' });
+		const newFile = new File(['test'], 'img.png', { type: 'image/png' });
 
-        component['handleFiles']([newFile]);
+		component['handleFiles']([newFile]);
 
-        expect(component.errorMessage).toContain('10 images');
-    });
+		expect(component.errorMessage).toContain('10 images');
+	});
 
-    // ---------- GETTERS ----------
+	// ---------- GETTERS ----------
 
-    it('should return title length', () => {
-        component.createPostForm.patchValue({ title: 'Test' });
+	it('should return title length', () => {
+		component.createPostForm.patchValue({ title: 'Test' });
 
-        expect(component.titleLength).toBe(4);
-    });
+		expect(component.titleLength).toBe(4);
+	});
 
-    it('should return content length', () => {
-        component.createPostForm.patchValue({ content: 'Content' });
+	it('should return content length', () => {
+		component.createPostForm.patchValue({ content: 'Content' });
 
-        expect(component.contentLength).toBe(7);
-    });
+		expect(component.contentLength).toBe(7);
+	});
 
-    // ---------- ERROR HANDLING ----------
+	// ---------- ERROR HANDLING ----------
 
-    it('should set error message', () => {
-        component.setError('Test error');
+	it('should set error message', () => {
+		component.setError('Test error');
 
-        expect(component.errorMessage).toBe('Test error');
-    });
+		expect(component.errorMessage).toBe('Test error');
+	});
 
-    // ---------- CREATE POST ----------
+	// ---------- VALIDATION ----------
 
-    it('should show error if form invalid', async () => {
-        component.createPostForm.patchValue({ title: '' });
+	it('should block creation when the title is only whitespace', async () => {
+		component.selectedTopic = mockTopic;
+		component.createPostForm.patchValue({ title: '   ', content: 'Content' });
 
-        await component.createPost();
+		await component.createPost();
 
-        expect(component.errorMessage).toBeTruthy();
-    });
+		expect(component.errorMessage).toBe('The title cannot be empty.');
+		expect(postServiceSpy.create).not.toHaveBeenCalled();
+	});
 
-    it('should create post successfully', async () => {
-        postServiceSpy.create.and.returnValue(of(mockPost));
+	it('should send normalized title and content', async () => {
+		postServiceSpy.create.and.returnValue(of(mockPost));
+		component.selectedTopic = mockTopic;
+		component.createPostForm.patchValue({
+			title: '  My    title \n',
+			content: '  Hello   world  \r\n\r\n\r\n\r\n bye '
+		});
 
-        component.selectedTopic = mockTopic;
+		await component.createPost();
 
-        component.createPostForm.patchValue({
-            title: 'Test Post',
-            content: 'Content'
-        });
+		expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({ title: 'My title', content: 'Hello world\n\nbye' }));
+	});
 
-        await component.createPost();
+	it('should not report a content error when the content is empty (optional)', () => {
+		component.createPostForm.patchValue({ content: '   ' });
 
-        expect(postServiceSpy.create).toHaveBeenCalled();
-        expect(routerSpy.navigate).toHaveBeenCalled();
-        expect(snackBarSpy.open).toHaveBeenCalled();
-    });
+		expect(component.contentValidationError).toBeNull();
+	});
 
-    // ---------- IMAGE UPLOAD ----------
+	// ---------- CREATE POST ----------
 
-    it('should upload images before creating post', async () => {
-        imageServiceSpy.uploadImages.and.returnValue(of(['img1']));
-        postServiceSpy.create.and.returnValue(of(mockPost));
+	it('should show error if form invalid', async () => {
+		component.createPostForm.patchValue({ title: '' });
 
-        component.selectedTopic = mockTopic;
+		await component.createPost();
 
-        component.selectedImages = [
-            new File(['test'], 'img.png', { type: 'image/png' })
-        ];
+		expect(component.errorMessage).toBeTruthy();
+	});
 
-        component.createPostForm.patchValue({
-            title: 'Post',
-            content: 'Content'
-        });
+	it('should create post successfully', async () => {
+		postServiceSpy.create.and.returnValue(of(mockPost));
 
-        await component.createPost();
+		component.selectedTopic = mockTopic;
 
-        expect(imageServiceSpy.uploadImages).toHaveBeenCalled();
-        expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({ images: ['img1'] }));
-    });
+		component.createPostForm.patchValue({
+			title: 'Test Post',
+			content: 'Content'
+		});
 
-    it('should handle upload error', async () => {
-        imageServiceSpy.uploadImages.and.returnValue(
-            throwError(() => new Error('Upload error'))
-        );
+		await component.createPost();
 
-        component.selectedTopic = mockTopic;
+		expect(postServiceSpy.create).toHaveBeenCalled();
+		expect(routerSpy.navigate).toHaveBeenCalled();
+		expect(snackBarSpy.open).toHaveBeenCalled();
+	});
 
-        component.selectedImages = [
-            new File(['test'], 'img.png', { type: 'image/png' })
-        ];
+	// ---------- IMAGE UPLOAD ----------
 
-        component.createPostForm.patchValue({
-            title: 'Post',
-            content: 'Content'
-        });
+	it('should upload images before creating post', async () => {
+		imageServiceSpy.uploadImages.and.returnValue(of(['img1']));
+		postServiceSpy.create.and.returnValue(of(mockPost));
 
-        await component.createPost();
+		component.selectedTopic = mockTopic;
 
-        expect(component.errorMessage).toBeTruthy();
-    });
+		component.selectedImages = [
+			new File(['test'], 'img.png', { type: 'image/png' })
+		];
 
-    // ---------- EDIT MODE ----------
+		component.createPostForm.patchValue({
+			title: 'Post',
+			content: 'Content'
+		});
 
-    it('should load post for edit', () => {
-        postServiceSpy.getById.and.returnValue(of(mockPost));
+		await component.createPost();
 
-        component.postId = 1;
+		expect(imageServiceSpy.uploadImages).toHaveBeenCalled();
+		expect(postServiceSpy.create).toHaveBeenCalledWith(jasmine.objectContaining({ images: ['img1'] }));
+	});
 
-        component['loadPostForEdit']();
+	it('should handle upload error', async () => {
+		imageServiceSpy.uploadImages.and.returnValue(
+			throwError(() => new Error('Upload error'))
+		);
 
-        expect(postServiceSpy.getById).toHaveBeenCalledWith(1);
-    });
+		component.selectedTopic = mockTopic;
 
-    it('should load post for edit and populate form when user is owner', () => {
-        postServiceSpy.getById.and.returnValue(of(mockPost));
+		component.selectedImages = [
+			new File(['test'], 'img.png', { type: 'image/png' })
+		];
 
-        authService.checkAuth.and.returnValue(of({
-            id: 1,
-            username: '',
-            roles: ['USER']
-        }));
+		component.createPostForm.patchValue({
+			title: 'Post',
+			content: 'Content'
+		});
 
-        component.postId = 1;
+		await component.createPost();
 
-        spyOn<any>(component, 'populateFormWithPost');
+		expect(component.errorMessage).toBeTruthy();
+	});
 
-        component['loadPostForEdit']();
+	// ---------- EDIT MODE ----------
 
-        expect(postServiceSpy.getById).toHaveBeenCalledWith(1);
-        expect(authService.checkAuth).toHaveBeenCalled();
-        expect(component['populateFormWithPost']).toHaveBeenCalled();
-    });
+	it('should load post for edit', () => {
+		postServiceSpy.getById.and.returnValue(of(mockPost));
 
-    it('should redirect to login if user is not authenticated', () => {
-        postServiceSpy.getById.and.returnValue(of(mockPost));
+		component.postId = 1;
 
-        authService.checkAuth.and.returnValue(of(null));
+		component['loadPostForEdit']();
 
-        component.postId = 1;
+		expect(postServiceSpy.getById).toHaveBeenCalledWith(1);
+	});
 
-        component['loadPostForEdit']();
+	it('should load post for edit and populate form when user is owner', () => {
+		postServiceSpy.getById.and.returnValue(of(mockPost));
 
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
-    });
+		authService.checkAuth.and.returnValue(of({
+			id: 1,
+			username: '',
+			roles: ['USER']
+		}));
 
-    it('should redirect to error if user is not owner nor admin', () => {
-        postServiceSpy.getById.and.returnValue(of(mockPost));
+		component.postId = 1;
 
-        authService.checkAuth.and.returnValue(of({
-            id: 2,
-            username: '',
-            roles: ['USER']
-        }));
+		spyOn<any>(component, 'populateFormWithPost');
 
-        component.postId = 1;
+		component['loadPostForEdit']();
 
-        component['loadPostForEdit']();
+		expect(postServiceSpy.getById).toHaveBeenCalledWith(1);
+		expect(authService.checkAuth).toHaveBeenCalled();
+		expect(component['populateFormWithPost']).toHaveBeenCalled();
+	});
 
-        expect(errorService.setError).toHaveBeenCalledWith(403, 'Forbidden', "You don't have permission to edit this post");
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/error']);
-    });
+	it('should redirect to login if user is not authenticated', () => {
+		postServiceSpy.getById.and.returnValue(of(mockPost));
 
-    it('should populate form with post', () => {
-        component['populateFormWithPost'](mockPost);
+		authService.checkAuth.and.returnValue(of(null));
 
-        expect(component.createPostForm.value.title).toBe('Test Post');
-        expect(component.selectedTopic).toEqual(mockTopic);
-    });
+		component.postId = 1;
 
-    it('should update post when in edit mode', async () => {
-        postServiceSpy.update.and.returnValue(of(mockPost));
+		component['loadPostForEdit']();
 
-        component.isEditMode = true;
-        component.postId = 1;
-        component.existingPost = mockPost;
-        component.selectedTopic = mockTopic;
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+	});
 
-        component.createPostForm.patchValue({
-            title: 'Updated title',
-            content: 'Updated content'
-        });
+	it('should redirect to error if user is not owner nor admin', () => {
+		postServiceSpy.getById.and.returnValue(of(mockPost));
 
-        await component.createPost();
+		authService.checkAuth.and.returnValue(of({
+			id: 2,
+			username: '',
+			roles: ['USER']
+		}));
 
-        expect(postServiceSpy.update).toHaveBeenCalled();
-        expect(snackBarSpy.open).toHaveBeenCalledWith(
-            'Post updated successfully',
-            'Close',
-            jasmine.any(Object)
-        );
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts', 1]);
-    });
+		component.postId = 1;
 
-    // ---------- CANCEL ----------
+		component['loadPostForEdit']();
 
-    it('should call window.history.back if history length > 1', () => {
-        spyOnProperty(window.history, 'length', 'get').and.returnValue(2);
-        spyOn(window.history, 'back');
+		expect(errorService.setError).toHaveBeenCalledWith(403, 'Forbidden', "You don't have permission to edit this post");
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/error']);
+	});
 
-        component.onCancel();
+	it('should populate form with post', () => {
+		component['populateFormWithPost'](mockPost);
 
-        expect(window.history.back).toHaveBeenCalled();
-        expect(routerSpy.navigate).not.toHaveBeenCalled();
-    });
+		expect(component.createPostForm.value.title).toBe('Test Post');
+		expect(component.selectedTopic).toEqual(mockTopic);
+	});
 
-    it('should navigate to /posts if history length <= 1', () => {
-        spyOnProperty(window.history, 'length', 'get').and.returnValue(1);
-        spyOn(window.history, 'back');
+	it('should update post when in edit mode', async () => {
+		postServiceSpy.update.and.returnValue(of(mockPost));
 
-        component.onCancel();
+		component.isEditMode = true;
+		component.postId = 1;
+		component.existingPost = mockPost;
+		component.selectedTopic = mockTopic;
 
-        expect(window.history.back).not.toHaveBeenCalled();
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts']);
-    });
+		component.createPostForm.patchValue({
+			title: 'Updated title',
+			content: 'Updated content'
+		});
+
+		await component.createPost();
+
+		expect(postServiceSpy.update).toHaveBeenCalled();
+		expect(snackBarSpy.open).toHaveBeenCalledWith(
+			'Post updated successfully',
+			'Close',
+			jasmine.any(Object)
+		);
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts', 1]);
+	});
+
+	// ---------- CANCEL ----------
+
+	it('should call window.history.back if history length > 1', () => {
+		spyOnProperty(window.history, 'length', 'get').and.returnValue(2);
+		spyOn(window.history, 'back');
+
+		component.onCancel();
+
+		expect(window.history.back).toHaveBeenCalled();
+		expect(routerSpy.navigate).not.toHaveBeenCalled();
+	});
+
+	it('should navigate to /posts if history length <= 1', () => {
+		spyOnProperty(window.history, 'length', 'get').and.returnValue(1);
+		spyOn(window.history, 'back');
+
+		component.onCancel();
+
+		expect(window.history.back).not.toHaveBeenCalled();
+		expect(routerSpy.navigate).toHaveBeenCalledWith(['/posts']);
+	});
 
 });

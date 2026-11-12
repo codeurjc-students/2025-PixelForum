@@ -4,19 +4,19 @@ import { HttpClientTestingModule } from "@angular/common/http/testing";
 
 describe('PostPageComponent - Unit Tests', () => {
 
-    let component: PostPageComponent;
-    let fixture: ComponentFixture<PostPageComponent>;
+	let component: PostPageComponent;
+	let fixture: ComponentFixture<PostPageComponent>;
 
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [PostPageComponent, HttpClientTestingModule]
-        }).compileComponents();
+	beforeEach(async () => {
+		await TestBed.configureTestingModule({
+			imports: [PostPageComponent, HttpClientTestingModule]
+		}).compileComponents();
 
-        fixture = TestBed.createComponent(PostPageComponent);
-        component = fixture.componentInstance;
-    });
+		fixture = TestBed.createComponent(PostPageComponent);
+		component = fixture.componentInstance;
+	});
 
-    it('should create component', () => {
-        expect(component).toBeTruthy();
-    });
+	it('should create component', () => {
+		expect(component).toBeTruthy();
+	});
 });

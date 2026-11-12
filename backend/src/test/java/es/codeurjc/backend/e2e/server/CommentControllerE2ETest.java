@@ -109,6 +109,23 @@ class CommentControllerE2ETest {
 	}
 
 	@Test
+	@DisplayName("Get post comments should work when authenticated")
+	void getPostCommentsAuthenticatedSystemTest() {
+		// GIVEN
+		createComment(authToken, "Comment for authenticated list");
+
+		// WHEN & THEN
+		given()
+				.cookie("AuthToken", authToken)
+				.when()
+				.get(commentsPath())
+				.then()
+				.statusCode(200)
+				.body("content", not(empty()))
+				.body("content[0].hasUserLiked", notNullValue());
+	}
+
+	@Test
 	@DisplayName("Get comment by id should return the comment")
 	void getCommentByIdSystemTest() {
 		// GIVEN

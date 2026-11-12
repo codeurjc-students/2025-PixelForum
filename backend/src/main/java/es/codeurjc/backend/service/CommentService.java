@@ -18,6 +18,7 @@ import es.codeurjc.backend.model.Post;
 import es.codeurjc.backend.model.User;
 import es.codeurjc.backend.repository.CommentRepository;
 import es.codeurjc.backend.repository.PostRepository;
+import es.codeurjc.backend.utils.TextRules;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -33,7 +34,7 @@ public class CommentService {
 		this.postRepository = postRepository;
 	}
 
-	public Comment findById(Long id) {
+	private Comment findById(Long id) {
 		return commentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 	}
 
@@ -42,7 +43,7 @@ public class CommentService {
 	}
 
 	private CommentDTO toDTO(Comment comment, User currentUser) {
-		 return mapper.toDTOWithLike(comment, currentUser);
+		return mapper.toDTOWithLike(comment, currentUser);
 	}
 
 	public CommentDTO getComment(Long id, User currentUser) {
@@ -57,10 +58,12 @@ public class CommentService {
 		return commentsPage.map(comment -> toDTO(comment, currentUser));
 	}
 
+	@Transactional
 	public CommentDTO createComment(Long postId, CommentDTO commentDTO, User user) {
 		Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
 
 		Comment comment = mapper.toDomain(commentDTO);
+		comment.setContent(TextRules.multiline("The comment", commentDTO.content(), 2000, 30));
 		comment.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 		comment.setUpdatedAt(null);
 		comment.setLikes(0);
@@ -79,11 +82,13 @@ public class CommentService {
 			throw new AccessDeniedException("You can only edit your own comments");
 		}
 
-		if (Objects.equals(comment.getContent(), commentDTO.content())) {
+		String newContent = TextRules.multiline("The comment", commentDTO.content(), 2000, 30);
+
+		if (Objects.equals(comment.getContent(), newContent)) {
 			return toDTO(comment, user);
 		}
 
-		comment.setContent(commentDTO.content());
+		comment.setContent(newContent);
 		comment.setUpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
 		Comment updatedComment = commentRepository.save(comment);

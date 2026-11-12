@@ -31,256 +31,256 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class PostUISystemTest {
 
-    @LocalServerPort
-    int port;
+	@LocalServerPort
+	int port;
 
-    private WebDriver driver;
-    private WebDriverWait wait;
+	private WebDriver driver;
+	private WebDriverWait wait;
 
-    @BeforeEach
-    void setUp() {
-        port = 4200;
-        String browser = System.getenv("BROWSER");
-        if ("firefox".equalsIgnoreCase(browser)) {
-            FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("--headless");
-            options.setAcceptInsecureCerts(true);
-            driver = new FirefoxDriver(options);
-        } else if ("edge".equalsIgnoreCase(browser)) {
-            EdgeOptions options = new EdgeOptions();
-            options.addArguments("--headless");
-            options.setAcceptInsecureCerts(true);
-            driver = new EdgeDriver(options);
-        } else {
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--ignore-certificate-errors");
-            options.setAcceptInsecureCerts(true);
-            driver = new ChromeDriver(options);
-        }
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    }
+	@BeforeEach
+	void setUp() {
+		port = 4200;
+		String browser = System.getenv("BROWSER");
+		if ("firefox".equalsIgnoreCase(browser)) {
+			FirefoxOptions options = new FirefoxOptions();
+			options.addArguments("--headless");
+			options.setAcceptInsecureCerts(true);
+			driver = new FirefoxDriver(options);
+		} else if ("edge".equalsIgnoreCase(browser)) {
+			EdgeOptions options = new EdgeOptions();
+			options.addArguments("--headless");
+			options.setAcceptInsecureCerts(true);
+			driver = new EdgeDriver(options);
+		} else {
+			ChromeOptions options = new ChromeOptions();
+			options.addArguments("--headless");
+			options.addArguments("--ignore-certificate-errors");
+			options.setAcceptInsecureCerts(true);
+			driver = new ChromeDriver(options);
+		}
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	}
 
-    @AfterEach
-    void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
+	@AfterEach
+	void tearDown() {
+		if (driver != null) {
+			driver.quit();
+		}
+	}
 
-    private void login(String username, String password) {
-        driver.get("https://localhost:" + port + "/login");
+	private void login(String username, String password) {
+		driver.get("https://localhost:" + port + "/login");
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("login-button")));
 
-        WebElement usernameField = driver.findElement(By.id("username"));
-        WebElement passwordField = driver.findElement(By.id("password"));
-        WebElement loginButton = driver.findElement(By.id("login-button"));
+		WebElement usernameField = driver.findElement(By.id("username"));
+		WebElement passwordField = driver.findElement(By.id("password"));
+		WebElement loginButton = driver.findElement(By.id("login-button"));
 
-        usernameField.sendKeys(username);
-        passwordField.sendKeys(password);
-        loginButton.click();
+		usernameField.sendKeys(username);
+		passwordField.sendKeys(password);
+		loginButton.click();
 
-        wait.until(ExpectedConditions.urlContains("/posts"));
-    }
+		wait.until(ExpectedConditions.urlContains("/posts"));
+	}
 
-    private String createPost(String title) {
-        driver.get("https://localhost:" + port + "/create-post");
+	private String createPost(String title) {
+		driver.get("https://localhost:" + port + "/create-post");
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
 
-        driver.findElement(By.id("title")).sendKeys(title);
-        driver.findElement(By.id("content")).sendKeys("Test content");
+		driver.findElement(By.id("title")).sendKeys(title);
+		driver.findElement(By.id("content")).sendKeys("Test content");
 
-        driver.findElement(By.id("topic-search")).sendKeys("GTA");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
-        driver.findElement(By.cssSelector(".topic-option")).click();
+		driver.findElement(By.id("topic-search")).sendKeys("GTA");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
+		driver.findElement(By.cssSelector(".topic-option")).click();
 
-        driver.findElement(By.id("save-post-button")).click();
+		driver.findElement(By.id("save-post-button")).click();
 
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+		wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
 
-        return driver.getCurrentUrl();
-    }
+		return driver.getCurrentUrl();
+	}
 
-    @Test
-    @DisplayName("List posts page displays posts")
-    void listPostsTest() {
-        driver.get("https://localhost:" + port + "/posts");
+	@Test
+	@DisplayName("List posts page displays posts")
+	void listPostsTest() {
+		driver.get("https://localhost:" + port + "/posts");
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
-        List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
-        assertTrue(posts.size() > 0, "There should be at least one post displayed");
-    }
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
+		List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
+		assertTrue(posts.size() > 0, "There should be at least one post displayed");
+	}
 
-    @Test
-    @DisplayName("Access post detail page")
-    void postDetailTest() {
-        driver.get("https://localhost:" + port + "/posts");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
+	@Test
+	@DisplayName("Access post detail page")
+	void postDetailTest() {
+		driver.get("https://localhost:" + port + "/posts");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
 
-        List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
-        WebElement firstPost = posts.get(0);
-        firstPost.click();
+		List<WebElement> posts = driver.findElements(By.cssSelector("app-post"));
+		WebElement firstPost = posts.get(0);
+		firstPost.click();
 
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
-        assertTrue(driver.getCurrentUrl().contains("/posts/"));
-    }
+		wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+		assertTrue(driver.getCurrentUrl().contains("/posts/"));
+	}
 
-    @Test
-    @DisplayName("Create a new post successfully")
-    void createPostTest() {
-        login("admin", "admin0");
-        driver.get("https://localhost:" + port + "/create-post");
+	@Test
+	@DisplayName("Create a new post successfully")
+	void createPostTest() {
+		login("admin", "admin0");
+		driver.get("https://localhost:" + port + "/create-post");
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
 
-        // Fill form
-        driver.findElement(By.id("title")).sendKeys("Selenium Test Post");
-        driver.findElement(By.id("content")).sendKeys("This post was created by Selenium E2E test.");
+		// Fill form
+		driver.findElement(By.id("title")).sendKeys("Selenium Test Post");
+		driver.findElement(By.id("content")).sendKeys("This post was created by Selenium E2E test.");
 
-        // Topic
-        driver.findElement(By.id("topic-search")).sendKeys("GTA V");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
-        driver.findElement(By.cssSelector(".topic-option")).click();
+		// Topic
+		driver.findElement(By.id("topic-search")).sendKeys("GTA V");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".topic-option")));
+		driver.findElement(By.cssSelector(".topic-option")).click();
 
-        // Image upload
-        WebElement fileInput = driver.findElement(By.id("images"));
-        fileInput.sendKeys(System.getProperty("user.dir") + "/src/test/resources/test.png");
+		// Image upload
+		WebElement fileInput = driver.findElement(By.id("images"));
+		fileInput.sendKeys(System.getProperty("user.dir") + "/src/test/resources/test.png");
 
-        driver.findElement(By.id("save-post-button")).click();
+		driver.findElement(By.id("save-post-button")).click();
 
-        // Wait for navigation to detail page
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+		// Wait for navigation to detail page
+		wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
 
-        // Verify title in detail page
-        WebElement postTitle = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("post-title")));
-        assertEquals("Selenium Test Post", postTitle.getText(), "The post should be created");
+		// Verify title in detail page
+		WebElement postTitle = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("post-title")));
+		assertEquals("Selenium Test Post", postTitle.getText(), "The post should be created");
 
-        // Verify image is displayed
-        List<WebElement> images = driver.findElements(By.id("post-image"));
-        assertTrue(images.size() > 0, "Post should contain an image");
-    }
+		// Verify image is displayed
+		List<WebElement> images = driver.findElements(By.id("post-image"));
+		assertTrue(images.size() > 0, "Post should contain an image");
+	}
 
-    @Test
-    @DisplayName("Unauthorized user cannot access create post page")
-    void unauthorizedCreatePostTest() {
-        driver.get("https://localhost:" + port + "/create-post");
+	@Test
+	@DisplayName("Unauthorized user cannot access create post page")
+	void unauthorizedCreatePostTest() {
+		driver.get("https://localhost:" + port + "/create-post");
 
-        wait.until(ExpectedConditions.urlContains("/login"));
+		wait.until(ExpectedConditions.urlContains("/login"));
 
-        assertTrue(driver.getCurrentUrl().contains("/login"));
-    }
+		assertTrue(driver.getCurrentUrl().contains("/login"));
+	}
 
-    @Test
-    @DisplayName("Edit an existing post")
-    void editPostTest() {
-        login("admin", "admin0");
+	@Test
+	@DisplayName("Edit an existing post")
+	void editPostTest() {
+		login("admin", "admin0");
 
-        // Create a post to edit
-        createPost("Post to edit");
-        List<WebElement> imagesBefore = driver.findElements(By.id("post-image"));
+		// Create a post to edit
+		createPost("Post to edit");
+		List<WebElement> imagesBefore = driver.findElements(By.id("post-image"));
 
-        // Click edit button
-        WebElement editButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("edit-btn")));
-        editButton.click();
+		// Click edit button
+		WebElement editButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("edit-btn")));
+		editButton.click();
 
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+/edit$"));
+		wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+/edit$"));
 
-        // Edit title and add image
-        WebElement titleInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
-        titleInput.clear();
-        titleInput.sendKeys("Edited Selenium Post");
-        WebElement fileInput = driver.findElement(By.id("images"));
-        fileInput.sendKeys(System.getProperty("user.dir") + "/src/test/resources/test.png");
+		// Edit title and add image
+		WebElement titleInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("title")));
+		titleInput.clear();
+		titleInput.sendKeys("Edited Selenium Post");
+		WebElement fileInput = driver.findElement(By.id("images"));
+		fileInput.sendKeys(System.getProperty("user.dir") + "/src/test/resources/test.png");
 
-        driver.findElement(By.id("save-post-button")).click();
+		driver.findElement(By.id("save-post-button")).click();
 
-        // Verify edited content
-        wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
-        WebElement postTitle = driver.findElement(By.id("post-title"));
-        assertEquals("Edited Selenium Post", postTitle.getText(), "The title should change to the edited one");
-        List<WebElement> imagesAfter = driver.findElements(By.id("post-image"));
-        assertEquals(imagesBefore.size() + 1, imagesAfter.size());
-    }
+		// Verify edited content
+		wait.until(ExpectedConditions.urlMatches(".*/posts/\\d+$"));
+		WebElement postTitle = driver.findElement(By.id("post-title"));
+		assertEquals("Edited Selenium Post", postTitle.getText(), "The title should change to the edited one");
+		List<WebElement> imagesAfter = driver.findElements(By.id("post-image"));
+		assertEquals(imagesBefore.size() + 1, imagesAfter.size());
+	}
 
-    @Test
-    @DisplayName("User should not access edit page of another user's post")
-    void editPostUnauthorizedTest() {
-        // GIVEN
-        // Create post as admin
-        login("admin", "admin0");
-        String postUrl = createPost("Admin Post For Unauthorized Test");
+	@Test
+	@DisplayName("User should not access edit page of another user's post")
+	void editPostUnauthorizedTest() {
+		// GIVEN
+		// Create post as admin
+		login("admin", "admin0");
+		String postUrl = createPost("Admin Post For Unauthorized Test");
 
-        // Extract postId
-        String postId = postUrl.substring(postUrl.lastIndexOf("/") + 1);
+		// Extract postId
+		String postId = postUrl.substring(postUrl.lastIndexOf("/") + 1);
 
-        // Logout admin
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
-        driver.manage().deleteAllCookies();
-        driver.navigate().refresh();
+		// Logout admin
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("logout-button")));
+		driver.manage().deleteAllCookies();
+		driver.navigate().refresh();
 
-        // Login as another user
-        login("martin", "user");
+		// Login as another user
+		login("martin", "user");
 
-        // WHEN
-        driver.get("https://localhost:" + port + "/posts/" + postId + "/edit");
+		// WHEN
+		driver.get("https://localhost:" + port + "/posts/" + postId + "/edit");
 
-        // THEN
-        wait.until(ExpectedConditions.urlContains("/error"));
-        assertTrue(driver.getCurrentUrl().contains("/error"), "Unauthorized user should be redirected to error page");
-    }
+		// THEN
+		wait.until(ExpectedConditions.urlContains("/error"));
+		assertTrue(driver.getCurrentUrl().contains("/error"), "Unauthorized user should be redirected to error page");
+	}
 
-    @Test
-    @DisplayName("Delete a post safely")
-    void deletePostTest() {
-        login("admin", "admin0");
+	@Test
+	@DisplayName("Delete a post safely")
+	void deletePostTest() {
+		login("admin", "admin0");
 
-        // Create a post to delete
-        String postTitleToDelete = "Selenium Delete Test Post";
-        String postUrl = createPost(postTitleToDelete);
+		// Create a post to delete
+		String postTitleToDelete = "Selenium Delete Test Post";
+		String postUrl = createPost(postTitleToDelete);
 
-        // Click delete
-        WebElement deleteButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("delete-btn")));
-        deleteButton.click();
-        WebElement confirmButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("confirm-button")));
-        confirmButton.click();
+		// Click delete
+		WebElement deleteButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("delete-btn")));
+		deleteButton.click();
+		WebElement confirmButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("confirm-button")));
+		confirmButton.click();
 
-        // Back to post list
-        wait.until(ExpectedConditions.urlMatches(".*/posts$"));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
+		// Back to post list
+		wait.until(ExpectedConditions.urlMatches(".*/posts$"));
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("app-post")));
 
-        driver.get(postUrl);
-        WebElement error = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
-        assertEquals("404", error.getText(), "The post should be deleted and not accessible");
-    }
+		driver.get(postUrl);
+		WebElement error = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error-code")));
+		assertEquals("404", error.getText(), "The post should be deleted and not accessible");
+	}
 
-    @Test
-    @DisplayName("Toggle like on a post")
-    void toggleLikeTest() {
-        // Login
-        login("martin", "user");
+	@Test
+	@DisplayName("Toggle like on a post")
+	void toggleLikeTest() {
+		// Login
+		login("martin", "user");
 
-        // Create a post to like
-        createPost("Post to Like");
+		// Create a post to like
+		createPost("Post to Like");
 
-        // Like the post
-        WebElement likeButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".like-btn")));
-        likeButton.click();
+		// Like the post
+		WebElement likeButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".like-btn")));
+		likeButton.click();
 
-        // Wait until likes change
-        wait.until(d -> getLikes() != 0);
-        assertEquals(1, getLikes(), "Like should increase by 1");
+		// Wait until likes change
+		wait.until(d -> getLikes() != 0);
+		assertEquals(1, getLikes(), "Like should increase by 1");
 
-        // Click again (unlike)
-        likeButton.click();
+		// Click again (unlike)
+		likeButton.click();
 
-        // Wait until likes return
-        wait.until(d -> getLikes() == 0);
-        assertEquals(0, getLikes(), "Like should return to original value");
-    }
+		// Wait until likes return
+		wait.until(d -> getLikes() == 0);
+		assertEquals(0, getLikes(), "Like should return to original value");
+	}
 
-    private int getLikes() {
-        return Integer.parseInt(driver.findElement(By.cssSelector(".like-btn .count")).getText());
-    }
+	private int getLikes() {
+		return Integer.parseInt(driver.findElement(By.cssSelector(".like-btn .count")).getText());
+	}
 }

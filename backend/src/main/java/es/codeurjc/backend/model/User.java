@@ -22,131 +22,133 @@ import jakarta.persistence.Table;
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    @Column(unique = true, nullable = false)
-    private String username;
+	@Column(unique = true, nullable = false)
+	private String username;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+	@Column(unique = true, nullable = false)
+	private String email;
 
-    @Column(nullable = false)
-    private String password;
+	@Column(nullable = false)
+	private String password;
 
-    private LocalDateTime createdAt;
-    private String bio;
+	private LocalDateTime createdAt;
 
-    @OneToOne
-    @JoinColumn(name = "profile_image_id")
-    private Image avatar;
+	@Column(length = 300)
+	private String bio;
 
-    @ManyToMany
-    @JoinTable(name = "user_liked_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
-    private Set<Post> likedPosts = new HashSet<>();
+	@OneToOne
+	@JoinColumn(name = "profile_image_id")
+	private Image avatar;
 
-    @ManyToMany
-    @JoinTable(name = "user_liked_comments", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "comment_id"))
-    private Set<Comment> likedComments = new HashSet<>();
+	@ManyToMany
+	@JoinTable(name = "user_liked_posts", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "post_id"))
+	private Set<Post> likedPosts = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> roles;
+	@ManyToMany
+	@JoinTable(name = "user_liked_comments", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "comment_id"))
+	private Set<Comment> likedComments = new HashSet<>();
 
-    public User() {
-    }
+	@ElementCollection(fetch = FetchType.EAGER)
+	private List<String> roles;
 
-    public User(String username, String email, String password, LocalDateTime createdAt, String bio, String... roles) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.createdAt = createdAt;
-        this.bio = bio;
-        likedPosts = new HashSet<>();
-        likedComments = new HashSet<>();
-        this.roles = List.of(roles);
-    }
+	public User() {
+	}
 
-    // Getters
-    public long getId() {
-        return id;
-    }
+	public User(String username, String email, String password, LocalDateTime createdAt, String bio, String... roles) {
+		this.username = username;
+		this.email = email;
+		this.password = password;
+		this.createdAt = createdAt;
+		this.bio = bio;
+		likedPosts = new HashSet<>();
+		likedComments = new HashSet<>();
+		this.roles = List.of(roles);
+	}
 
-    public String getUsername() {
-        return this.username;
-    }
+	// Getters
+	public long getId() {
+		return id;
+	}
 
-    public String getEmail() {
-        return this.email;
-    }
+	public String getUsername() {
+		return this.username;
+	}
 
-    public String getPassword() {
-        return this.password;
-    }
+	public String getEmail() {
+		return this.email;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public String getPassword() {
+		return this.password;
+	}
 
-    public String getBio() {
-        return bio;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public Image getAvatar() {
-        return avatar;
-    }
+	public String getBio() {
+		return bio;
+	}
 
-    public Set<Post> getLikedPosts() {
-        return likedPosts;
-    }
+	public Image getAvatar() {
+		return avatar;
+	}
 
-    public Set<Comment> getLikedComments() {
-        return likedComments;
-    }
+	public Set<Post> getLikedPosts() {
+		return likedPosts;
+	}
 
-    public List<String> getRoles() {
-        return roles;
-    }
+	public Set<Comment> getLikedComments() {
+		return likedComments;
+	}
 
-    // Setters
-    public void setId(long id) {
-        this.id = id;
-    }
+	public List<String> getRoles() {
+		return roles;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	// Setters
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public void setAvatar(Image avatar) {
-        this.avatar = avatar;
-    }
+	public void setBio(String bio) {
+		this.bio = bio;
+	}
 
-    public void setLikedPosts(Set<Post> likedPosts) {
-        this.likedPosts = likedPosts;
-    }
+	public void setAvatar(Image avatar) {
+		this.avatar = avatar;
+	}
 
-    public void setLikedComments(Set<Comment> likedComments) {
-        this.likedComments = likedComments;
-    }
+	public void setLikedPosts(Set<Post> likedPosts) {
+		this.likedPosts = likedPosts;
+	}
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
+	public void setLikedComments(Set<Comment> likedComments) {
+		this.likedComments = likedComments;
+	}
+
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
+	}
 
 }

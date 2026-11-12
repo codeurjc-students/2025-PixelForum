@@ -63,8 +63,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 		this.route.params
 			.pipe(takeUntil(this.destroy$))
 			.subscribe(params => {
-					const id = params['userId'];
-					this.loadUserProfile(id);
+				const id = params['userId'];
+				this.loadUserProfile(id);
 			});
 	}
 

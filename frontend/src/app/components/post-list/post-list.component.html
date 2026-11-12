@@ -31,7 +31,7 @@
 	</div>
 
 	<!-- Load More Button -->
-	<div *ngIf="hasMorePages" class="load-more-container">
+	<div *ngIf="!isLoading && hasMorePages" class="load-more-container">
 		<button class="btn" (click)="loadMorePosts()" [disabled]="isLoadingMore" type="button">
 			<span *ngIf="!isLoadingMore">Load More</span>
 			<span *ngIf="isLoadingMore">

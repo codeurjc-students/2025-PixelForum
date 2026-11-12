@@ -4,16 +4,16 @@ import java.time.Duration;
 
 <span class="fc" id="L5">public enum TokenType {</span>
 
-<span class="fc" id="L7">    ACCESS(Duration.ofMinutes(5), &quot;AuthToken&quot;),</span>
-<span class="fc" id="L8">    REFRESH(Duration.ofDays(7), &quot;RefreshToken&quot;);</span>
+<span class="fc" id="L7">	ACCESS(Duration.ofMinutes(5), &quot;AuthToken&quot;),</span>
+<span class="fc" id="L8">	REFRESH(Duration.ofDays(7), &quot;RefreshToken&quot;);</span>
 
-    //Token lifetime in seconds
-    public final Duration duration;
-    public final String cookieName;
+	// Token lifetime in seconds
+	public final Duration duration;
+	public final String cookieName;
 
-<span class="fc" id="L14">    TokenType(Duration duration, String cookieName) {</span>
-<span class="fc" id="L15">        this.duration = duration;</span>
-<span class="fc" id="L16">        this.cookieName = cookieName;</span>
-<span class="fc" id="L17">    }</span>
+<span class="fc" id="L14">	TokenType(Duration duration, String cookieName) {</span>
+<span class="fc" id="L15">		this.duration = duration;</span>
+<span class="fc" id="L16">		this.cookieName = cookieName;</span>
+<span class="fc" id="L17">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

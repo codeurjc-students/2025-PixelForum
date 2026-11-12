@@ -21,12 +21,12 @@ public class JwtTokenProvider {
 	private final SecretKey jwtSecret = Jwts.SIG.HS256.key().build();
 	private final JwtParser jwtParser = Jwts.parser().verifyWith(jwtSecret).build();
 
-	public String tokenStringFromHeaders(HttpServletRequest req){
+	public String tokenStringFromHeaders(HttpServletRequest req) {
 		String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);
 		if (bearerToken == null) {
 			throw new IllegalArgumentException("Missing Authorization header");
 		}
-		if(!bearerToken.startsWith("Bearer ")){
+		if (!bearerToken.startsWith("Bearer ")) {
 			throw new IllegalArgumentException("Authorization header does not start with Bearer: " + bearerToken);
 		}
 		return bearerToken.substring(7);
@@ -42,7 +42,8 @@ public class JwtTokenProvider {
 			if (TokenType.ACCESS.cookieName.equals(cookie.getName())) {
 				String accessToken = cookie.getValue();
 				if (accessToken == null) {
-					throw new IllegalArgumentException("Cookie %s has null value".formatted(TokenType.ACCESS.cookieName));
+					throw new IllegalArgumentException(
+							"Cookie %s has null value".formatted(TokenType.ACCESS.cookieName));
 				}
 
 				return accessToken;
@@ -51,10 +52,8 @@ public class JwtTokenProvider {
 		throw new IllegalArgumentException("No access token cookie found in request");
 	}
 
-	public Claims validateToken(HttpServletRequest req, boolean fromCookie){
-		var token = fromCookie?
-				tokenStringFromCookies(req):
-				tokenStringFromHeaders(req);
+	public Claims validateToken(HttpServletRequest req, boolean fromCookie) {
+		var token = fromCookie ? tokenStringFromCookies(req) : tokenStringFromHeaders(req);
 		return validateToken(token);
 	}
 
@@ -68,7 +67,7 @@ public class JwtTokenProvider {
 
 	public String generateRefreshToken(User user) {
 		var token = buildToken(TokenType.REFRESH, user);
-        return token.compact();
+		return token.compact();
 	}
 
 	private JwtBuilder buildToken(TokenType tokenType, User user) {
@@ -84,12 +83,12 @@ public class JwtTokenProvider {
 	}
 
 	public boolean isTokenType(Claims claims, TokenType expectedType) {
-        String tokenType = claims.get("type", String.class);
-        return expectedType.name().equals(tokenType);
-    }
+		String tokenType = claims.get("type", String.class);
+		return expectedType.name().equals(tokenType);
+	}
 
-    public boolean isTokenType(String token, TokenType expectedType) {
-        Claims claims = validateToken(token);
-        return isTokenType(claims, expectedType);
-    }
+	public boolean isTokenType(String token, TokenType expectedType) {
+		Claims claims = validateToken(token);
+		return isTokenType(claims, expectedType);
+	}
 }

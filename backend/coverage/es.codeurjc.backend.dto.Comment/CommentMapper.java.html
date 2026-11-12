@@ -11,30 +11,32 @@ import es.codeurjc.backend.model.User;
 @Mapper(componentModel = &quot;spring&quot;, uses = UserMapper.class)
 public interface CommentMapper {
 
-    @Mapping(target = &quot;hasUserLiked&quot;, ignore = true)
-    CommentDTO toDTO(Comment comment);
+	@Mapping(target = &quot;hasUserLiked&quot;, ignore = true)
+	CommentDTO toDTO(Comment comment);
 
-    List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments);
+	List&lt;CommentDTO&gt; toDTOs(Collection&lt;Comment&gt; comments);
 
-    @Mapping(target = &quot;author&quot;, ignore = true)
-    @Mapping(target = &quot;post&quot;, ignore = true)
-    @Mapping(target = &quot;usersThatLiked&quot;, ignore = true)
-    Comment toDomain(CommentDTO commentDTO);
+	@Mapping(target = &quot;author&quot;, ignore = true)
+	@Mapping(target = &quot;post&quot;, ignore = true)
+	@Mapping(target = &quot;usersThatLiked&quot;, ignore = true)
+	@Mapping(target = &quot;id&quot;, ignore = true)
+	@Mapping(target = &quot;parentComment&quot;, ignore = true) // TO BE REMOVED WHEN NESTED COMMENTS ARE IMPLEMENTED
+	Comment toDomain(CommentDTO commentDTO);
 
-    default CommentDTO toDTOWithLike(Comment comment, User currentUser) {
-<span class="fc" id="L25">        CommentDTO dto = toDTO(comment);</span>
-<span class="fc" id="L26">        Boolean hasLiked = false;</span>
-<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (currentUser != null) {</span>
-<span class="pc bpc" id="L28" title="1 of 4 branches missed.">            hasLiked = comment.getUsersThatLiked() != null &amp;&amp; comment.getUsersThatLiked().contains(currentUser);</span>
-        }
-<span class="fc" id="L30">        return new CommentDTO(</span>
-<span class="fc" id="L31">                dto.id(), dto.content(),</span>
-<span class="fc" id="L32">                dto.createdAt(), dto.updatedAt(),</span>
-<span class="fc" id="L33">                dto.author(),</span>
-<span class="fc" id="L34">                dto.parentComment(),</span>
-<span class="fc" id="L35">                dto.likes(),</span>
-                hasLiked,
-<span class="fc" id="L37">                dto.post());</span>
-    }
+	default CommentDTO toDTOWithLike(Comment comment, User currentUser) {
+<span class="fc" id="L27">		CommentDTO dto = toDTO(comment);</span>
+<span class="fc" id="L28">		Boolean hasLiked = false;</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">		if (currentUser != null) {</span>
+<span class="pc bpc" id="L30" title="1 of 4 branches missed.">			hasLiked = comment.getUsersThatLiked() != null &amp;&amp; comment.getUsersThatLiked().contains(currentUser);</span>
+		}
+<span class="fc" id="L32">		return new CommentDTO(</span>
+<span class="fc" id="L33">				dto.id(), dto.content(),</span>
+<span class="fc" id="L34">				dto.createdAt(), dto.updatedAt(),</span>
+<span class="fc" id="L35">				dto.author(),</span>
+<span class="fc" id="L36">				dto.parentComment(),</span>
+<span class="fc" id="L37">				dto.likes(),</span>
+				hasLiked,
+<span class="fc" id="L39">				dto.post());</span>
+	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

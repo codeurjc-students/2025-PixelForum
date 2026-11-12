@@ -16,21 +16,21 @@ import es.codeurjc.backend.service.TopicService;
 @RequestMapping("/api/v1/topics")
 public class TopicRestController {
 
-    private final TopicService topicService;
+	private final TopicService topicService;
 
-    public TopicRestController(TopicService topicService) {
-        this.topicService = topicService;
-    }
+	public TopicRestController(TopicService topicService) {
+		this.topicService = topicService;
+	}
 
-    @GetMapping("/")
-    public List<Topic> getAllTopics() {
-        return topicService.findAll();
-    }
+	@GetMapping("/")
+	public List<Topic> getAllTopics() {
+		return topicService.findAll();
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Topic> getTopicById(@PathVariable long id) {
-        Optional<Topic> topic = topicService.findById(id);
-        return topic.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	@GetMapping("/{id}")
+	public ResponseEntity<Topic> getTopicById(@PathVariable long id) {
+		Optional<Topic> topic = topicService.findById(id);
+		return topic.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
 }

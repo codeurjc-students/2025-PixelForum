@@ -258,6 +258,14 @@
 	white-space: pre-wrap;
 	word-break: break-word;
 	font-size: 1rem;
+
+	&.clamped {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 20;
+		line-clamp: 20;
+		overflow: hidden;
+	}
 }
 
 /* Footer */
