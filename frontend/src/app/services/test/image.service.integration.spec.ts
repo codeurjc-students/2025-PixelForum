@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ImageService } from '../image.service';
 import { AuthService } from '../auth.service';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 jasmine.getEnv().configure({ random: false });
@@ -14,7 +15,7 @@ describe('ImageService - Integration Tests', () => {
 	beforeEach((done: DoneFn) => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientModule],
-			providers: [ImageService, AuthService]
+			providers: [ImageService, AuthService, { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }]
 		});
 
 		service = TestBed.inject(ImageService);

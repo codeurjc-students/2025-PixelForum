@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
 
 import { User } from '../../models/user.model';
 import { ImageService } from '../image.service';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 jasmine.getEnv().configure({ random: false });
@@ -20,7 +21,7 @@ describe('UserService - Integration', () => {
 	beforeEach((done: DoneFn) => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientModule],
-			providers: [UserService, AuthService, ImageService]
+			providers: [UserService, AuthService, ImageService, { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }]
 		});
 
 		service = TestBed.inject(UserService);

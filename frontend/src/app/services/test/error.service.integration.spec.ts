@@ -6,6 +6,7 @@ import { ErrorService } from '../error.service';
 import { AuthService } from '../auth.service';
 import { ErrorInterceptor } from '../../interceptors/error.interceptor';
 import { of } from 'rxjs';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 
 describe('ErrorService/Interceptor - Integration Tests', () => {
@@ -28,11 +29,8 @@ describe('ErrorService/Interceptor - Integration Tests', () => {
 				ErrorService,
 				{ provide: Router, useValue: routerSpy },
 				{ provide: AuthService, useValue: authServiceSpy },
-				{
-					provide: HTTP_INTERCEPTORS,
-					useClass: ErrorInterceptor,
-					multi: true
-				}
+				{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+				{ provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }
 			]
 		});
 

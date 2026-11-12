@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { PostService } from '../post.service';
 import { Post } from '../../models/post.model';
 import { AuthService } from '../auth.service';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 jasmine.getEnv().configure({ random: false });
@@ -17,7 +18,7 @@ describe('PostService - Integration', () => {
 
 		TestBed.configureTestingModule({
 			imports: [HttpClientModule],
-			providers: [PostService, AuthService]
+			providers: [PostService, AuthService, { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }]
 		});
 
 		service = TestBed.inject(PostService);

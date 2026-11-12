@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../auth.service';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 jasmine.getEnv().configure({ random: false });
@@ -11,7 +12,7 @@ describe('AuthService - Integration Tests', () => {
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientModule],
-			providers: [AuthService]
+			providers: [AuthService, { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }]
 		});
 		service = TestBed.inject(AuthService);
 	});
@@ -21,10 +22,10 @@ describe('AuthService - Integration Tests', () => {
 	});
 
 	it('login should connect to real API and return response', (done: DoneFn) => {
-		service.login('admin', 'admin0').subscribe({
+		service.login('martin', 'user').subscribe({
 			next: response => {
 				expect(response).toBeTruthy();
-				expect(response?.username).toBe('admin');
+				expect(response?.username).toBe('martin');
 				done();
 			},
 			error: err => {
@@ -49,13 +50,13 @@ describe('AuthService - Integration Tests', () => {
 
 	it('me should return user info when authenticated', (done: DoneFn) => {
 		// First login
-		service.login('admin', 'admin0').subscribe({
+		service.login('martin', 'user').subscribe({
 			next: () => {
 				// Then get user info
 				service.me().subscribe({
 					next: user => {
 						expect(user).toBeTruthy();
-						expect(user.username).toBe('admin');
+						expect(user.username).toBe('martin');
 						done();
 					},
 					error: err => {
@@ -69,7 +70,7 @@ describe('AuthService - Integration Tests', () => {
 
 	it('checkAuth should update loggedIn$ observable if authenticated', (done: DoneFn) => {
 		// Login first
-		service.login('admin', 'admin0').subscribe({
+		service.login('martin', 'user').subscribe({
 			next: () => {
 				// Check auth
 				service.checkAuth().subscribe({
@@ -86,7 +87,7 @@ describe('AuthService - Integration Tests', () => {
 
 	it('logout should clear authentication', (done: DoneFn) => {
 		// Login first
-		service.login('admin', 'admin0').subscribe({
+		service.login('martin', 'user').subscribe({
 			next: () => {
 				// Then logout
 				service.logout().subscribe({

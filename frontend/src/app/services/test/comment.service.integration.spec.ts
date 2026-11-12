@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { CommentService } from '../comment.service';
 import { AuthService } from '../auth.service';
 import { Comment } from '../../models/comment.model';
+import { CredentialsInterceptor } from '../../interceptors/credentials.interceptor';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 jasmine.getEnv().configure({ random: false });
@@ -18,7 +19,7 @@ describe('CommentService - Integration', () => {
 	beforeEach((done: DoneFn) => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientModule],
-			providers: [CommentService, AuthService]
+			providers: [CommentService, AuthService, { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }]
 		});
 
 		service = TestBed.inject(CommentService);
